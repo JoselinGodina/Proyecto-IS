@@ -64,10 +64,7 @@ loginForm.addEventListener("submit", async (e) => {
 const registerBtn = document.getElementById("registerBtn")
 
 registerBtn.addEventListener("click", () => {
-  // Aquí redirigirías a la página de registro
-  console.log("Redirect to register page")
-  alert("Redirigiendo a página de registro...")
-  // window.location.href = '/register';
+  window.location.href = "registro.html"
 })
 
 // Add input validation feedback
