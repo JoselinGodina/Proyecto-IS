@@ -18,15 +18,33 @@ togglePassword.addEventListener("click", () => {
 // Handle login form submission
 const loginForm = document.getElementById("loginForm")
 
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault()
+loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
 
-  const email = document.getElementById("email").value
-  const password = document.getElementById("password").value
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
 
   // Aquí es donde conectarás con tu backend en el futuro
-  console.log("Login attempt:", { email, password })
+ // Limpia errores previos
+  email.setCustomValidity("");
+  password.setCustomValidity("");
 
+  // Validaciones personalizadas
+  if (email.value.trim() === "") {
+    email.setCustomValidity("Por favor, ingresa tu correo institucional.");
+  } else if (!email.value.includes("@")) {
+    email.setCustomValidity("Por favor, ingresa un correo válido.");
+  }
+
+  if (password.value.trim() === "") {
+    password.setCustomValidity("Por favor, ingresa tu contraseña.");
+  }
+
+  // Si hay errores, mostrarlos en español
+  if (!loginForm.checkValidity()) {
+    loginForm.reportValidity();
+    return;
+  }
   // Ejemplo de cómo se vería la llamada al backend:
   /*
     try {
