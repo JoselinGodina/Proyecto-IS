@@ -1,131 +1,130 @@
-// Toggle password visibility para contraseña
-const togglePasswordRegistro = document.getElementById("togglePasswordRegistro")
-const passwordRegistroInput = document.getElementById("passwordRegistro")
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vale de Préstamo - Sistema Educativo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="receipt-container">
+        <div class="receipt-card" id="receiptCard">
+             Header del Vale 
+            <div class="receipt-header">
+                <div class="receipt-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                </div>
+                <h1>Vale de Préstamo</h1>
+                <p class="receipt-subtitle">Sistema de Gestión de Laboratorio</p>
+            </div>
 
-togglePasswordRegistro.addEventListener("click", () => {
-  const type = passwordRegistroInput.getAttribute("type") === "password" ? "text" : "password"
-  passwordRegistroInput.setAttribute("type", type)
-  togglePasswordRegistro.querySelector(".eye-icon").style.opacity = type === "text" ? "0.5" : "1"
-})
+             Información del Vale 
+            <div class="receipt-info">
+                <div class="info-row">
+                    <span class="info-label">No. de Vale:</span>
+                    <span class="info-value" id="receiptNumber"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fecha y Hora:</span>
+                    <span class="info-value" id="receiptDateTime"></span>
+                </div>
+            </div>
 
-// Toggle password visibility para confirmar contraseña
-const toggleConfirmPassword = document.getElementById("toggleConfirmPassword")
-const confirmPasswordInput = document.getElementById("confirmPassword")
+            <hr class="receipt-divider">
 
-toggleConfirmPassword.addEventListener("click", () => {
-  const type = confirmPasswordInput.getAttribute("type") === "password" ? "text" : "password"
-  confirmPasswordInput.setAttribute("type", type)
-  toggleConfirmPassword.querySelector(".eye-icon").style.opacity = type === "text" ? "0.5" : "1"
-})
+             Datos del Estudiante 
+            <div class="receipt-section">
+                <h3 class="section-title">Datos del Estudiante</h3>
+                <div class="student-data">
+                    <div class="data-row">
+                        <span class="data-label">Nombre:</span>
+                        <span class="data-value" id="studentNameReceipt"></span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">No. Control:</span>
+                        <span class="data-value" id="studentControlReceipt"></span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Carrera:</span>
+                        <span class="data-value" id="studentCareerReceipt"></span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Semestre:</span>
+                        <span class="data-value" id="studentSemesterReceipt"></span>
+                    </div>
+                </div>
+            </div>
 
-// Validar que las contraseñas coincidan
-const passwordMatchHint = document.getElementById("passwordMatch")
+            <hr class="receipt-divider">
 
-confirmPasswordInput.addEventListener("input", () => {
-  const password = passwordRegistroInput.value
-  const confirmPassword = confirmPasswordInput.value
+             Materiales Prestados 
+            <div class="receipt-section">
+                <h3 class="section-title">Materiales Prestados</h3>
+                <table class="materials-table">
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th>Categoría</th>
+                            <th class="text-center">Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="materialsTableBody">
+                         Los materiales se cargarán dinámicamente 
+                    </tbody>
+                </table>
+            </div>
 
-  if (confirmPassword === "") {
-    passwordMatchHint.textContent = ""
-    passwordMatchHint.className = "form-hint"
-  } else if (password === confirmPassword) {
-    passwordMatchHint.textContent = "Las contraseñas coinciden"
-    passwordMatchHint.className = "form-hint success"
-    confirmPasswordInput.style.borderColor = "#10B981"
-  } else {
-    passwordMatchHint.textContent = "Las contraseñas no coinciden"
-    passwordMatchHint.className = "form-hint error"
-    confirmPasswordInput.style.borderColor = "#EF4444"
-  }
-})
+            <hr class="receipt-divider">
 
-// Handle register form submission
-const registerForm = document.getElementById("registerForm")
+             Motivo del Préstamo 
+            <div class="receipt-section">
+                <h3 class="section-title">Motivo del Préstamo</h3>
+                <p class="reason-text" id="loanReasonReceipt"></p>
+            </div>
 
-registerForm.addEventListener("submit", async (e) => {
-  e.preventDefault()
+            <hr class="receipt-divider">
 
-  // Validar que las contraseñas coincidan
-  const password = passwordRegistroInput.value
-  const confirmPassword = confirmPasswordInput.value
+             Firmas 
+            <div class="signatures-section">
+                <div class="signature-box">
+                    <div class="signature-line"></div>
+                    <p class="signature-label">Firma del Estudiante</p>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line"></div>
+                    <p class="signature-label">Firma del Encargado</p>
+                </div>
+            </div>
 
-  if (password !== confirmPassword) {
-    alert("Las contraseñas no coinciden")
-    return
-  }
+             Footer del Vale 
+            <div class="receipt-footer">
+                <p>Este vale debe ser presentado al momento de devolver el material</p>
+                <p class="footer-note">Conserve este documento como comprobante</p>
+            </div>
+        </div>
 
-  // Recopilar datos del formulario
-  const formData = {
-    nombres: document.getElementById("nombres").value,
-    apellidos: document.getElementById("apellidos").value,
-    carrera: document.getElementById("carrera").value,
-    semestre: document.getElementById("semestre").value,
-    numeroControl: document.getElementById("numeroControl").value,
-    email: document.getElementById("emailRegistro").value,
-    password: password,
-  }
+         Botones de Acción 
+        <div class="receipt-actions">
+            <button class="btn-primary" onclick="printReceipt()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Imprimir Vale
+            </button>
+            <button class="btn-secondary" onclick="window.location.href='alumno.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                </svg>
+                Volver al Inicio
+            </button>
+        </div>
+    </div>
 
-  console.log("Registro attempt:", formData)
-
-  // Aquí es donde conectarás con tu backend en el futuro
-  /*
-    try {
-        const response = await fetch('/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            // Registro exitoso
-            console.log('Registro successful:', data);
-            alert('Cuenta creada exitosamente. Redirigiendo al login...');
-            window.location.href = '/index.html';
-        } else {
-            // Error en registro
-            alert('Error: ' + data.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al conectar con el servidor');
-    }
-    */
-
-  // Por ahora, solo mostramos un mensaje
-  alert("Formulario de registro enviado. Conecta con tu backend para procesar el registro.")
-})
-
-// Botón para volver al login
-const backToLoginBtn = document.getElementById("backToLoginBtn")
-
-backToLoginBtn.addEventListener("click", () => {
-  window.location.href = "index.html"
-})
-
-// Add input validation feedback
-const inputs = document.querySelectorAll(".form-input")
-
-inputs.forEach((input) => {
-  input.addEventListener("blur", function () {
-    if (this.value.trim() === "" && this.hasAttribute("required")) {
-      this.style.borderColor = "#EF4444"
-    } else if (this.value.trim() !== "") {
-      this.style.borderColor = "#10B981"
-    }
-  })
-
-  input.addEventListener("focus", function () {
-    this.style.borderColor = "var(--color-burgundy)"
-  })
-})
-
-// Validación del número de control (solo números)
-const numeroControlInput = document.getElementById("numeroControl")
-
-numeroControlInput.addEventListener("input", function () {
-  this.value = this.value.replace(/[^0-9]/g, "")
-})
+    <script src="vale-prestamo.js"></script>
+</body>
+</html>
