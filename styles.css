@@ -390,8 +390,7 @@ body {
   background-color: var(--color-white);
   padding: 0 2rem;
   display: flex;
-  justify-content: center;
-  gap: 10rem;
+  gap: 2rem;
   border-bottom: 2px solid var(--color-border);
 }
 
@@ -449,6 +448,58 @@ body {
 .section-subtitle {
   font-size: 1rem;
   color: var(--color-gray);
+}
+
+/* Header Controls */
+.header-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Redesigned search bar with modern styling */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 350px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.25rem;
+  color: var(--color-burgundy);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.875rem 1.25rem 0.875rem 3.5rem;
+  border: 2px solid var(--color-burgundy);
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  color: var(--color-navy);
+  background-color: var(--color-white);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-navy);
+  box-shadow: 0 0 0 4px rgba(139, 21, 56, 0.15);
+  transform: translateY(-1px);
+}
+
+.search-input::placeholder {
+  color: var(--color-gray);
+  font-weight: 400;
+}
+
+/* Remove old search-bar styles */
+.search-bar {
+  display: none;
 }
 
 /* Category Dropdown */
@@ -515,6 +566,29 @@ body {
   background-color: var(--color-burgundy);
   color: var(--color-white);
   font-weight: 600;
+}
+
+/* Empty Search State */
+.empty-search {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--color-gray);
+}
+
+.empty-search svg {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-search p {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+}
+
+.empty-search small {
+  font-size: 0.875rem;
+  color: var(--color-gray);
 }
 
 /* Materials Grid */
@@ -1221,29 +1295,15 @@ body {
     gap: 1rem;
   }
 
-  .dropdown-btn {
+  .header-controls {
     width: 100%;
-  }
-
-  .student-data {
-    grid-template-columns: 1fr;
-  }
-
-  .signatures-section {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .receipt-info {
-    grid-template-columns: 1fr;
-  }
-
-  .receipt-card {
-    padding: 2rem 1.5rem;
-  }
-
-  .receipt-actions {
     flex-direction: column;
+  }
+
+  /* Make search container full width on mobile */
+  .search-container {
+    width: 100%;
+    min-width: auto;
   }
 }
 

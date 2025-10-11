@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    
+    <!-- Header del Alumno -->
     <header class="student-header">
         <div class="header-left">
             <div class="user-icon">
@@ -33,52 +33,74 @@
             </button>
         </div>
     </header>
+
+    <!-- Navegación por Tabs -->
     <nav class="tabs-nav">
         <button class="tab-btn active" data-tab="material">Material Disponible</button>
         <button class="tab-btn" data-tab="solicitudes">Mis Solicitudes</button>
         <button class="tab-btn" data-tab="asesorias">Asesorías</button>
     </nav>
- 
+
+    <!-- Contenido Principal -->
     <main class="student-main">
+        <!-- Tab: Material Disponible -->
         <section id="material-tab" class="tab-content active">
             <div class="section-header">
                 <div>
                     <h1>Material de Laboratorio</h1>
                     <p class="section-subtitle">Consulta el material disponible para préstamo en el laboratorio de electrónica</p>
                 </div>
-                <div class="category-dropdown">
-                    <button class="dropdown-btn" id="categoryBtn">
-                        <span id="selectedCategory">Todas las Categorías</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"></polyline>
+                
+                <div class="header-controls">
+                    <!-- Reorganized search and category controls with improved design -->
+                    <!-- Search bar positioned to the left -->
+                    <div class="search-container">
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
                         </svg>
-                    </button>
-                    <div class="dropdown-menu" id="categoryMenu">
-                        <button class="dropdown-item" data-category="all">Todas las Categorías</button>
-                        <button class="dropdown-item" data-category="Componentes Pasivos">Componentes Pasivos</button>
-                        <button class="dropdown-item" data-category="Semiconductores">Semiconductores</button>
-                        <button class="dropdown-item" data-category="Herramientas">Herramientas</button>
-                        <button class="dropdown-item" data-category="Circuitos Integrados">Circuitos Integrados</button>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Buscar material..." />
+                    </div>
+                    
+                    <!-- Category dropdown -->
+                    <div class="category-dropdown">
+                        <button class="dropdown-btn" id="categoryBtn">
+                            <span id="selectedCategory">Todas las Categorías</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu" id="categoryMenu">
+                            <button class="dropdown-item" data-category="all">Todas las Categorías</button>
+                            <button class="dropdown-item" data-category="Componentes Pasivos">Componentes Pasivos</button>
+                            <button class="dropdown-item" data-category="Semiconductores">Semiconductores</button>
+                            <button class="dropdown-item" data-category="Herramientas">Herramientas</button>
+                            <button class="dropdown-item" data-category="Circuitos Integrados">Circuitos Integrados</button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Grid de Materiales -->
             <div class="materials-grid" id="materialsGrid">
-                 Los materiales se cargarán dinámicamente con JavaScript 
+                <!-- Los materiales se cargarán dinámicamente con JavaScript -->
             </div>
         </section>
 
+        <!-- Tab: Mis Solicitudes -->
         <section id="solicitudes-tab" class="tab-content">
             <h1>Mis Solicitudes</h1>
             <p class="section-subtitle">Aquí aparecerán tus solicitudes de préstamo</p>
             <div class="empty-state">
                 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M9 11l3 3L22 4"></path>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    <path d="M21 12v7a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2V5a2 2 0 0 0 2-2h11"></path>
                 </svg>
                 <p>No tienes solicitudes pendientes</p>
             </div>
         </section>
 
+        <!-- Tab: Asesorías -->
         <section id="asesorias-tab" class="tab-content">
             <h1>Asesorías</h1>
             <p class="section-subtitle">Solicita asesorías con profesores</p>
@@ -93,6 +115,8 @@
             </div>
         </section>
     </main>
+
+    <!-- Botón Flotante del Carrito -->
     <button class="cart-float-btn" id="cartBtn" onclick="window.location.href='carrito.html'">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="9" cy="21" r="1"></circle>
@@ -101,6 +125,8 @@
         </svg>
         <span class="cart-badge" id="cartBadge">0</span>
     </button>
+
+    <!-- Modal para Agregar Material -->
     <div class="modal" id="addMaterialModal">
         <div class="modal-content">
             <div class="modal-header">
