@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Préstamo - Sistema Educativo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="student-header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='alumno.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <h2>Carrito de Préstamo</h2>
+        </div>
+        <div class="header-right">
+            <button class="logout-btn" onclick="window.location.href='index.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="cart-main">
+        <div class="cart-container">
+            <div class="cart-items-section">
+                <h2>Materiales Seleccionados</h2>
+                <div id="cartItemsList" class="cart-items-list">
+                     Los items se cargarán dinámicamente 
+                </div>
+                <div id="emptyCart" class="empty-cart" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <p>Tu carrito está vacío</p>
+                    <button class="btn-primary" onclick="window.location.href='alumno.html'">Explorar Materiales</button>
+                </div>
+            </div>
+            <div class="cart-summary-section">
+                <div class="summary-card">
+                    <h3>Resumen del Préstamo</h3>
+                    <div class="summary-row">
+                        <span>Total de artículos:</span>
+                        <strong id="totalItems">0</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Total de unidades:</span>
+                        <strong id="totalUnits">0</strong>
+                    </div>
+                    
+                    <hr class="summary-divider">
+                    
+                    <div class="form-group">
+                        <label for="loanReason">Motivo del Préstamo *</label>
+                        <textarea 
+                            id="loanReason" 
+                            class="form-textarea" 
+                            rows="4" 
+                            placeholder="Describe el motivo general para el préstamo de estos materiales..."
+                            required
+                        ></textarea>
+                        <small class="form-hint">Este motivo aplicará para todos los materiales seleccionados</small>
+                    </div>
+
+                    <button class="btn-primary btn-block" id="confirmLoanBtn" onclick="confirmLoan()">Confirmar Préstamo</button>
+                    <button class="btn-secondary btn-block" onclick="window.location.href='alumno.html'">Continuar Agregando Materiales</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="carrito.js"></script>
+</body>
+</html>
