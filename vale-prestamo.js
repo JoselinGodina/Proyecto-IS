@@ -8,11 +8,11 @@ function loadReceiptData() {
   const loanData = JSON.parse(localStorage.getItem("currentLoan"))
   const studentData = JSON.parse(localStorage.getItem("studentData"))
 
-  if (!loanData || !studentData) {
-    alert("No se encontraron datos del préstamo")
-    window.location.href = "alumno.html"
-    return
-  }
+  //if (!loanData || !studentData) {
+    //alert("No se encontraron datos del préstamo")
+    //window.location.href = "alumno.html"
+    //return
+  //}
 
   // Generate receipt number
   const receiptNumber = "VP-" + Date.now().toString().slice(-8)

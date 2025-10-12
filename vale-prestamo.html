@@ -9,7 +9,6 @@
 <body>
     <div class="receipt-container">
         <div class="receipt-card" id="receiptCard">
-             Header del Vale 
             <div class="receipt-header">
                 <div class="receipt-logo">
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -20,8 +19,7 @@
                 <h1>Vale de Préstamo</h1>
                 <p class="receipt-subtitle">Sistema de Gestión de Laboratorio</p>
             </div>
-
-             Información del Vale 
+ 
             <div class="receipt-info">
                 <div class="info-row">
                     <span class="info-label">No. de Vale:</span>
@@ -34,8 +32,6 @@
             </div>
 
             <hr class="receipt-divider">
-
-             Datos del Estudiante 
             <div class="receipt-section">
                 <h3 class="section-title">Datos del Estudiante</h3>
                 <div class="student-data">
@@ -54,6 +50,10 @@
                     <div class="data-row">
                         <span class="data-label">Semestre:</span>
                         <span class="data-value" id="studentSemesterReceipt"></span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Docente:</span>
+                        <span class="data-value" id="studentTeacherReceipt"></span>
                     </div>
                 </div>
             </div>
@@ -87,26 +87,12 @@
 
             <hr class="receipt-divider">
 
-             Firmas 
-            <div class="signatures-section">
-                <div class="signature-box">
-                    <div class="signature-line"></div>
-                    <p class="signature-label">Firma del Estudiante</p>
-                </div>
-                <div class="signature-box">
-                    <div class="signature-line"></div>
-                    <p class="signature-label">Firma del Encargado</p>
-                </div>
-            </div>
-
-             Footer del Vale 
+              
             <div class="receipt-footer">
                 <p>Este vale debe ser presentado al momento de devolver el material</p>
                 <p class="footer-note">Conserve este documento como comprobante</p>
             </div>
         </div>
-
-         Botones de Acción 
         <div class="receipt-actions">
             <button class="btn-primary" onclick="printReceipt()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -114,13 +100,11 @@
                     <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                     <rect x="6" y="14" width="12" height="8"></rect>
                 </svg>
-                Imprimir Vale
             </button>
             <button class="btn-secondary" onclick="window.location.href='alumno.html'">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 </svg>
-                Volver al Inicio
             </button>
         </div>
     </div>
