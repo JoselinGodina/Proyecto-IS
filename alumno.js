@@ -1,4 +1,4 @@
-// Sample materials data
+
 const materials = [
   {
     id: 1,
