@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Asesorías - Administrador</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            color: #1e3a5f;
+        }
+
+        /* Header */
+        .header {
+            background-color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .settings-icon {
+            width: 24px;
+            height: 24px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .admin-details h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e3a5f;
+            margin-bottom: 0.25rem;
+        }
+
+        .admin-details p {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-badge {
+            background-color: #1e3a5f;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            color: #8b1538;
+        }
+
+        /* Title Section */
+        .title-section {
+            background-color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .title-section h1 {
+            font-size: 1.5rem;
+            color: #1e3a5f;
+            font-weight: 600;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 0 2rem;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 1rem 0.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            color: #8b1538;
+        }
+
+        .nav-tab.active {
+            color: #8b1538;
+            border-bottom-color: #8b1538;
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .content-title h2 {
+            font-size: 1.5rem;
+            color: #1e3a5f;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .content-title p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .nueva-asesoria-btn {
+            background-color: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .nueva-asesoria-btn:hover {
+            background-color: #152d47;
+        }
+
+        /* Advisory Cards Container */
+        .asesorias-list {
+            display: none;
+            gap: 1.5rem;
+        }
+
+        .asesorias-list.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Advisory Card */
+        .asesoria-card {
+            background-color: white;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .asesoria-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .asesoria-title-section {
+            flex: 1;
+        }
+
+        .asesoria-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .asesoria-icon {
+            width: 20px;
+            height: 20px;
+            color: #3b82f6;
+        }
+
+        .asesoria-title h3 {
+            font-size: 1.1rem;
+            color: #1e3a5f;
+            font-weight: 600;
+        }
+
+        .asesoria-instructor {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.75rem;
+        }
+
+        .asesoria-description {
+            font-size: 0.9rem;
+            color: #4b5563;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background-color: #10b981;
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Advisory Info Grid */
+        .asesoria-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-icon {
+            width: 18px;
+            height: 18px;
+            color: #6b7280;
+        }
+
+        .info-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+            color: #1e3a5f;
+            font-weight: 500;
+        }
+
+        /* Progress Bar */
+        .cupos-section {
+            margin-bottom: 1rem;
+        }
+
+        .cupos-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Action Buttons */
+        .asesoria-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .btn-editar,
+        .btn-cancelar {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-editar {
+            background-color: white;
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+        }
+
+        .btn-editar:hover {
+            background-color: #eff6ff;
+        }
+
+        .btn-cancelar {
+            background-color: white;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .btn-cancelar:hover {
+            background-color: #fef2f2;
+        }
+
+        /* Empty State */
+        .empty-state {
+            background-color: white;
+            border-radius: 8px;
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .empty-state.active {
+            display: block;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        /* Modal Container */
+        .modal {
+            background-color: white;
+            border-radius: 8px;
+            border: 3px solid #8b1538;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Modal Header */
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e0e0e0;
+            position: relative;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            color: #1e3a5f;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            padding-right: 2rem;
+        }
+
+        .modal-header p {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            color: #8b1538;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #6b0f2a;
+        }
+
+        /* Modal Body */
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1e3a5f;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            color: #1e3a5f;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #8b1538;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Modal Footer */
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn-cancel {
+            background-color: white;
+            color: #666;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f5f5f5;
+            border-color: #9ca3af;
+        }
+
+        .btn-submit {
+            background-color: #8b1538;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #6b0f2a;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-tabs {
+                gap: 1rem;
+                justify-content: flex-start;
+            }
+
+            .content-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nueva-asesoria-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-footer {
+                flex-direction: column-reverse;
+            }
+
+            .btn-cancel,
+            .btn-submit {
+                width: 100%;
+            }
+
+            /* Responsive styles for advisory cards */
+            .asesoria-info {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .status-badge {
+                position: static;
+                display: inline-block;
+                margin-bottom: 1rem;
+            }
+
+            .asesoria-header {
+                flex-direction: column;
+            }
+
+            .asesoria-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn-editar,
+            .btn-cancelar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="admin-info">
+            <svg class="settings-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31 2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <div class="admin-details">
+                <h3>Nombre del Administrador</h3>
+                <p>ADM-2024-001 - Administrador del Sistema</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="admin-badge">Administrador</span>
+            <button class="logout-btn" onclick="cerrarSesion()">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Cerrar Sesión
+            </button>
+        </div>
+    </header>
+
+    <!-- Title -->
+    <div class="title-section">
+        <h1>Administrador</h1>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <div class="nav-tab" onclick="navigateTo('solicitudes')">Solicitudes</div>
+        <div class="nav-tab" onclick="navigateTo('usuarios')">Usuarios</div>
+        <div class="nav-tab" onclick="navigateTo('inventario')">Inventario</div>
+        <div class="nav-tab" onclick="navigateTo('reportes')">Reportes</div>
+        <div class="nav-tab active">Asesorías</div>
+        <div class="nav-tab" onclick="navigateTo('gestion-material')">Gestión de Material</div>
+        <div class="nav-tab" onclick="navigateTo('pedidos-material')">Pedidos de Material</div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-header">
+            <div class="content-title">
+                <h2>Gestión de Asesorías</h2>
+                <p>Crea y administra asesorías para estudiantes</p>
+            </div>
+            <button class="nueva-asesoria-btn" onclick="abrirModal()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Nueva Asesoría
+            </button>
+        </div>
+
+        <!-- Asesorías List -->
+        <div class="asesorias-list" id="asesoriasList"></div>
+
+        <!-- Empty State -->
+        <div class="empty-state active" id="emptyState">
+            <svg class="calendar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <h3>No hay asesorías programadas</h3>
+            <p>Crea una nueva asesoría usando el botón "Nueva Asesoría"</p>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalSiClickFuera(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="modalTitle">Crear Nueva Asesoría</h2>
+                <p id="modalSubtitle">Programa una nueva asesoría para los estudiantes</p>
+                <button class="modal-close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <form id="asesoriaForm" onsubmit="guardarAsesoria(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="titulo">Título</label>
+                        <input 
+                            type="text" 
+                            id="titulo" 
+                            name="titulo" 
+                            placeholder="Ej: Introducción a Arduino"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea 
+                            id="descripcion" 
+                            name="descripcion" 
+                            placeholder="Describe el contenido de la asesoría"
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group" id="instructorGroup" style="display: none;">
+                        <label for="instructor">Impartido por</label>
+                        <input 
+                            type="text" 
+                            id="instructor" 
+                            name="instructor" 
+                            placeholder="Nombre del instructor"
+                        >
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fecha">Fecha</label>
+                            <input 
+                                type="date" 
+                                id="fecha" 
+                                name="fecha"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="horario">Horario</label>
+                            <input 
+                                type="text" 
+                                id="horario" 
+                                name="horario"
+                                placeholder="14:00-16:00"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cupos" id="cuposLabel">Cupos Disponibles</label>
+                        <input 
+                            type="number" 
+                            id="cupos" 
+                            name="cupos"
+                            min="1"
+                            value="15"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn-submit" id="submitBtn">Crear Asesoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Asesorías data storage
+        let asesorias = [];
+        let editandoAsesoriaId = null;
+
+        // Initialize with sample data
+        function inicializarAsesorias() {
+            asesorias = [
+                {
+                    id: 1,
+                    titulo: 'Introducción a Arduino y Sensores',
+                    instructor: 'Ing. Mario González',
+                    descripcion: 'Aprende los fundamentos de Arduino, conexión de sensores básicos y programación de microcontroladores.',
+                    fecha: '2024-01-25',
+                    horario: '14:00-16:00',
+                    cuposTotal: 15,
+                    cuposOcupados: 3,
+                    estado: 'Programado'
+                }
+            ];
+            renderizarAsesorias();
+        }
+
+        // Render asesorías list
+        function renderizarAsesorias() {
+            const listContainer = document.getElementById('asesoriasList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (asesorias.length === 0) {
+                listContainer.classList.remove('active');
+                emptyState.classList.add('active');
+                return;
+            }
+
+            emptyState.classList.remove('active');
+            listContainer.classList.add('active');
+            
+            listContainer.innerHTML = asesorias.map(asesoria => {
+                const porcentajeOcupado = (asesoria.cuposOcupados / asesoria.cuposTotal) * 100;
+                
+                return `
+                    <div class="asesoria-card">
+                        <span class="status-badge">${asesoria.estado}</span>
+                        
+                        <div class="asesoria-header">
+                            <div class="asesoria-title-section">
+                                <div class="asesoria-title">
+                                    <svg class="asesoria-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
+                                    <h3>${asesoria.titulo}</h3>
+                                </div>
+                                <p class="asesoria-instructor">Impartido por: ${asesoria.instructor}</p>
+                                <p class="asesoria-description">${asesoria.descripcion}</p>
+                            </div>
+                        </div>
+
+                        <div class="asesoria-info">
+                            <div class="info-item">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <div class="info-content">
+                                    <span class="info-label">Fecha</span>
+                                    <span class="info-value">${asesoria.fecha}</span>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="info-content">
+                                    <span class="info-label">Horario</span>
+                                    <span class="info-value">${asesoria.horario}</span>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                <div class="info-content">
+                                    <span class="info-label">Cupos</span>
+                                    <span class="info-value">${asesoria.cuposOcupados}/${asesoria.cuposTotal}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cupos-section">
+                            <div class="cupos-label">
+                                <span>Cupos ocupados</span>
+                                <span>${asesoria.cuposOcupados}/${asesoria.cuposTotal}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${porcentajeOcupado}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="asesoria-actions">
+                            <button class="btn-editar" onclick="editarAsesoria(${asesoria.id})">Editar</button>
+                            <button class="btn-cancelar" onclick="cancelarAsesoria(${asesoria.id})">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function editarAsesoria(id) {
+            const asesoria = asesorias.find(a => a.id === id);
+            if (!asesoria) return;
+
+            editandoAsesoriaId = id;
+
+            // Update modal title and subtitle
+            document.getElementById('modalTitle').textContent = 'Editar Asesoría';
+            document.getElementById('modalSubtitle').textContent = `Modifica la información de la asesoría a ${asesoria.titulo.split(' ')[asesoria.titulo.split(' ').length - 1]}`;
+            
+            // Update button text
+            document.getElementById('submitBtn').textContent = 'Guardar Cambios';
+            
+            // Update cupos label
+            document.getElementById('cuposLabel').textContent = 'Cupos Totales';
+            
+            // Show instructor field
+            document.getElementById('instructorGroup').style.display = 'block';
+
+            // Fill form with current data
+            document.getElementById('titulo').value = asesoria.titulo;
+            document.getElementById('descripcion').value = asesoria.descripcion;
+            document.getElementById('instructor').value = asesoria.instructor;
+            document.getElementById('fecha').value = asesoria.fecha;
+            document.getElementById('horario').value = asesoria.horario;
+            document.getElementById('cupos').value = asesoria.cuposTotal;
+
+            // Open modal
+            abrirModal();
+        }
+
+        // Cancel asesoría
+        function cancelarAsesoria(id) {
+            if (confirm('¿Estás seguro de que deseas cancelar esta asesoría?')) {
+                asesorias = asesorias.filter(a => a.id !== id);
+                renderizarAsesorias();
+            }
+        }
+
+        function navigateTo(section) {
+            alert('Navegando a: ' + section + '\n(Esta sección está en desarrollo)');
+        }
+
+        function abrirModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('asesoriaForm').reset();
+            
+            // Reset to create mode
+            editandoAsesoriaId = null;
+            document.getElementById('modalTitle').textContent = 'Crear Nueva Asesoría';
+            document.getElementById('modalSubtitle').textContent = 'Programa una nueva asesoría para los estudiantes';
+            document.getElementById('submitBtn').textContent = 'Crear Asesoría';
+            document.getElementById('cuposLabel').textContent = 'Cupos Disponibles';
+            document.getElementById('instructorGroup').style.display = 'none';
+        }
+
+        function cerrarModalSiClickFuera(event) {
+            if (event.target === event.currentTarget) {
+                cerrarModal();
+            }
+        }
+
+        function guardarAsesoria(event) {
+            event.preventDefault();
+            
+            if (editandoAsesoriaId) {
+                // Edit existing asesoría
+                const index = asesorias.findIndex(a => a.id === editandoAsesoriaId);
+                if (index !== -1) {
+                    asesorias[index] = {
+                        ...asesorias[index],
+                        titulo: document.getElementById('titulo').value,
+                        descripcion: document.getElementById('descripcion').value,
+                        instructor: document.getElementById('instructor').value,
+                        fecha: document.getElementById('fecha').value,
+                        horario: document.getElementById('horario').value,
+                        cuposTotal: parseInt(document.getElementById('cupos').value)
+                    };
+                }
+            } else {
+                // Create new asesoría
+                const nuevaAsesoria = {
+                    id: asesorias.length > 0 ? Math.max(...asesorias.map(a => a.id)) + 1 : 1,
+                    titulo: document.getElementById('titulo').value,
+                    instructor: 'Administrador del Sistema',
+                    descripcion: document.getElementById('descripcion').value,
+                    fecha: document.getElementById('fecha').value,
+                    horario: document.getElementById('horario').value,
+                    cuposTotal: parseInt(document.getElementById('cupos').value),
+                    cuposOcupados: 0,
+                    estado: 'Programado'
+                };
+                asesorias.push(nuevaAsesoria);
+            }
+
+            renderizarAsesorias();
+            cerrarModal();
+        }
+
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                alert('Cerrando sesión...');
+            }
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                cerrarModal();
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', inicializarAsesorias);
+    </script>
+</body>
+</html>
+
