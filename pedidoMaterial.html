@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador - Sistema de Pedidos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --burgundy: #8B1538;
+            --navy: #1a2332;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --border-gray: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--navy);
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border-gray);
+            padding: 1rem 2rem;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .settings-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--navy);
+            cursor: pointer;
+        }
+
+        .admin-details h2 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .admin-details p {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-badge {
+            background-color: var(--navy);
+            color: var(--white);
+            padding: 0.375rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--navy);
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            color: var(--burgundy);
+        }
+
+        /* Title Section */
+        .title-section {
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border-gray);
+            padding: 1.5rem 2rem 0;
+        }
+
+        .title-section h1 {
+            max-width: 1400px;
+            margin: 0 auto;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            background-color: var(--white);
+            border-bottom: 2px solid var(--border-gray);
+            padding: 0 2rem;
+        }
+
+        .nav-tabs-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            color: var(--navy);
+            cursor: pointer;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            background-color: var(--light-gray);
+        }
+
+        .nav-tab.active {
+            color: var(--burgundy);
+            border-bottom-color: var(--burgundy);
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.25rem;
+        }
+
+        .section-header p {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        /* Order Cards */
+        .orders-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .order-card {
+            background-color: var(--white);
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-icon {
+            width: 48px;
+            height: 48px;
+            background-color: #fce4ec;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .order-icon svg {
+            width: 24px;
+            height: 24px;
+            color: var(--burgundy);
+        }
+
+        .order-details {
+            flex: 1;
+        }
+
+        .order-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.25rem;
+        }
+
+        .order-code {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .order-meta {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-left: auto;
+        }
+
+        .order-quantity,
+        .order-date {
+            text-align: right;
+        }
+
+        .order-quantity label,
+        .order-date label {
+            display: block;
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .order-quantity-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--burgundy);
+        }
+
+        .order-date-value {
+            font-size: 0.875rem;
+            color: var(--navy);
+            font-weight: 500;
+        }
+
+        .order-user {
+            font-size: 0.875rem;
+            color: var(--navy);
+        }
+
+        /* Placeholder Content */
+        .placeholder-content {
+            background-color: var(--white);
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .placeholder-content h3 {
+            font-size: 1.125rem;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .placeholder-content p {
+            color: #666;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            color: var(--navy);
+            margin-bottom: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background-color: var(--burgundy);
+            color: var(--white);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-gray);
+            color: var(--navy);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-tabs-container {
+                overflow-x: auto;
+            }
+
+            .order-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .order-meta {
+                width: 100%;
+                margin-left: 0;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="admin-info">
+                <svg class="settings-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <div class="admin-details">
+                    <h2>Nombre del Administrador</h2>
+                    <p>ADMIN-ACORE-0001 - Administrador del Sistema</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span class="admin-badge">Administrador</span>
+                <button class="logout-btn" onclick="showLogoutModal()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Title Section -->
+    <div class="title-section">
+        <h1>Administrador</h1>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <div class="nav-tabs-container">
+            <button class="nav-tab" onclick="changeSection('solicitudes')">Solicitudes</button>
+            <button class="nav-tab" onclick="changeSection('usuarios')">Usuarios</button>
+            <button class="nav-tab" onclick="changeSection('inventario')">Inventario</button>
+            <button class="nav-tab" onclick="changeSection('reportes')">Reportes</button>
+            <button class="nav-tab" onclick="changeSection('asesorias')">Asesorías</button>
+            <button class="nav-tab" onclick="changeSection('gestion')">Gestión de Material</button>
+            <button class="nav-tab active" onclick="changeSection('pedidos')">Pedidos de Material</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div id="content-area">
+            <!-- Pedidos de Material Section (Default) -->
+            <div id="pedidos-section">
+                <div class="section-header">
+                    <h2>Pedidos de Material</h2>
+                    <p>Material para el laboratorio</p>
+                </div>
+                <div class="orders-container" id="ordersContainer">
+                    <!-- Orders will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <!-- Placeholder for other sections -->
+            <div id="placeholder-section" style="display: none;">
+                <div class="placeholder-content">
+                    <h3>Sección en desarrollo</h3>
+                    <p>Esta funcionalidad estará disponible próximamente.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <h3>Cerrar Sesión</h3>
+            <p>¿Estás seguro de que deseas cerrar sesión?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideLogoutModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="logout()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample orders data
+        const orders = [
+            {
+                id: 1,
+                name: 'Resistencias 1kΩ',
+                code: 'PED-001',
+                quantity: 100,
+                date: '14/1/2024',
+                user: 'Juan Pérez'
+            },
+            {
+                id: 2,
+                name: 'Capacitores 100μF',
+                code: 'PED-002',
+                quantity: 50,
+                date: '13/1/2024',
+                user: 'María García'
+            }
+        ];
+
+        // Load orders on page load
+        function loadOrders() {
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = '';
+
+            orders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                orderCard.innerHTML = `
+                    <div class="order-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="order-details">
+                        <div class="order-name">${order.name}</div>
+                        <div class="order-code">Código: ${order.code}</div>
+                    </div>
+                    <div class="order-meta">
+                        <div class="order-quantity">
+                            <label>Cantidad</label>
+                            <div class="order-quantity-value">${order.quantity}</div>
+                        </div>
+                        <div class="order-date">
+                            <label>📅 ${order.date}</label>
+                            <div class="order-user">${order.user}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(orderCard);
+            });
+        }
+
+        // Change section
+        function changeSection(section) {
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const pedidosSection = document.getElementById('pedidos-section');
+            const placeholderSection = document.getElementById('placeholder-section');
+
+            if (section === 'pedidos') {
+                pedidosSection.style.display = 'block';
+                placeholderSection.style.display = 'none';
+            } else {
+                pedidosSection.style.display = 'none';
+                placeholderSection.style.display = 'block';
+            }
+        }
+
+        // Modal functions
+        function showLogoutModal() {
+            document.getElementById('logoutModal').classList.add('active');
+        }
+
+        function hideLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('active');
+        }
+
+        function logout() {
+            alert('Sesión cerrada exitosamente');
+            hideLogoutModal();
+        }
+
+        // Initialize
+        loadOrders();
+    </script>
+</body>
+</html>
