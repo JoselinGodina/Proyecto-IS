@@ -488,20 +488,27 @@ body {
   font-weight: 600;
 }
 
+.status-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-weight: bold;
+  color: rgb(180, 25, 25);
+}
+
 .status-pendiente {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: orange;
 }
 
 .status-aprobada {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: green;
 }
 
 .status-rechazada {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: red;
 }
+
+
+
 
 .solicitud-body {
   margin: 1rem 0;
