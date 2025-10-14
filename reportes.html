@@ -666,10 +666,94 @@
             if (tipo === 'pdf') {
                 // Generate and show print preview
                 mostrarVistaPrevia(categoria);
-            } else {
-                // For Excel, show alert
-                alert(`Generando archivo Excel de ${categoria}...\n\nEsta funcionalidad se conectará con el backend para generar el archivo.`);
+            } else if (tipo === 'excel') {
+                generarExcel(categoria);
             }
+        }
+
+        function generarExcel(categoria) {
+            // Get current date and time for filename
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            
+            // Get materials data based on category
+            let filename, materials, quantityHeader;
+
+            switch(categoria) {
+                case 'disponible':
+                    filename = `Reporte_Material_Disponible_${dateStr}.csv`;
+                    quantityHeader = 'Cantidad Disponible';
+                    materials = [
+                        { nombre: 'Resistencias 1/4W', categoria: 'Componentes Pasivos', cantidad: 150 },
+                        { nombre: 'Capacitores Electrolíticos', categoria: 'Componentes Pasivos', cantidad: 45 },
+                        { nombre: 'Transistores 2N2222', categoria: 'Semiconductores', cantidad: 25 },
+                        { nombre: 'LEDs 5mm', categoria: 'Componentes Activos', cantidad: 200 },
+                        { nombre: 'Protoboards', categoria: 'Herramientas', cantidad: 15 }
+                    ];
+                    break;
+                case 'danado':
+                    filename = `Reporte_Material_Danado_${dateStr}.csv`;
+                    quantityHeader = 'Cantidad Dañada';
+                    materials = [
+                        { nombre: 'Resistencias 1/4W', categoria: 'Componentes Pasivos', cantidad: 50 },
+                        { nombre: 'Capacitores Electrolíticos', categoria: 'Componentes Pasivos', cantidad: 15 },
+                        { nombre: 'Transistores 2N2222', categoria: 'Semiconductores', cantidad: 5 },
+                        { nombre: 'Multímetros', categoria: 'Instrumentos', cantidad: 3 }
+                    ];
+                    break;
+                case 'inventario':
+                    filename = `Reporte_Inventario_Completo_${dateStr}.csv`;
+                    quantityHeader = 'Cantidad Total';
+                    materials = [
+                        { nombre: 'Resistencias 1/4W', categoria: 'Componentes Pasivos', cantidad: 200 },
+                        { nombre: 'Capacitores Electrolíticos', categoria: 'Componentes Pasivos', cantidad: 60 },
+                        { nombre: 'Transistores 2N2222', categoria: 'Semiconductores', cantidad: 30 },
+                        { nombre: 'LEDs 5mm', categoria: 'Componentes Activos', cantidad: 250 },
+                        { nombre: 'Protoboards', categoria: 'Herramientas', cantidad: 20 },
+                        { nombre: 'Multímetros', categoria: 'Instrumentos', cantidad: 10 }
+                    ];
+                    break;
+                case 'visitas':
+                    filename = `Reporte_Carreras_Mayor_Visita_${dateStr}.csv`;
+                    quantityHeader = 'Visitas';
+                    materials = [
+                        { nombre: 'Ingeniería Electrónica', categoria: 'Carrera', cantidad: 35 },
+                        { nombre: 'Ingeniería Mecatrónica', categoria: 'Carrera', cantidad: 28 },
+                        { nombre: 'Ingeniería Industrial', categoria: 'Carrera', cantidad: 15 },
+                        { nombre: 'Ingeniería en Sistemas', categoria: 'Carrera', cantidad: 7 }
+                    ];
+                    break;
+                default:
+                    materials = [];
+            }
+
+            // Create CSV content
+            let csvContent = '\uFEFF'; // UTF-8 BOM for proper Excel encoding
+            
+            // Add header row
+            csvContent += `Material,Categoría,${quantityHeader}\n`;
+            
+            // Add data rows
+            materials.forEach(material => {
+                csvContent += `"${material.nombre}","${material.categoria}",${material.cantidad}\n`;
+            });
+
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (navigator.msSaveBlob) { // IE 10+
+                navigator.msSaveBlob(blob, filename);
+            } else {
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            console.log('[v0] Excel file generated:', filename);
         }
 
         function mostrarVistaPrevia(categoria) {
