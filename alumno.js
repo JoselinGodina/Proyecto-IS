@@ -1,4 +1,3 @@
-
 const materials = [
   {
     id: 1,
@@ -50,6 +49,104 @@ const materials = [
   },
 ]
 
+const solicitudesData = [
+  {
+    id: 1,
+    material: "Arduino UNO R3, Resistencias 220Ω (x10), LED RGB",
+    fecha: "2025-01-20",
+    fechaSolicitud: "2025-01-15",
+    motivo:
+      "Proyecto de semáforo inteligente para la materia de Sistemas Embebidos. Necesito implementar un prototipo funcional.",
+    cantidadTotal: 12,
+    estado: "pendiente",
+  },
+  {
+    id: 2,
+    material: "Multímetro Digital, Protoboard 830 puntos",
+    fecha: "2025-01-18",
+    fechaSolicitud: "2025-01-14",
+    motivo: "Práctica de medición de circuitos en serie y paralelo para Electrónica Analógica.",
+    cantidadTotal: 2,
+    estado: "aprobada",
+  },
+  {
+    id: 3,
+    material: "Capacitores Electrolíticos (varios valores), Diodos 1N4007",
+    fecha: "2025-01-10",
+    fechaSolicitud: "2025-01-08",
+    motivo: "Construcción de fuente de alimentación regulada. Proyecto final del curso.",
+    cantidadTotal: 15,
+    estado: "rechazada",
+  },
+  {
+    id: 4,
+    material: "Sensor ultrasónico HC-SR04, Servomotor SG90",
+    fecha: "2025-01-25",
+    fechaSolicitud: "2025-01-16",
+    motivo: "Desarrollo de sistema de detección de obstáculos para robot móvil. Competencia de robótica.",
+    cantidadTotal: 3,
+    estado: "pendiente",
+  },
+]
+
+const asesoriasData = [
+  {
+    id: 1,
+    titulo: "Introducción a Microcontroladores ARM",
+    fecha: "2025-01-22",
+    hora: "14:00 - 16:00",
+    docente: "Dr. Carlos Méndez",
+    cupo: 15,
+    inscritos: 8,
+    descripcion:
+      "Aprende los fundamentos de la arquitectura ARM Cortex-M y su programación. Incluye ejemplos prácticos con STM32.",
+  },
+  {
+    id: 2,
+    titulo: "Diseño de PCB con KiCad",
+    fecha: "2025-01-24",
+    hora: "10:00 - 12:00",
+    docente: "Ing. María González",
+    cupo: 20,
+    inscritos: 18,
+    descripcion:
+      "Taller práctico sobre diseño de circuitos impresos profesionales. Desde el esquemático hasta la fabricación.",
+  },
+  {
+    id: 3,
+    titulo: "Programación de FPGAs con Verilog",
+    fecha: "2025-01-26",
+    hora: "16:00 - 18:00",
+    docente: "Dr. Roberto Sánchez",
+    cupo: 12,
+    inscritos: 12,
+    descripcion:
+      "Introducción al diseño digital con FPGAs. Aprende Verilog HDL y sintetiza tus primeros circuitos digitales.",
+  },
+  {
+    id: 4,
+    titulo: "Internet de las Cosas (IoT) con ESP32",
+    fecha: "2025-01-28",
+    hora: "15:00 - 17:00",
+    docente: "Ing. Ana Martínez",
+    cupo: 18,
+    inscritos: 10,
+    descripcion:
+      "Conecta dispositivos a la nube usando ESP32. Aprende protocolos MQTT, HTTP y crea tu primer proyecto IoT.",
+  },
+  {
+    id: 5,
+    titulo: "Análisis de Circuitos con SPICE",
+    fecha: "2025-01-30",
+    hora: "11:00 - 13:00",
+    docente: "Dr. Luis Ramírez",
+    cupo: 15,
+    inscritos: 6,
+    descripcion:
+      "Simulación y análisis de circuitos electrónicos usando LTspice. Técnicas avanzadas de análisis AC/DC y transitorio.",
+  },
+]
+
 let currentCategory = "all"
 let selectedMaterial = null
 const cart = JSON.parse(localStorage.getItem("cart")) || []
@@ -58,6 +155,8 @@ const cart = JSON.parse(localStorage.getItem("cart")) || []
 document.addEventListener("DOMContentLoaded", () => {
   loadStudentData()
   renderMaterials()
+  renderSolicitudes()
+  renderAsesorias()
   updateCartBadge()
   setupTabs()
   setupCategoryDropdown()
@@ -225,3 +324,135 @@ document.getElementById("addMaterialModal").addEventListener("click", function (
     closeAddModal()
   }
 })
+
+// Render solicitudes
+function renderSolicitudes() {
+  const grid = document.getElementById("solicitudesGrid")
+
+  if (!grid) return
+
+  if (solicitudesData.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #666;">
+        <p>No tienes solicitudes pendientes</p>
+      </div>
+    `
+    return
+  }
+
+  const estadoTexto = {
+    pendiente: "Pendiente",
+    aprobada: "Aprobada",
+    rechazada: "Rechazada",
+  }
+
+  grid.innerHTML = solicitudesData
+    .map(
+      (solicitud) => `
+    <div class="material-card">
+      <div class="material-header">
+        <div>
+          <h3 class="material-title">Solicitud #${solicitud.id}</h3>
+          <span class="material-category">Solicitado: ${formatDate(solicitud.fechaSolicitud)}</span>
+        </div>
+        <span class="status-badge status-${solicitud.estado}">${estadoTexto[solicitud.estado]}</span>
+      </div>
+      <div style="margin: 1rem 0;">
+        <p style="margin: 0.5rem 0;"><strong>Material:</strong> ${solicitud.material}</p>
+        <p style="margin: 0.5rem 0;"><strong>Fecha de préstamo:</strong> ${formatDate(solicitud.fecha)}</p>
+        <p style="margin: 0.5rem 0;"><strong>Cantidad total:</strong> ${solicitud.cantidadTotal} unidades</p>
+      </div>
+      <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+        <p style="margin: 0; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Motivo:</p>
+        <p style="margin: 0; color: #666; line-height: 1.5;">${solicitud.motivo}</p>
+      </div>
+    </div>
+  `,
+    )
+    .join("")
+}
+
+// Render asesorias
+function renderAsesorias() {
+  const grid = document.getElementById("asesoriasGrid")
+
+  if (!grid) return
+
+  if (asesoriasData.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #666;">
+        <p>No hay asesorías disponibles</p>
+      </div>
+    `
+    return
+  }
+
+  grid.innerHTML = asesoriasData
+    .map((asesoria) => {
+      const disponibles = asesoria.cupo - asesoria.inscritos
+      const porcentaje = (asesoria.inscritos / asesoria.cupo) * 100
+
+      let cupoClass = "available"
+      let cupoTexto = `${disponibles} disponibles`
+
+      if (porcentaje >= 100) {
+        cupoClass = "unavailable"
+        cupoTexto = "Cupo lleno"
+      } else if (porcentaje >= 75) {
+        cupoClass = "limited"
+        cupoTexto = `${disponibles} disponibles`
+      }
+
+      return `
+      <div class="material-card">
+        <div class="material-header">
+          <div>
+            <h3 class="material-title">${asesoria.titulo}</h3>
+            <span class="material-category">${asesoria.docente}</span>
+          </div>
+        </div>
+        <div style="margin: 1rem 0;">
+          <p style="margin: 0.5rem 0;"><strong>Fecha:</strong> ${formatDate(asesoria.fecha)}</p>
+          <p style="margin: 0.5rem 0;"><strong>Horario:</strong> ${asesoria.hora}</p>
+          <p style="margin: 0.5rem 0;"><strong>Cupo:</strong> ${asesoria.inscritos}/${asesoria.cupo} inscritos</p>
+          <p style="margin: 0.5rem 0;">
+            <strong>Disponibilidad:</strong> 
+            <span class="status-badge status-${cupoClass}">${cupoTexto}</span>
+          </p>
+        </div>
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+          <p style="margin: 0; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Descripción:</p>
+          <p style="margin: 0; color: #666; line-height: 1.5;">${asesoria.descripcion}</p>
+        </div>
+        <button 
+          class="add-to-cart-btn" 
+          onclick="solicitarAsesoria(${asesoria.id})"
+          ${disponibles === 0 ? "disabled" : ""}
+          style="margin-top: 1rem; width: 100%;"
+        >
+          ${disponibles === 0 ? "Cupo Completo" : "Solicitar Asesoría"}
+        </button>
+      </div>
+    `
+    })
+    .join("")
+}
+
+// Helper function to format dates
+function formatDate(dateString) {
+  const options = { year: "numeric", month: "long", day: "numeric" }
+  return new Date(dateString).toLocaleDateString("es-ES", options)
+}
+
+// Function to handle asesoria requests
+function solicitarAsesoria(asesoriaId) {
+  const asesoria = asesoriasData.find((a) => a.id === asesoriaId)
+  if (!asesoria) return
+
+  const disponibles = asesoria.cupo - asesoria.inscritos
+  if (disponibles > 0) {
+    alert(
+      `Solicitud enviada para: ${asesoria.titulo}\nDocente: ${asesoria.docente}\nFecha: ${formatDate(asesoria.fecha)}`,
+    )
+  }
+}

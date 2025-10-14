@@ -89,29 +89,25 @@
 
         <!-- Tab: Mis Solicitudes -->
         <section id="solicitudes-tab" class="tab-content">
-            <h1>Mis Solicitudes</h1>
-            <p class="section-subtitle">Aquí aparecerán tus solicitudes de préstamo</p>
-            <div class="empty-state">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M9 11l3 3L22 4"></path>
-                    <path d="M21 12v7a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2V5a2 2 0 0 0 2-2h11"></path>
-                </svg>
-                <p>No tienes solicitudes pendientes</p>
+            <div class="section-header">
+                <h1>Mis Solicitudes</h1>
+                <p class="section-subtitle">Historial de solicitudes de préstamo de material</p>
+            </div>
+            <!-- Added solicitudes grid to display requests -->
+            <div class="solicitudes-grid" id="solicitudesGrid">
+                <!-- Las solicitudes se cargarán dinámicamente con JavaScript -->
             </div>
         </section>
 
         <!-- Tab: Asesorías -->
         <section id="asesorias-tab" class="tab-content">
-            <h1>Asesorías</h1>
-            <p class="section-subtitle">Solicita asesorías con profesores</p>
-            <div class="empty-state">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                <p>No tienes asesorías programadas</p>
+            <div class="section-header">
+                <h1>Asesorías Disponibles</h1>
+                <p class="section-subtitle">Consulta y solicita asesorías con profesores</p>
+            </div>
+            <!-- Added asesorias grid to display tutoring sessions -->
+            <div class="asesorias-grid" id="asesoriasGrid">
+                <!-- Las asesorías se cargarán dinámicamente con JavaScript -->
             </div>
         </section>
     </main>
