@@ -1,131 +1,99 @@
-// Toggle password visibility para contraseña
-const togglePasswordRegistro = document.getElementById("togglePasswordRegistro")
-const passwordRegistroInput = document.getElementById("passwordRegistro")
+// Obtener los elementos del formulario
+const registerForm = document.getElementById("registerForm");
+const passwordRegistroInput = document.getElementById("passwordRegistro");
+const confirmPasswordInput = document.getElementById("confirmPassword");
 
+// Manejo de toggle de contraseña
+const togglePasswordRegistro = document.getElementById("togglePasswordRegistro");
 togglePasswordRegistro.addEventListener("click", () => {
-  const type = passwordRegistroInput.getAttribute("type") === "password" ? "text" : "password"
-  passwordRegistroInput.setAttribute("type", type)
-  togglePasswordRegistro.querySelector(".eye-icon").style.opacity = type === "text" ? "0.5" : "1"
-})
+  const type = passwordRegistroInput.type === "password" ? "text" : "password";
+  passwordRegistroInput.type = type;
+});
 
-// Toggle password visibility para confirmar contraseña
-const toggleConfirmPassword = document.getElementById("toggleConfirmPassword")
-const confirmPasswordInput = document.getElementById("confirmPassword")
-
+const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
 toggleConfirmPassword.addEventListener("click", () => {
-  const type = confirmPasswordInput.getAttribute("type") === "password" ? "text" : "password"
-  confirmPasswordInput.setAttribute("type", type)
-  toggleConfirmPassword.querySelector(".eye-icon").style.opacity = type === "text" ? "0.5" : "1"
-})
+  const type = confirmPasswordInput.type === "password" ? "text" : "password";
+  confirmPasswordInput.type = type;
+});
 
-// Validar que las contraseñas coincidan
-const passwordMatchHint = document.getElementById("passwordMatch")
-
+// Validar que coincidan las contraseñas
 confirmPasswordInput.addEventListener("input", () => {
-  const password = passwordRegistroInput.value
-  const confirmPassword = confirmPasswordInput.value
-
-  if (confirmPassword === "") {
-    passwordMatchHint.textContent = ""
-    passwordMatchHint.className = "form-hint"
-  } else if (password === confirmPassword) {
-    passwordMatchHint.textContent = "Las contraseñas coinciden"
-    passwordMatchHint.className = "form-hint success"
-    confirmPasswordInput.style.borderColor = "#10B981"
+  const password = passwordRegistroInput.value;
+  const confirm = confirmPasswordInput.value;
+  const hint = document.getElementById("passwordMatch");
+  if (confirm === "") {
+    hint.textContent = "";
+  } else if (password === confirm) {
+    hint.textContent = "Las contraseñas coinciden";
+    confirmPasswordInput.style.borderColor = "#10B981";
   } else {
-    passwordMatchHint.textContent = "Las contraseñas no coinciden"
-    passwordMatchHint.className = "form-hint error"
-    confirmPasswordInput.style.borderColor = "#EF4444"
+    hint.textContent = "Las contraseñas no coinciden";
+    confirmPasswordInput.style.borderColor = "#EF4444";
   }
-})
+});
 
-// Handle register form submission
-const registerForm = document.getElementById("registerForm")
-
-registerForm.addEventListener("submit", async (e) => {
-  e.preventDefault()
-
-  // Validar que las contraseñas coincidan
-  const password = passwordRegistroInput.value
-  const confirmPassword = confirmPasswordInput.value
-
-  if (password !== confirmPassword) {
-    alert("Las contraseñas no coinciden")
-    return
-  }
-
-  // Recopilar datos del formulario
-  const formData = {
-    nombres: document.getElementById("nombres").value,
-    apellidos: document.getElementById("apellidos").value,
-    carrera: document.getElementById("carrera").value,
-    semestre: document.getElementById("semestre").value,
-    numeroControl: document.getElementById("numeroControl").value,
-    email: document.getElementById("emailRegistro").value,
-    password: password,
-  }
-
-  console.log("Registro attempt:", formData)
-
-  // Aquí es donde conectarás con tu backend en el futuro
-  /*
-    try {
-        const response = await fetch('/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            // Registro exitoso
-            console.log('Registro successful:', data);
-            alert('Cuenta creada exitosamente. Redirigiendo al login...');
-            window.location.href = '/index.html';
-        } else {
-            // Error en registro
-            alert('Error: ' + data.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al conectar con el servidor');
-    }
-    */
-
-  // Por ahora, solo mostramos un mensaje
-  alert("Formulario de registro enviado. Conecta con tu backend para procesar el registro.")
-})
-
-// Botón para volver al login
-const backToLoginBtn = document.getElementById("backToLoginBtn")
-
-backToLoginBtn.addEventListener("click", () => {
-  window.location.href = "index.html"
-})
-
-// Add input validation feedback
-const inputs = document.querySelectorAll(".form-input")
-
-inputs.forEach((input) => {
-  input.addEventListener("blur", function () {
-    if (this.value.trim() === "" && this.hasAttribute("required")) {
-      this.style.borderColor = "#EF4444"
-    } else if (this.value.trim() !== "") {
-      this.style.borderColor = "#10B981"
-    }
-  })
-
-  input.addEventListener("focus", function () {
-    this.style.borderColor = "var(--color-burgundy)"
-  })
-})
-
-// Validación del número de control (solo números)
-const numeroControlInput = document.getElementById("numeroControl")
-
+// Validación de número de control
+const numeroControlInput = document.getElementById("numeroControl");
 numeroControlInput.addEventListener("input", function () {
-  this.value = this.value.replace(/[^0-9]/g, "")
-})
+  this.value = this.value.replace(/[^0-9]/g, "");
+});
+
+// Manejar envío del formulario
+registerForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const id_usuario = document.getElementById("numeroControl").value.trim();
+  const nombres = document.getElementById("nombres").value.trim();
+  const apellidos = document.getElementById("apellidos").value.trim();
+  const correo = document.getElementById("emailRegistro").value.trim();
+  const contrasena = passwordRegistroInput.value;
+  const confirmPassword = confirmPasswordInput.value;
+
+  // Validar contraseñas
+  if (contrasena !== confirmPassword) {
+    alert("Las contraseñas no coinciden");
+    return;
+  }
+
+  // Obtener valores de select
+  const carreraSelect = document.getElementById("carrera");
+  const carrera = carreraSelect.value;
+  const semestreSelect = document.getElementById("semestre");
+  const semestre = semestreSelect.value;
+
+  // Validación básica antes de enviar
+  if (!id_usuario || !nombres || !apellidos || !correo || !carrera || !semestre) {
+    alert("Todos los campos son obligatorios");
+    return;
+  }
+
+  const formData = {
+    id_usuario,
+    nombres,
+    apellidos,
+    carreras_id_carreras: carrera,
+    correo,
+    semestre,
+    contrasena,
+  };
+
+  try {
+    const response = await fetch("http://localhost:3000/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("✅ " + data.message);
+      window.location.href = "index.html";
+    } else {
+      alert("⚠️ " + (data.error || "Error al registrar"));
+    }
+  } catch (error) {
+    console.error(error);
+    alert("❌ Error al conectar con el servidor");
+  }
+});
