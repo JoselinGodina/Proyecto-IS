@@ -152,6 +152,16 @@
             padding: 1.5rem;
             border-radius: 8px 8px 0 0;
             border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-header-text {
+            flex: 1;
+            min-width: 200px;
         }
 
         .section-header h3 {
@@ -164,6 +174,42 @@
         .section-header p {
             font-size: 0.85rem;
             color: #666;
+        }
+
+        .search-container {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.65rem 0.75rem 0.65rem 2.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            color: #1e3a5f;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #8b1538;
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #9ca3af;
+            pointer-events: none;
         }
 
         .users-table-container {
@@ -483,6 +529,15 @@
             .btn-submit {
                 width: 100%;
             }
+
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -509,9 +564,7 @@
         </div>
     </header>
 
-    <!-- <div class="title-section">
-        <h1>Administrador</h1>
-    </div> -->
+    
 
     <nav class="nav-tabs">
         <a href="solicitudes.html" class="nav-tab">Solicitudes</a>
@@ -530,8 +583,22 @@
         </div>
 
         <div class="section-header">
-            <h3>Usuarios Registrados</h3>
-            <p>Lista de todos los usuarios del sistema</p>
+            <div class="section-header-text">
+                <h3>Usuarios Registrados</h3>
+                <p>Lista de todos los usuarios del sistema</p>
+            </div>
+            <div class="search-container">
+                <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput"
+                    placeholder="Buscar por nombre..."
+                    oninput="buscarUsuarios()"
+                >
+            </div>
         </div>
 
         <div class="users-table-container">
@@ -662,10 +729,23 @@
         ];
 
         let currentUserId = null;
+        let filteredUsers = [...users];
 
         function renderUsers() {
             const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = users.map(user => `
+            
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: #666;">
+                            No se encontraron usuarios que coincidan con la búsqueda
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = filteredUsers.map(user => `
                 <tr>
                     <td>${user.nombre}</td>
                     <td><span class="user-badge badge-${user.tipo}">${user.tipo}</span></td>
@@ -753,9 +833,7 @@
             user.email = document.getElementById('editEmail').value;
             user.numero = document.getElementById('editNumero').value;
             
-            console.log('[v0] Usuario actualizado:', user);
-            
-            renderUsers();
+            buscarUsuarios();
             cerrarModal('edit');
             alert('Datos del usuario actualizados exitosamente');
         }
@@ -772,9 +850,7 @@
             const nuevoRol = document.getElementById('selectRol').value;
             user.tipo = nuevoRol;
             
-            console.log('[v0] Rol asignado:', { userId: currentUserId, nuevoRol });
-            
-            renderUsers();
+            buscarUsuarios();
             cerrarModal('role');
             alert(`Rol "${nuevoRol}" asignado exitosamente a ${user.nombre}`);
         }
@@ -786,7 +862,7 @@
             
             if (confirm(`¿Estás seguro de que deseas ${accion} a ${user.nombre}?`)) {
                 user.estado = nuevoEstado;
-                renderUsers();
+                buscarUsuarios();
                 alert(`Usuario ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} exitosamente`);
             }
         }
@@ -795,6 +871,20 @@
             if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
                 alert('Cerrando sesión...');
             }
+        }
+
+        function buscarUsuarios() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                filteredUsers = [...users];
+            } else {
+                filteredUsers = users.filter(user => 
+                    user.nombre.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            renderUsers();
         }
 
         // Cerrar modales con tecla Escape
