@@ -697,11 +697,6 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="materialNumber">Número del Material</label>
-                        <input type="text" id="materialNumber" placeholder="Descripción técnica del material" required>
-                    </div>
-
-                    <div class="form-group">
                         <label for="category">Categoría</label>
                         <div class="custom-select">
                             <div class="select-trigger" id="selectTrigger">
@@ -814,7 +809,6 @@
                 const formData = {
                     code: document.getElementById('materialCode').value,
                     description: document.getElementById('description').value,
-                    materialNumber: document.getElementById('materialNumber').value,
                     category: categoryInput.value,
                     quantity: document.getElementById('quantity').value
                 };
