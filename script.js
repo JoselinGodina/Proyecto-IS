@@ -1,3 +1,20 @@
+// 1️⃣ Limpiar campos de login al cargar la página
+window.addEventListener("load", () => {
+  document.getElementById("email").value = "";
+  document.getElementById("password").value = "";
+});
+
+// Evitar que el navegador use cache al volver con <- o ->
+// Esto borra los inputs y limpia localStorage si la página viene del back/forward
+window.addEventListener("pageshow", function (event) {
+  if (event.persisted || (window.performance && window.performance.getEntriesByType("navigation")[0].type === "back_forward")) {
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+    localStorage.removeItem("usuario");
+    sessionStorage.clear();
+  }
+});
+
 // Toggle password visibility
 const togglePassword = document.getElementById("togglePassword")
 const passwordInput = document.getElementById("password")
@@ -18,64 +35,38 @@ togglePassword.addEventListener("click", () => {
 // Handle login form submission
 const loginForm = document.getElementById("loginForm")
 
-loginForm.addEventListener("submit", (e) => {
+loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  const correo = document.getElementById("email").value.trim();
+  const contrasena = document.getElementById("password").value.trim();
 
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
-
-  // Aquí es donde conectarás con tu backend en el futuro
- // Limpia errores previos
-  email.setCustomValidity("");
-  password.setCustomValidity("");
-
-  // Validaciones personalizadas
-  if (email.value.trim() === "") {
-    email.setCustomValidity("Por favor, ingresa tu correo institucional.");
-  } else if (!email.value.includes("@")) {
-    email.setCustomValidity("Por favor, ingresa un correo válido.");
-  }
-
-  if (password.value.trim() === "") {
-    password.setCustomValidity("Por favor, ingresa tu contraseña.");
-  }
-
-  // Si hay errores, mostrarlos en español
-  if (!loginForm.checkValidity()) {
-    loginForm.reportValidity();
+  if (!correo || !contrasena) {
+    alert("Por favor, completa todos los campos");
     return;
   }
-  // Ejemplo de cómo se vería la llamada al backend:
-  /*
-    try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            // Login exitoso
-            console.log('Login successful:', data);
-            // Redirigir al dashboard o guardar token
-            localStorage.setItem('token', data.token);
-            window.location.href = '/dashboard';
-        } else {
-            // Error en login
-            alert('Error: ' + data.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al conectar con el servidor');
-    }
-    */
 
-  // Por ahora, solo mostramos un mensaje
-  alert("Formulario enviado. Conecta con tu backend para procesar el login.")
+  try {
+    const response = await fetch("http://localhost:3000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ correo, contrasena }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+  // Guardar datos del usuario en localStorage
+  localStorage.setItem("usuario", JSON.stringify(data.user));
+
+  alert(`✅ Bienvenido ${data.user.nombres}`);
+  window.location.href = "alumno.html"; // redirige al portal del alumno
+}
+
+  } catch (error) {
+    console.error("Error al conectar:", error);
+    alert("Error al conectar con el servidor.");
+  }
+ 
 })
 
 // Handle register button
