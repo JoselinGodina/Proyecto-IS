@@ -2,9 +2,9 @@
 // Alumno.js - Gestión de sesión y materiales
 // ===========================================
 
-// ----------------------
-// Evitar que la página use cache con las flechas <- ->
-// ----------------------
+// ================================
+// Seguridad: evitar regresar con flecha <-
+// ================================
 window.addEventListener("pageshow", function(event) {
   if (event.persisted || (window.performance && window.performance.getEntriesByType("navigation")[0].type === "back_forward")) {
     // Borrar datos de sesión y carrito
@@ -15,6 +15,13 @@ window.addEventListener("pageshow", function(event) {
     window.location.href = "index.html";
   }
 });
+
+window.onpopstate = function () {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario) {
+    window.location.href = "index.html";
+  }
+};
 
 // ----------------------
 // Verificar sesión al cargar
@@ -27,8 +34,8 @@ window.addEventListener("load", () => {
   } else {
     // Mostrar datos del usuario
     document.getElementById("studentName").textContent = usuario.nombres + " " + usuario.apellidos;
-    document.getElementById("studentInfo").textContent = usuario.id_usuario + " - Ingeniería en Sistemas Computacionales"; // Cambiar según la carrera real
-    document.getElementById("semesterBadge").textContent = "6to Semestre"; // Cambiar dinámicamente si tienes ese dato
+    document.getElementById("studentInfo").textContent = usuario.id_usuario + " - Ingeniería en Sistemas Computacionales"; 
+    document.getElementById("semesterBadge").textContent = "6to Semestre"; 
   }
 });
 
