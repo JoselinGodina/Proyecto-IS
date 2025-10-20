@@ -112,10 +112,11 @@ function loadStudentData() {
   const user = JSON.parse(localStorage.getItem("usuario"));
   if (user) {
     document.getElementById("studentName").textContent = `${user.nombres} ${user.apellidos}`;
-    document.getElementById("studentInfo").textContent = `${user.id_usuario} - Carrera`;
-    document.getElementById("semesterBadge").textContent = "6to Semestre";
+    document.getElementById("studentInfo").textContent = `${user.id_usuario} - ${user.carrera}`;
+    document.getElementById("semesterBadge").textContent = user.semestre;
   }
 }
+
 
 // ----------------------
 // Tabs

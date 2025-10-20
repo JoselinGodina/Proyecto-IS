@@ -61,6 +61,10 @@ loginForm.addEventListener("submit", async (e) => {
   alert(`✅ Bienvenido ${data.user.nombres}`);
   window.location.href = "alumno.html"; // redirige al portal del alumno
 }
+  else {
+    // Usuario no registrado o contraseña incorrecta
+    alert("⚠️Usuario o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo." );
+  }
 
   } catch (error) {
     console.error("Error al conectar:", error);
