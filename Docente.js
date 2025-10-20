@@ -1,3 +1,11 @@
+window.addEventListener("pageshow", (event) => {
+  const usuarioActual = JSON.parse(localStorage.getItem("usuarioActual") || localStorage.getItem("usuario"));
+  if (!usuarioActual) {
+    window.location.href = "index.html";
+  }
+});
+
+
 // ----------------------
 // Obtener usuario actual
 // ----------------------
@@ -11,6 +19,21 @@ if (usuarioActual) {
   nombreElem.textContent = usuarioActual.nombre;
   codigoElem.textContent = `${usuarioActual.id} - Electrónica Analógica`; // Cambia "Electrónica Analógica" según tu sistema
 }
+
+
+// ----------------------
+// Botón Cerrar Sesión
+// ----------------------
+const btnLogout = document.querySelector(".btn-logout");
+
+btnLogout.addEventListener("click", () => {
+  // Borrar usuario de localStorage
+  localStorage.removeItem("usuario");      // o "usuarioActual" si lo usas en Docente.js
+  sessionStorage.clear();                   // limpia cualquier sessionStorage
+  // Redirigir al login
+  window.location.href = "index.html";
+});
+
 
 // ----------------------
 // Data storage
