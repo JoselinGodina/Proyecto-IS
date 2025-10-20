@@ -54,13 +54,20 @@ loginForm.addEventListener("submit", async (e) => {
 
     const data = await response.json();
 
-    if (response.ok) {
+   if (response.ok) {
   // Guardar datos del usuario en localStorage
   localStorage.setItem("usuario", JSON.stringify(data.user));
 
   alert(`✅ Bienvenido ${data.user.nombres}`);
-  window.location.href = "alumno.html"; // redirige al portal del alumno
+
+  // Redirigir según el rol
+  if (data.user.roles_id_rol === '1') { // Admin
+    window.location.href = "usuarios.html";
+  } else {
+    window.location.href = "alumno.html"; // Usuario normal
+  }
 }
+
   else {
     // Usuario no registrado o contraseña incorrecta
     alert("⚠️Usuario o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo." );
@@ -72,6 +79,36 @@ loginForm.addEventListener("submit", async (e) => {
   }
  
 })
+
+// Este código va en tu index.html (o en el JS que usa el login)
+async function loginUsuario(event) {
+    event.preventDefault();
+
+    const id = document.getElementById("usuario").value;
+    const contrasena = document.getElementById("contrasena").value;
+
+    // Aquí harías tu consulta al backend (Node.js o lo que uses)
+    // Supongamos que ya recibes los datos del usuario:
+    const respuesta = {
+        id_usuario: id,
+        nombres: "Admin",
+        apellidos: "Principal",
+        correo: "admin@instituto.edu.mx",
+        roles_id_rol: "1" // si es admin (si es alumno, sería "2")
+    };
+
+    // Guardar sesión en localStorage
+    localStorage.setItem("usuario", JSON.stringify(respuesta));
+
+    // Redirección según rol
+    if (respuesta.roles_id_rol === "1") {
+        window.location.href = "usuarios.html";
+    } else {
+        window.location.href = "alumno.html";
+    }
+}
+
+
 
 // Handle register button
 const registerBtn = document.getElementById("registerBtn")

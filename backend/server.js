@@ -89,7 +89,13 @@ app.post("/login", async (req, res) => {
 
     res.json({
       message: "Inicio de sesión exitoso",
-      user: { id_usuario: user.id_usuario, nombres: user.nombres, apellidos: user.apellidos, correo: user.correo }
+user: { 
+  id_usuario: user.id_usuario, 
+  nombres: user.nombres, 
+  apellidos: user.apellidos, 
+  correo: user.correo,
+  roles_id_rol: user.roles_id_rol // <-- importante
+}
     });
   } catch (error) {
     console.error("❌ Error en /login:", error);
