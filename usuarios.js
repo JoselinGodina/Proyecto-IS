@@ -171,6 +171,15 @@ document.addEventListener('keydown', e => {
         cerrarModal('role');
     }
 });
+function cerrarSesion() {
+    localStorage.removeItem('usuarioLogueado');
+    sessionStorage.clear();
+    const inputs = document.querySelectorAll('input, textarea');
+    inputs.forEach(input => input.value = '');
+    document.body.innerHTML = '';
+    window.location.href = 'index.html';
+}
+
 
 // === Render inicial de usuarios ===
 renderUsers();

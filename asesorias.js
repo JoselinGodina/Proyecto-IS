@@ -1,20 +1,5 @@
 const API_URL = "http://localhost:3000/asesorias";
 
-window.addEventListener("pageshow", (event) => {
-  const usuarioActual = JSON.parse(localStorage.getItem("usuarioActual") || localStorage.getItem("usuario"));
-  if (!usuarioActual) {
-    window.location.href = "index.html";
-  }
-});
-const btnLogout = document.querySelector(".btn-logout");
-
-btnLogout.addEventListener("click", () => {
-  // Borrar usuario de localStorage
-  localStorage.removeItem("usuario");      // o "usuarioActual" si lo usas en Docente.js
-  sessionStorage.clear();                   // limpia cualquier sessionStorage
-  // Redirigir al login
-  window.location.href = "index.html";
-});
 // Guardar asesorías en memoria
 let asesorias = [];
 let editandoAsesoriaId = null;
