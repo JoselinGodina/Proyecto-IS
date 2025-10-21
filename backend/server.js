@@ -170,6 +170,73 @@ app.delete("/asesorias/:id", async (req, res) => {
 });
 
 
+// Ruta para obtener todas las asesorías (para mostrar al alumno)
+app.get("/alumno/asesorias", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM crear_asesoria ORDER BY fecha ASC");
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener asesorías para alumno:", error);
+    res.status(500).json({ error: "Error al obtener asesorías" });
+  }
+});
+
+// Endpoint para inscribirse en una asesoría
+// ===========================================
+// 📘 INSCRIBIR ALUMNO A UNA ASESORÍA
+// ===========================================
+app.post("/inscribir", async (req, res) => {
+  const { id_usuario, id_crear_asesoria } = req.body;
+
+  try {
+    // 1️⃣ Verificar que la asesoría exista
+    const asesoriaResult = await pool.query(
+      "SELECT cupo, cuposOcupados FROM CREAR_ASESORIA WHERE id_crear_asesoria = $1",
+      [id_crear_asesoria]
+    );
+
+    if (asesoriaResult.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Asesoría no encontrada" });
+    }
+
+    const { cupo, cuposocupados } = asesoriaResult.rows[0];
+
+    // 2️⃣ Revisar si hay cupos disponibles
+    if (cuposocupados >= cupo) {
+      return res.status(400).json({ success: false, error: "Cupo lleno" });
+    }
+
+    // 3️⃣ (Opcional) Verificar si el alumno ya está inscrito
+    // Si tienes una tabla de inscripciones, puedes usar algo como:
+    // const existe = await pool.query(
+    //   "SELECT * FROM INSCRIPCIONES WHERE id_usuario = $1 AND id_crear_asesoria = $2",
+    //   [id_usuario, id_crear_asesoria]
+    // );
+    // if (existe.rows.length > 0) {
+    //   return res.status(400).json({ success: false, error: "Ya estás inscrito en esta asesoría" });
+    // }
+
+    // 4️⃣ Incrementar el contador de cupos ocupados
+    await pool.query(
+      "UPDATE CREAR_ASESORIA SET cuposOcupados = cuposOcupados + 1 WHERE id_crear_asesoria = $1",
+      [id_crear_asesoria]
+    );
+
+    // 5️⃣ (Opcional) Registrar la inscripción si tienes una tabla
+    // await pool.query(
+    //   "INSERT INTO INSCRIPCIONES (id_usuario, id_crear_asesoria, fecha_inscripcion) VALUES ($1, $2, NOW())",
+    //   [id_usuario, id_crear_asesoria]
+    // );
+
+    // 6️⃣ Respuesta exitosa
+    res.json({ success: true, message: "Inscripción realizada con éxito" });
+  } catch (error) {
+    console.error("❌ Error en /inscribir:", error);
+    res.status(500).json({ success: false, error: "Error en el servidor" });
+  }
+});
+
+
 
 
 // Iniciar servidor

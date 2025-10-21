@@ -1,5 +1,5 @@
-// ===========================================
-// Alumno.js - Gestión de sesión y materiales
+// =========================================== 
+// Alumno.js - Gestión de sesión, materiales y asesorías
 // ===========================================
 
 // ================================
@@ -7,20 +7,16 @@
 // ================================
 window.addEventListener("pageshow", function(event) {
   if (event.persisted || (window.performance && window.performance.getEntriesByType("navigation")[0].type === "back_forward")) {
-    // Borrar datos de sesión y carrito
     localStorage.removeItem("usuario");
     localStorage.removeItem("cart");
     sessionStorage.clear();
-    // Redirigir al login
     window.location.href = "index.html";
   }
 });
 
 window.onpopstate = function () {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
-  if (!usuario) {
-    window.location.href = "index.html";
-  }
+  if (!usuario) window.location.href = "index.html";
 };
 
 // ----------------------
@@ -28,14 +24,11 @@ window.onpopstate = function () {
 // ----------------------
 window.addEventListener("load", () => {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
-  if (!usuario) {
-    // No hay usuario, redirigir al login
-    window.location.href = "index.html";
-  } else {
-    // Mostrar datos del usuario
+  if (!usuario) window.location.href = "index.html";
+  else {
     document.getElementById("studentName").textContent = usuario.nombres + " " + usuario.apellidos;
-    document.getElementById("studentInfo").textContent = usuario.id_usuario + " - Ingeniería en Sistemas Computacionales"; 
-    document.getElementById("semesterBadge").textContent = "6to Semestre"; 
+    document.getElementById("studentInfo").textContent = usuario.id_usuario + " - " + (usuario.carrera || "Carrera");
+    document.getElementById("semesterBadge").textContent = usuario.semestre || "Semestre";
   }
 });
 
@@ -43,15 +36,17 @@ window.addEventListener("load", () => {
 // Logout
 // ----------------------
 const logoutBtn = document.getElementById("logoutBtn");
-logoutBtn.addEventListener("click", () => {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("cart");
-  sessionStorage.clear();
-  window.location.href = "index.html";
-});
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("cart");
+    sessionStorage.clear();
+    window.location.href = "index.html";
+  });
+}
 
 // ----------------------
-// Datos de materiales
+// Datos de materiales (ejemplo)
 // ----------------------
 const materials = [
   { id: 1, name: "Resistencias 1/4W", category: "Componentes Pasivos", available: 200 },
@@ -65,24 +60,11 @@ const materials = [
 ];
 
 // ----------------------
-// Datos de solicitudes
+// Datos de solicitudes (ejemplo)
 // ----------------------
 const solicitudesData = [
-  { id: 1, material: "Arduino UNO R3, Resistencias 220Ω (x10), LED RGB", fecha: "2025-01-20", fechaSolicitud: "2025-01-15", motivo: "Proyecto de semáforo inteligente para la materia de Sistemas Embebidos. Necesito implementar un prototipo funcional.", cantidadTotal: 12, estado: "pendiente" },
-  { id: 2, material: "Multímetro Digital, Protoboard 830 puntos", fecha: "2025-01-18", fechaSolicitud: "2025-01-14", motivo: "Práctica de medición de circuitos en serie y paralelo para Electrónica Analógica.", cantidadTotal: 2, estado: "aprobada" },
-  { id: 3, material: "Capacitores Electrolíticos (varios valores), Diodos 1N4007", fecha: "2025-01-10", fechaSolicitud: "2025-01-08", motivo: "Construcción de fuente de alimentación regulada. Proyecto final del curso.", cantidadTotal: 15, estado: "rechazada" },
-  { id: 4, material: "Sensor ultrasónico HC-SR04, Servomotor SG90", fecha: "2025-01-25", fechaSolicitud: "2025-01-16", motivo: "Desarrollo de sistema de detección de obstáculos para robot móvil. Competencia de robótica.", cantidadTotal: 3, estado: "pendiente" },
-];
-
-// ----------------------
-// Datos de asesorías
-// ----------------------
-const asesoriasData = [
-  { id: 1, titulo: "Introducción a Microcontroladores ARM", fecha: "2025-01-22", hora: "14:00 - 16:00", docente: "Dr. Carlos Méndez", cupo: 15, inscritos: 8, descripcion: "Aprende los fundamentos de la arquitectura ARM Cortex-M y su programación. Incluye ejemplos prácticos con STM32." },
-  { id: 2, titulo: "Diseño de PCB con KiCad", fecha: "2025-01-24", hora: "10:00 - 12:00", docente: "Ing. María González", cupo: 20, inscritos: 18, descripcion: "Taller práctico sobre diseño de circuitos impresos profesionales. Desde el esquemático hasta la fabricación." },
-  { id: 3, titulo: "Programación de FPGAs con Verilog", fecha: "2025-01-26", hora: "16:00 - 18:00", docente: "Dr. Roberto Sánchez", cupo: 12, inscritos: 12, descripcion: "Introducción al diseño digital con FPGAs. Aprende Verilog HDL y sintetiza tus primeros circuitos digitales." },
-  { id: 4, titulo: "Internet de las Cosas (IoT) con ESP32", fecha: "2025-01-28", hora: "15:00 - 17:00", docente: "Ing. Ana Martínez", cupo: 18, inscritos: 10, descripcion: "Conecta dispositivos a la nube usando ESP32. Aprende protocolos MQTT, HTTP y crea tu primer proyecto IoT." },
-  { id: 5, titulo: "Análisis de Circuitos con SPICE", fecha: "2025-01-30", hora: "11:00 - 13:00", docente: "Dr. Luis Ramírez", cupo: 15, inscritos: 6, descripcion: "Simulación y análisis de circuitos electrónicos usando LTspice. Técnicas avanzadas de análisis AC/DC y transitorio." },
+  { id: 1, material: "Arduino UNO R3, Resistencias 220Ω (x10), LED RGB", fecha: "2025-01-20", fechaSolicitud: "2025-01-15", motivo: "Proyecto de semáforo inteligente", cantidadTotal: 12, estado: "pendiente" },
+  { id: 2, material: "Multímetro Digital, Protoboard 830 puntos", fecha: "2025-01-18", fechaSolicitud: "2025-01-14", motivo: "Práctica de medición de circuitos", cantidadTotal: 2, estado: "aprobada" },
 ];
 
 // ----------------------
@@ -99,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStudentData();
   renderMaterials();
   renderSolicitudes();
-  renderAsesorias();
+  fetchAndRenderAsesorias(); // Trae las asesorías desde backend
   updateCartBadge();
   setupTabs();
   setupCategoryDropdown();
@@ -112,11 +94,10 @@ function loadStudentData() {
   const user = JSON.parse(localStorage.getItem("usuario"));
   if (user) {
     document.getElementById("studentName").textContent = `${user.nombres} ${user.apellidos}`;
-    document.getElementById("studentInfo").textContent = `${user.id_usuario} - ${user.carrera}`;
-    document.getElementById("semesterBadge").textContent = user.semestre;
+    document.getElementById("studentInfo").textContent = `${user.id_usuario} - ${user.carrera || ""}`;
+    document.getElementById("semesterBadge").textContent = user.semestre || "";
   }
 }
-
 
 // ----------------------
 // Tabs
@@ -160,9 +141,7 @@ function setupCategoryDropdown() {
     });
   });
 
-  document.addEventListener("click", () => {
-    categoryMenu.classList.remove("show");
-  });
+  document.addEventListener("click", () => categoryMenu.classList.remove("show"));
 }
 
 // ----------------------
@@ -170,12 +149,10 @@ function setupCategoryDropdown() {
 // ----------------------
 function renderMaterials() {
   const grid = document.getElementById("materialsGrid");
-  const filteredMaterials =
-    currentCategory === "all" ? materials : materials.filter((m) => m.category === currentCategory);
+  if (!grid) return;
+  const filteredMaterials = currentCategory === "all" ? materials : materials.filter(m => m.category === currentCategory);
 
-  grid.innerHTML = filteredMaterials
-    .map(
-      (material) => `
+  grid.innerHTML = filteredMaterials.map(material => `
     <div class="material-card" onclick="openAddModal(${material.id})">
       <div class="material-header">
         <div>
@@ -188,16 +165,14 @@ function renderMaterials() {
         Agregar al préstamo
       </button>
     </div>
-  `
-    )
-    .join("");
+  `).join("");
 }
 
 // ----------------------
 // Modal materiales
 // ----------------------
 function openAddModal(materialId) {
-  selectedMaterial = materials.find((m) => m.id === materialId);
+  selectedMaterial = materials.find(m => m.id === materialId);
   if (!selectedMaterial) return;
   document.getElementById("modalMaterialName").textContent = selectedMaterial.name;
   document.getElementById("modalMaterialCategory").textContent = selectedMaterial.category;
@@ -212,7 +187,7 @@ function closeAddModal() {
   selectedMaterial = null;
 }
 
-document.getElementById("addMaterialModal").addEventListener("click", function (e) {
+document.getElementById("addMaterialModal")?.addEventListener("click", function (e) {
   if (e.target === this) closeAddModal();
 });
 
@@ -235,17 +210,9 @@ function decreaseQuantity() {
 function confirmAddToCart() {
   const quantity = Number.parseInt(document.getElementById("quantityInput").value);
   if (!selectedMaterial || quantity < 1) return;
-  const existingItem = cart.find((item) => item.id === selectedMaterial.id);
-  if (existingItem) {
-    existingItem.quantity += quantity;
-  } else {
-    cart.push({
-      id: selectedMaterial.id,
-      name: selectedMaterial.name,
-      category: selectedMaterial.category,
-      quantity: quantity,
-    });
-  }
+  const existingItem = cart.find(item => item.id === selectedMaterial.id);
+  if (existingItem) existingItem.quantity += quantity;
+  else cart.push({ id: selectedMaterial.id, name: selectedMaterial.name, category: selectedMaterial.category, quantity });
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartBadge();
   closeAddModal();
@@ -255,7 +222,7 @@ function confirmAddToCart() {
 function updateCartBadge() {
   const badge = document.getElementById("cartBadge");
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  badge.textContent = totalItems;
+  if (badge) badge.textContent = totalItems;
 }
 
 // ----------------------
@@ -269,9 +236,7 @@ function renderSolicitudes() {
     return;
   }
   const estadoTexto = { pendiente: "Pendiente", aprobada: "Aprobada", rechazada: "Rechazada" };
-  grid.innerHTML = solicitudesData
-    .map(
-      (solicitud) => `
+  grid.innerHTML = solicitudesData.map(solicitud => `
     <div class="material-card">
       <div class="material-header">
         <div>
@@ -281,66 +246,96 @@ function renderSolicitudes() {
         <span class="status-badge status-${solicitud.estado}">${estadoTexto[solicitud.estado]}</span>
       </div>
       <div style="margin: 1rem 0;">
-        <p style="margin: 0.5rem 0;"><strong>Material:</strong> ${solicitud.material}</p>
-        <p style="margin: 0.5rem 0;"><strong>Fecha de préstamo:</strong> ${formatDate(solicitud.fecha)}</p>
-        <p style="margin: 0.5rem 0;"><strong>Cantidad total:</strong> ${solicitud.cantidadTotal} unidades</p>
+        <p><strong>Material:</strong> ${solicitud.material}</p>
+        <p><strong>Fecha de préstamo:</strong> ${formatDate(solicitud.fecha)}</p>
+        <p><strong>Cantidad total:</strong> ${solicitud.cantidadTotal} unidades</p>
       </div>
       <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-        <p style="margin: 0; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Motivo:</p>
-        <p style="margin: 0; color: #666; line-height: 1.5;">${solicitud.motivo}</p>
+        <p style="margin: 0.5rem 0;"><strong>Motivo:</strong> ${solicitud.motivo}</p>
       </div>
     </div>
-  `
-    )
-    .join("");
+  `).join("");
 }
 
 // ----------------------
-// Render asesorías
+// Render asesorías desde backend
 // ----------------------
-function renderAsesorias() {
+async function fetchAndRenderAsesorias() {
+  try {
+    const res = await fetch("http://localhost:3000/asesorias");
+    const asesoriasData = await res.json();
+    renderAsesorias(asesoriasData);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderAsesorias(asesoriasData) {
   const grid = document.getElementById("asesoriasGrid");
   if (!grid) return;
-  if (asesoriasData.length === 0) {
+  if (!asesoriasData || asesoriasData.length === 0) {
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #666;"><p>No hay asesorías disponibles</p></div>`;
     return;
   }
-  grid.innerHTML = asesoriasData
-    .map((asesoria) => {
-      const disponibles = asesoria.cupo - asesoria.inscritos;
-      const porcentaje = (asesoria.inscritos / asesoria.cupo) * 100;
-      let cupoClass = "available";
-      let cupoTexto = `${disponibles} disponibles`;
-      if (porcentaje >= 100) {
-        cupoClass = "unavailable";
-        cupoTexto = "Cupo lleno";
-      } else if (porcentaje >= 75) {
-        cupoClass = "limited";
-        cupoTexto = `${disponibles} disponibles`;
-      }
-      return `
+
+  grid.innerHTML = asesoriasData.map(a => {
+    const cuposOcupados = a.cuposocupados || 0; // <-- CORREGIDO
+    const disponibles = a.cupo - cuposOcupados;
+    const porcentaje = (cuposOcupados / a.cupo) * 100;
+    let cupoClass = "available", cupoTexto = `${disponibles} disponibles`;
+    if (porcentaje >= 100) { cupoClass = "unavailable"; cupoTexto = "Cupo lleno"; }
+    else if (porcentaje >= 75) { cupoClass = "limited"; cupoTexto = `${disponibles} disponibles`; }
+
+    return `
       <div class="material-card">
         <div class="material-header">
           <div>
-            <h3 class="material-title">${asesoria.titulo}</h3>
-            <span class="material-category">${asesoria.docente}</span>
+            <h3 class="material-title">${a.titulo}</h3>
+            <span class="material-category">${a.docente}</span>
           </div>
         </div>
         <div style="margin: 1rem 0;">
-          <p style="margin: 0.5rem 0;"><strong>Fecha:</strong> ${formatDate(asesoria.fecha)}</p>
-          <p style="margin: 0.5rem 0;"><strong>Horario:</strong> ${asesoria.hora}</p>
-          <p style="margin: 0.5rem 0;"><strong>Cupo:</strong> ${asesoria.inscritos}/${asesoria.cupo} inscritos</p>
-          <p style="margin: 0.5rem 0;"><strong>Disponibilidad:</strong> <span class="status-badge status-${cupoClass}">${cupoTexto}</span></p>
+          <p><strong>Fecha:</strong> ${formatDate(a.fecha)}</p>
+          <p><strong>Horario:</strong> ${a.horario}</p>
+          <p><strong>Cupo:</strong> ${cuposOcupados}/${a.cupo} inscritos</p>
+          <p><strong>Disponibilidad:</strong> <span class="status-badge status-${cupoClass}">${cupoTexto}</span></p>
         </div>
         <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-          <p style="margin: 0; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Descripción:</p>
-          <p style="margin: 0; color: #666; line-height: 1.5;">${asesoria.descripcion}</p>
+          <p><strong>Descripción:</strong> ${a.descripcion}</p>
         </div>
-        <button class="add-to-cart-btn" onclick="solicitarAsesoria(${asesoria.id})" ${disponibles === 0 ? "disabled" : ""} style="margin-top: 1rem; width: 100%;">${disponibles === 0 ? "Cupo Completo" : "Solicitar Asesoría"}</button>
+        <button class="add-to-cart-btn" onclick="solicitarAsesoria('${a.id_crear_asesoria}')" ${disponibles === 0 ? "disabled" : ""} style="margin-top: 1rem; width: 100%;">
+          ${disponibles === 0 ? "Cupo Completo" : "Solicitar Asesoría"}
+        </button>
       </div>
     `;
-    })
-    .join("");
+  }).join("");
+}
+
+// ----------------------
+// Función para solicitar asesoría
+// ----------------------
+async function solicitarAsesoria(id_crear_asesoria) {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario) return alert("Debes iniciar sesión.");
+
+  try {
+    const res = await fetch("http://localhost:3000/inscribir", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_usuario: usuario.id_usuario, id_crear_asesoria })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      alert("¡Te has inscrito correctamente!");
+      fetchAndRenderAsesorias(); // 🔄 recarga las asesorías y se actualiza el número de cuposOcupados
+    } else {
+      alert(data.error || "No se pudo inscribir");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error al inscribirse. Revisa la consola.");
+  }
 }
 
 // ----------------------
@@ -349,13 +344,4 @@ function renderAsesorias() {
 function formatDate(dateString) {
   const options = { year: "numeric", month: "long", day: "numeric" };
   return new Date(dateString).toLocaleDateString("es-ES", options);
-}
-
-function solicitarAsesoria(asesoriaId) {
-  const asesoria = asesoriasData.find((a) => a.id === asesoriaId);
-  if (!asesoria) return;
-  const disponibles = asesoria.cupo - asesoria.inscritos;
-  if (disponibles > 0) {
-    alert(`Solicitud enviada para: ${asesoria.titulo}\nDocente: ${asesoria.docente}\nFecha: ${formatDate(asesoria.fecha)}`);
-  }
 }

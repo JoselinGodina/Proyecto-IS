@@ -25,7 +25,7 @@ async function inicializarAsesorias() {
             fecha: a.fecha,
             horario: a.horario,
             cuposTotal: a.cupo,
-            cuposOcupados: a.cuposOcupados || 0,
+            cuposOcupados: a.cuposocupados || 0,
             estado: a.estado || "Programado",
             instructor: a.instructor || adminLogueado.nombres
         }));
