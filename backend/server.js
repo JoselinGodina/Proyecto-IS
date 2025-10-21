@@ -203,7 +203,7 @@ app.post("/inscribir", async (req, res) => {
 
     // 2️⃣ Revisar si hay cupos disponibles
     if (cuposocupados >= cupo) {
-      return res.status(400).json({ success: false, error: "Cupo lleno" });
+      return res.status(400).json({ success: false, error: "Ya perteneces a esta asesoria:)" });
     }
 
     // 3️⃣ (Opcional) Verificar si el alumno ya está inscrito
