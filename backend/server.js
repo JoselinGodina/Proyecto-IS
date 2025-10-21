@@ -104,6 +104,72 @@ user: {
 });
 
 
+// ================================
+// 🧩 CRUD de Asesorías (Administrador)
+// ================================
+
+// Obtener todas las asesorías creadas
+app.get("/asesorias", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM crear_asesoria ORDER BY fecha ASC");
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener asesorías:", error);
+    res.status(500).json({ error: "Error al obtener asesorías" });
+  }
+});
+
+// Crear una nueva asesoría
+app.post("/asesorias", async (req, res) => {
+  try {
+    const { id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo } = req.body;
+
+    await pool.query(
+      `INSERT INTO crear_asesoria (id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo]
+    );
+
+    res.status(201).json({ message: "Asesoría creada correctamente" });
+  } catch (error) {
+    console.error("Error al crear asesoría:", error);
+    res.status(500).json({ error: "Error al crear asesoría" });
+  }
+});
+
+// Editar una asesoría
+app.put("/asesorias/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titulo, descripcion, fecha, horario, cupo } = req.body;
+
+    await pool.query(
+      `UPDATE crear_asesoria 
+       SET titulo = $1, descripcion = $2, fecha = $3, horario = $4, cupo = $5
+       WHERE id_crear_asesoria = $6`,
+      [titulo, descripcion, fecha, horario, cupo, id]
+    );
+
+    res.json({ message: "Asesoría actualizada correctamente" });
+  } catch (error) {
+    console.error("Error al editar asesoría:", error);
+    res.status(500).json({ error: "Error al editar asesoría" });
+  }
+});
+
+// Cancelar (eliminar) asesoría
+app.delete("/asesorias/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query("DELETE FROM crear_asesoria WHERE id_crear_asesoria = $1", [id]);
+    res.json({ message: "Asesoría cancelada correctamente" });
+  } catch (error) {
+    console.error("Error al cancelar asesoría:", error);
+    res.status(500).json({ error: "Error al cancelar asesoría" });
+  }
+});
+
+
 
 
 // Iniciar servidor
