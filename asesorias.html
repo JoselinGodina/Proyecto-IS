@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Asesorías - Administrador</title>
-   <link rel="stylesheet" href="asesorias.css">
+    <link rel="stylesheet" href="asesorias.css">
 </head>
 <body>
     <!-- Header -->
@@ -30,11 +30,6 @@
         </div>
     </header>
 
-    <!-- Title -->
-    <!-- <div class="title-section">
-        <h1>Administrador</h1>
-    </div> -->
-
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
         <a href="solicitudes.html" class="nav-tab">Solicitudes</a>
@@ -43,7 +38,6 @@
         <a href="reportes.html" class="nav-tab">Reportes</a>
         <a href="asesorias.html" class="nav-tab active">Asesorías</a>
         <a href="gestionMaterial.html" class="nav-tab">Entrada de Material</a>
-        <!-- <a href="pedidoMaterial.html" class="nav-tab">Entrada de Material</a> -->
     </div>
 
     <!-- Main Content -->
@@ -86,68 +80,34 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="titulo">Título</label>
-                        <input 
-                            type="text" 
-                            id="titulo" 
-                            name="titulo" 
-                            placeholder="Ej: Introducción a Arduino"
-                            required
-                        >
+                        <input type="text" id="titulo" name="titulo" placeholder="Ej: Introducción a Arduino" required>
                     </div>
 
                     <div class="form-group">
                         <label for="descripcion">Descripción</label>
-                        <textarea 
-                            id="descripcion" 
-                            name="descripcion" 
-                            placeholder="Describe el contenido de la asesoría"
-                            required
-                        ></textarea>
+                        <textarea id="descripcion" name="descripcion" placeholder="Describe el contenido de la asesoría" required></textarea>
                     </div>
 
                     <div class="form-group" id="instructorGroup" style="display: none;">
                         <label for="instructor">Impartido por</label>
-                        <input 
-                            type="text" 
-                            id="instructor" 
-                            name="instructor" 
-                            placeholder="Nombre del instructor"
-                        >
+                        <input type="text" id="instructor" name="instructor" placeholder="Nombre del instructor">
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="fecha">Fecha</label>
-                            <input 
-                                type="date" 
-                                id="fecha" 
-                                name="fecha"
-                                required
-                            >
+                            <input type="date" id="fecha" name="fecha" required>
                         </div>
 
                         <div class="form-group">
                             <label for="horario">Horario</label>
-                            <input 
-                                type="text" 
-                                id="horario" 
-                                name="horario"
-                                placeholder="14:00-16:00"
-                                required
-                            >
+                            <input type="text" id="horario" name="horario" placeholder="14:00-16:00" required>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="cupos" id="cuposLabel">Cupos Disponibles</label>
-                        <input 
-                            type="number" 
-                            id="cupos" 
-                            name="cupos"
-                            min="1"
-                            value="15"
-                            required
-                        >
+                        <input type="number" id="cupos" name="cupos" min="1" value="15" required>
                     </div>
                 </div>
 
@@ -159,6 +119,6 @@
         </div>
     </div>
 
-  <script src="asesorias.js"></script>
+    <script src="asesorias.js"></script>
 </body>
 </html>
