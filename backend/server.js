@@ -208,7 +208,7 @@ app.post("/inscribir", async (req, res) => {
 
     const { cupo, cuposocupados } = asesoriaResult.rows[0];
 
-    // 2️⃣ Revisar si el alumno ya está inscrito
+    // 2️ Revisar si el alumno ya está inscrito
     const existe = await pool.query(
       "SELECT * FROM inscripciones WHERE id_usuario = $1 AND id_crear_asesoria = $2",
       [id_usuario, id_crear_asesoria]
@@ -216,11 +216,11 @@ app.post("/inscribir", async (req, res) => {
     if (existe.rows.length > 0)
       return res.status(400).json({ success: false, error: "Ya estás inscrito en esta asesoría" });
 
-    // 3️⃣ Revisar cupos
-    if (cuposocupados >= cupo)
+    // 3️ Revisar cupos
+    if (cuposocupados <= cupo)
       return res.status(400).json({ success: false, error: "Cupo lleno" });
 
-    // 4️⃣ Insertar en inscripciones
+    // 4️ Insertar en inscripciones
     await pool.query(
       `INSERT INTO inscripciones (id_usuario, id_crear_asesoria, fecha_inscripcion)
        VALUES ($1, $2, NOW())`,
