@@ -166,5 +166,99 @@ function renderAsesorias() {
 // Otras funciones (formatDate, crear, editar, ver estudiantes)
 // ----------------------
 
+// Format date
+function formatDate(dateString) {
+  const date = new Date(dateString + "T00:00:00")
+  const options = { year: "numeric", month: "2-digit", day: "2-digit" }
+  return date.toLocaleDateString("es-MX", options)
+}
+
+// Nueva asesoría
+document.getElementById("btn-nueva-asesoria").addEventListener("click", () => {
+  document.getElementById("form-crear-asesoria").reset()
+  openModal("modal-crear")
+})
+
+document.getElementById("form-crear-asesoria").addEventListener("submit", (e) => {
+  e.preventDefault()
+
+  const nuevaAsesoria = {
+    id: nextId++,
+    titulo: document.getElementById("crear-titulo").value,
+    descripcion: document.getElementById("crear-descripcion").value,
+    fecha: document.getElementById("crear-fecha").value,
+    horario: document.getElementById("crear-horario").value,
+    cupos: Number.parseInt(document.getElementById("crear-cupos").value),
+    inscritos: 0,
+    estudiantes: [],
+  }
+
+  asesorias.push(nuevaAsesoria)
+  renderAsesorias()
+  closeModal("modal-crear")
+})
+
+// Editar asesoría
+function editarAsesoria(id) {
+  const asesoria = asesorias.find((a) => a.id === id)
+  if (!asesoria) return
+
+  document.getElementById("editar-id").value = asesoria.id
+  document.getElementById("editar-titulo").value = asesoria.titulo
+  document.getElementById("editar-descripcion").value = asesoria.descripcion
+  document.getElementById("editar-fecha").value = asesoria.fecha
+  document.getElementById("editar-horario").value = asesoria.horario
+  document.getElementById("editar-cupos").value = asesoria.cupos
+
+  openModal("modal-editar")
+}
+
+document.getElementById("form-editar-asesoria").addEventListener("submit", (e) => {
+  e.preventDefault()
+
+  const id = Number.parseInt(document.getElementById("editar-id").value)
+  const asesoria = asesorias.find((a) => a.id === id)
+
+  if (asesoria) {
+    asesoria.titulo = document.getElementById("editar-titulo").value
+    asesoria.descripcion = document.getElementById("editar-descripcion").value
+    asesoria.fecha = document.getElementById("editar-fecha").value
+    asesoria.horario = document.getElementById("editar-horario").value
+    asesoria.cupos = Number.parseInt(document.getElementById("editar-cupos").value)
+
+    renderAsesorias()
+    closeModal("modal-editar")
+  }
+})
+
+// Ver estudiantes
+function verEstudiantes(id) {
+  const asesoria = asesorias.find((a) => a.id === id)
+  if (!asesoria) return
+
+  const container = document.getElementById("estudiantes-list")
+
+  if (asesoria.estudiantes.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: #666;">No hay estudiantes inscritos</p>'
+  } else {
+    container.innerHTML = asesoria.estudiantes
+      .map(
+        (estudiante) => `
+      <div class="estudiante-item">
+        <div class="estudiante-avatar">A</div>
+        <div class="estudiante-info">
+          <div class="estudiante-name">${estudiante.nombre}</div>
+          <div class="estudiante-code">${estudiante.codigo}</div>
+        </div>
+        <div class="estudiante-email">${estudiante.email}</div>
+      </div>
+    `,
+      )
+      .join("")
+  }
+
+  openModal("modal-estudiantes")
+}
+
 // Initialize
 renderAsesorias();
