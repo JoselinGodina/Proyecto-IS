@@ -240,12 +240,7 @@ app.post("/inscribir", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-//usua
-//const express = require("express")
-//const app = express()
-//const pool = require("./db") // Assuming pool is imported from a database connection file
-
+//select de usuarios
 app.use(express.json())
 
 // ===========================================
@@ -327,7 +322,6 @@ app.put("/usuarios/:id/rol", async (req, res) => {
 app.listen(3000, () => {
   console.log("Server is running on port 3000")
 })
-=======
 // Ver inscritos por asesoría (para docente)
 app.get("/inscripciones/:id_crear_asesoria", async (req, res) => {
   try {
@@ -361,7 +355,6 @@ app.get("/asesorias/:id/inscritos", async (req, res) => {
     res.status(500).json({ error: "Error al obtener los inscritos" });
   }
 });
->>>>>>> a49b9dfeba28b26590de5f882506e58efa51f181
 
 
 // ============================
