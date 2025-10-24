@@ -8,31 +8,36 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
+// ============================
 // Configuración PostgreSQL
+// ============================
 const pool = new Pool({
   user: "postgres",
   host: "localhost",
   database: "ProyectoIs",
-  password: "270704", 
+  password: "270704",
   port: 5432,
 });
 
-// Middleware
+// ============================
+// Middlewares
+// ============================
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "../")));
 
-// Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, "../"))); // '../' porque frontend está en la carpeta padre
-
-// Abrir index.html al entrar al root
+// ============================
+// Rutas base
+// ============================
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../index.html"));
 });
 
-// Ruta de prueba
-app.get("/ping", (req, res) => res.send("Servidor funcionando"));
+app.get("/ping", (req, res) => res.send("Servidor funcionando correctamente 🚀"));
 
-// Ruta de registro
+// ============================
+// 🧍 Registro de usuario
+// ============================
 app.post("/register", async (req, res) => {
   try {
     const { id_usuario, nombres, apellidos, carreras_id_carreras, correo, semestre, contrasena } = req.body;
@@ -45,7 +50,6 @@ app.post("/register", async (req, res) => {
       "SELECT * FROM usuarios WHERE id_usuario = $1 OR correo = $2",
       [id_usuario, correo]
     );
-
     if (userExist.rows.length > 0) {
       return res.status(400).json({ error: "El usuario o correo ya están registrados" });
     }
@@ -65,37 +69,31 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Ruta de login
+// ============================
+// 🔐 Login
+// ============================
 app.post("/login", async (req, res) => {
   try {
     const { correo, contrasena } = req.body;
-
-    if (!correo || !contrasena) {
-      return res.status(400).json({ error: "Faltan correo o contraseña" });
-    }
+    if (!correo || !contrasena) return res.status(400).json({ error: "Faltan datos" });
 
     const result = await pool.query("SELECT * FROM usuarios WHERE correo = $1", [correo]);
-
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: "Correo no registrado" });
-    }
+    if (result.rows.length === 0) return res.status(401).json({ error: "Correo no registrado" });
 
     const user = result.rows[0];
     const passwordMatch = await bcrypt.compare(contrasena, user.contrasena);
-
-    if (!passwordMatch) {
-      return res.status(401).json({ error: "Contraseña incorrecta" });
-    }
+    if (!passwordMatch) return res.status(401).json({ error: "Contraseña incorrecta" });
 
     res.json({
       message: "Inicio de sesión exitoso",
-user: { 
-  id_usuario: user.id_usuario, 
-  nombres: user.nombres, 
-  apellidos: user.apellidos, 
-  correo: user.correo,
-  roles_id_rol: user.roles_id_rol // <-- importante
-}
+      user: {
+        id_usuario: user.id_usuario,
+        nombres: user.nombres,
+        apellidos: user.apellidos,
+        correo: user.correo,
+        roles_id_rol: user.roles_id_rol,
+        semestre: user.semestre,
+      },
     });
   } catch (error) {
     console.error("❌ Error en /login:", error);
@@ -103,12 +101,9 @@ user: {
   }
 });
 
-
-// ================================
-// 🧩 CRUD de Asesorías (Administrador)
-// ================================
-
-// Obtener todas las asesorías creadas
+// ============================
+// 📘 CRUD: CREAR_ASESORIA
+// ============================
 app.get("/asesorias", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM crear_asesoria ORDER BY fecha ASC");
@@ -119,17 +114,14 @@ app.get("/asesorias", async (req, res) => {
   }
 });
 
-// Crear una nueva asesoría
 app.post("/asesorias", async (req, res) => {
   try {
     const { id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo } = req.body;
-
     await pool.query(
-      `INSERT INTO crear_asesoria (id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      `INSERT INTO crear_asesoria (id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo, cuposocupados)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 0)`,
       [id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo]
     );
-
     res.status(201).json({ message: "Asesoría creada correctamente" });
   } catch (error) {
     console.error("Error al crear asesoría:", error);
@@ -137,19 +129,16 @@ app.post("/asesorias", async (req, res) => {
   }
 });
 
-// Editar una asesoría
 app.put("/asesorias/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { titulo, descripcion, fecha, horario, cupo } = req.body;
-
     await pool.query(
       `UPDATE crear_asesoria 
-       SET titulo = $1, descripcion = $2, fecha = $3, horario = $4, cupo = $5
-       WHERE id_crear_asesoria = $6`,
+       SET titulo=$1, descripcion=$2, fecha=$3, horario=$4, cupo=$5 
+       WHERE id_crear_asesoria=$6`,
       [titulo, descripcion, fecha, horario, cupo, id]
     );
-
     res.json({ message: "Asesoría actualizada correctamente" });
   } catch (error) {
     console.error("Error al editar asesoría:", error);
@@ -157,7 +146,6 @@ app.put("/asesorias/:id", async (req, res) => {
   }
 });
 
-// Cancelar (eliminar) asesoría
 app.delete("/asesorias/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -169,8 +157,9 @@ app.delete("/asesorias/:id", async (req, res) => {
   }
 });
 
-
-// Ruta para obtener todas las asesorías (para mostrar al alumno)
+// ============================
+// 👩‍🎓 Asesorías visibles para alumnos
+// ============================
 app.get("/alumno/asesorias", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM crear_asesoria ORDER BY fecha ASC");
@@ -181,61 +170,77 @@ app.get("/alumno/asesorias", async (req, res) => {
   }
 });
 
-// Endpoint para inscribirse en una asesoría
-// ===========================================
-// 📘 INSCRIBIR ALUMNO A UNA ASESORÍA
-// ===========================================
+// ============================
+// 🧾 Tabla INSCRIPCIONES
+// ============================
+
+// Listar inscripciones de un alumno
+app.get("/inscripciones/:id_usuario", async (req, res) => {
+  try {
+    const { id_usuario } = req.params;
+    const result = await pool.query(
+      `SELECT i.id_inscripcion, i.fecha_inscripcion, c.titulo, c.descripcion, c.fecha, c.horario 
+       FROM inscripciones i
+       JOIN crear_asesoria c ON i.id_crear_asesoria = c.id_crear_asesoria
+       WHERE i.id_usuario = $1`,
+      [id_usuario]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener inscripciones:", error);
+    res.status(500).json({ error: "Error al obtener inscripciones" });
+  }
+});
+
+// Registrar inscripción
 app.post("/inscribir", async (req, res) => {
   const { id_usuario, id_crear_asesoria } = req.body;
 
   try {
     // 1️⃣ Verificar que la asesoría exista
     const asesoriaResult = await pool.query(
-      "SELECT cupo, cuposOcupados FROM CREAR_ASESORIA WHERE id_crear_asesoria = $1",
+      "SELECT cupo, cuposocupados FROM crear_asesoria WHERE id_crear_asesoria = $1",
       [id_crear_asesoria]
     );
 
-    if (asesoriaResult.rows.length === 0) {
+    if (asesoriaResult.rows.length === 0)
       return res.status(404).json({ success: false, error: "Asesoría no encontrada" });
-    }
 
     const { cupo, cuposocupados } = asesoriaResult.rows[0];
 
-    // 2️⃣ Revisar si hay cupos disponibles
-    if (cuposocupados >= cupo) {
-      return res.status(400).json({ success: false, error: "Ya perteneces a esta asesoria:)" });
-    }
+    // 2️ Revisar si el alumno ya está inscrito
+    const existe = await pool.query(
+      "SELECT * FROM inscripciones WHERE id_usuario = $1 AND id_crear_asesoria = $2",
+      [id_usuario, id_crear_asesoria]
+    );
+    if (existe.rows.length > 0)
+      return res.status(400).json({ success: false, error: "Ya estás inscrito en esta asesoría" });
 
-    // 3️⃣ (Opcional) Verificar si el alumno ya está inscrito
-    // Si tienes una tabla de inscripciones, puedes usar algo como:
-    // const existe = await pool.query(
-    //   "SELECT * FROM INSCRIPCIONES WHERE id_usuario = $1 AND id_crear_asesoria = $2",
-    //   [id_usuario, id_crear_asesoria]
-    // );
-    // if (existe.rows.length > 0) {
-    //   return res.status(400).json({ success: false, error: "Ya estás inscrito en esta asesoría" });
-    // }
+    // 3️ Revisar cupos
+    if (cuposocupados >= cupo)
+      return res.status(400).json({ success: false, error: "cupo lleno" });
 
-    // 4️⃣ Incrementar el contador de cupos ocupados
+    // 4️ Insertar en inscripciones
     await pool.query(
-      "UPDATE CREAR_ASESORIA SET cuposOcupados = cuposOcupados + 1 WHERE id_crear_asesoria = $1",
+      `INSERT INTO inscripciones (id_usuario, id_crear_asesoria, fecha_inscripcion)
+       VALUES ($1, $2, NOW())`,
+      [id_usuario, id_crear_asesoria]
+    );
+
+    // 5️⃣ Actualizar contador
+    await pool.query(
+      "UPDATE crear_asesoria SET cuposocupados = cuposocupados + 1 WHERE id_crear_asesoria = $1",
       [id_crear_asesoria]
     );
 
-    // 5️⃣ (Opcional) Registrar la inscripción si tienes una tabla
-    // await pool.query(
-    //   "INSERT INTO INSCRIPCIONES (id_usuario, id_crear_asesoria, fecha_inscripcion) VALUES ($1, $2, NOW())",
-    //   [id_usuario, id_crear_asesoria]
-    // );
-
-    // 6️⃣ Respuesta exitosa
-    res.json({ success: true, message: "Inscripción realizada con éxito" });
+    res.json({ success: true, message: "Inscripción realizada correctamente" });
   } catch (error) {
     console.error("❌ Error en /inscribir:", error);
     res.status(500).json({ success: false, error: "Error en el servidor" });
   }
 });
 
+<<<<<<< HEAD
 //usua
 //const express = require("express")
 //const app = express()
@@ -322,10 +327,46 @@ app.put("/usuarios/:id/rol", async (req, res) => {
 app.listen(3000, () => {
   console.log("Server is running on port 3000")
 })
+=======
+// Ver inscritos por asesoría (para docente)
+app.get("/inscripciones/:id_crear_asesoria", async (req, res) => {
+  try {
+    const { id_crear_asesoria } = req.params;
+    const result = await pool.query(
+      `SELECT u.id_usuario, u.nombres, u.apellidos, u.correo
+       FROM inscripciones i
+       JOIN usuarios u ON u.id_usuario = i.id_usuario
+       WHERE i.id_crear_asesoria = $1`,
+      [id_crear_asesoria]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener inscritos:", error);
+    res.status(500).json({ error: "Error al obtener inscritos" });
+  }
+});
+
+app.get("/asesorias/:id/inscritos", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(`
+      SELECT u.id_usuario, u.nombres, u.apellidos, u.correo
+      FROM inscripciones i
+      JOIN usuarios u ON i.id_usuario = u.id_usuario
+      WHERE i.id_crear_asesoria = $1
+    `, [id]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error al obtener inscritos:", err);
+    res.status(500).json({ error: "Error al obtener los inscritos" });
+  }
+});
+>>>>>>> a49b9dfeba28b26590de5f882506e58efa51f181
 
 
-
-// Iniciar servidor
+// ============================
+// 🚀 Iniciar servidor
+// ============================
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
