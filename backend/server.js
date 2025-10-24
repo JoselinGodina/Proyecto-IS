@@ -236,6 +236,92 @@ app.post("/inscribir", async (req, res) => {
   }
 });
 
+//usua
+//const express = require("express")
+//const app = express()
+//const pool = require("./db") // Assuming pool is imported from a database connection file
+
+app.use(express.json())
+
+// ===========================================
+// 📋 OBTENER USUARIOS CON ROLES
+// ===========================================
+app.get("/usuarios", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        u.id_usuario,
+        CONCAT(u.nombres, ' ', u.apellidos) AS nombre,
+        r.descripcion AS tipo,
+        u.correo AS email,
+        u.id_usuario AS numeroControl,
+        u.roles_id_rol
+      FROM usuarios u
+      JOIN roles r ON u.roles_id_rol = r.id_rol
+      ORDER BY u.nombres ASC
+    `)
+
+    res.json(result.rows)
+  } catch (error) {
+    console.error("❌ Error al obtener usuarios:", error)
+    res.status(500).json({ error: "Error al obtener usuarios" })
+  }
+})
+
+// ===========================================
+// 📝 ACTUALIZAR DATOS DE USUARIO
+// ===========================================
+app.put("/usuarios/:id", async (req, res) => {
+  try {
+    const { id } = req.params
+    const { nombre, email, numeroControl } = req.body
+
+    // Separar nombre completo en nombres y apellidos
+    const nombreParts = nombre.trim().split(" ")
+    const nombres = nombreParts.slice(0, Math.ceil(nombreParts.length / 2)).join(" ")
+    const apellidos = nombreParts.slice(Math.ceil(nombreParts.length / 2)).join(" ")
+
+    await pool.query(
+      `UPDATE usuarios 
+       SET nombres = $1, apellidos = $2, correo = $3
+       WHERE id_usuario = $4`,
+      [nombres, apellidos, email, id],
+    )
+
+    res.json({ message: "Usuario actualizado correctamente" })
+  } catch (error) {
+    console.error("❌ Error al actualizar usuario:", error)
+    res.status(500).json({ error: "Error al actualizar usuario" })
+  }
+})
+
+// ===========================================
+// 🔄 CAMBIAR ROL DE USUARIO
+// ===========================================
+app.put("/usuarios/:id/rol", async (req, res) => {
+  try {
+    const { id } = req.params
+    const { rol } = req.body
+
+    await pool.query(
+      `UPDATE usuarios 
+       SET roles_id_rol = $1
+       WHERE id_usuario = $2`,
+      [rol, id],
+    )
+
+    res.json({ message: "Rol actualizado correctamente" })
+  } catch (error) {
+    console.error("❌ Error al actualizar rol:", error)
+    res.status(500).json({ error: "Error al actualizar rol" })
+  }
+})
+
+// ... existing code here ...
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000")
+})
 
 
 

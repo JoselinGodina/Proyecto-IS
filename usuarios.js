@@ -1,185 +1,216 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // === Verificar sesión y rol ===
-    const usuario = JSON.parse(localStorage.getItem("usuario"));
+  // === Verificar sesión y rol ===
+  const usuario = JSON.parse(localStorage.getItem("usuario"))
 
-    if (!usuario) {
-        // No hay sesión → redirigir al login
-        window.location.replace("index.html");
-        return;
-    }
+  if (!usuario) {
+    window.location.replace("index.html")
+    return
+  }
 
-    if (usuario.roles_id_rol !== '1') {
-        // No es admin → redirigir a alumno
-        window.location.replace("alumno.html");
-        return;
-    }
+  if (usuario.roles_id_rol !== "1") {
+    window.location.replace("alumno.html")
+    return
+  }
 
-    // Mostrar nombre y datos del admin en la cabecera
-    const nombreCompleto = `${usuario.nombres} ${usuario.apellidos}`;
-    document.querySelector(".admin-details h3").textContent = nombreCompleto;
-    document.querySelector(".admin-details p").textContent = `${usuario.id_usuario} - Administrador del Sistema`;
-});
+  const nombreCompleto = `${usuario.nombres} ${usuario.apellidos}`
+  document.querySelector(".admin-details h3").textContent = nombreCompleto
+  document.querySelector(".admin-details p").textContent = `${usuario.id_usuario} - Administrador del Sistema`
 
-// === Función para cerrar sesión ===
+  cargarUsuarios()
+})
+
 function cerrarSesion() {
-    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-        localStorage.removeItem('usuario');
-        localStorage.removeItem('rol');
-        localStorage.removeItem('token');
-        // Reemplaza la página actual para evitar regresar atrás
-        window.location.replace("index.html");
-    }
+  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+    localStorage.removeItem("usuario")
+    localStorage.removeItem("rol")
+    localStorage.removeItem("token")
+    window.location.replace("index.html")
+  }
 }
 
-// === Datos de usuarios de ejemplo ===
-let users = [
-    { id: 1, nombre: 'Nombre del alumno', tipo: 'estudiante', email: 'correo@instituto.edu.mx', numero: '20240001', estado: 'activo' },
-    { id: 2, nombre: 'Nombre del Docente', tipo: 'docente', email: 'correo@instituto.edu.mx', numero: 'DOC-001', estado: 'activo' },
-    { id: 3, nombre: 'Nombre del alumno', tipo: 'estudiante', email: 'correo@instituto.edu.mx', numero: '20240002', estado: 'inactivo' }
-];
+let users = []
+let currentUserId = null
+let filteredUsers = []
 
-let currentUserId = null;
-let filteredUsers = [...users];
+async function cargarUsuarios() {
+  try {
+    const response = await fetch("http://localhost:3000/usuarios")
+    if (!response.ok) throw new Error("Error al cargar usuarios")
 
-// === Renderizar tabla de usuarios ===
+    users = await response.json()
+
+    users = users.map((user) => ({
+      id: user.id_usuario,
+      nombre: user.nombre,
+      tipo: mapRolToTipo(user.tipo),
+      email: user.email,
+      numero: user.numerocontrol,
+      roles_id_rol: user.roles_id_rol,
+    }))
+
+    filteredUsers = [...users]
+    renderUsers()
+  } catch (error) {
+    console.error("Error al cargar usuarios:", error)
+    alert("Error al cargar los usuarios de la base de datos")
+  }
+}
+
+function mapRolToTipo(descripcion) {
+  const roleMap = {
+    Administrador: "administrador",
+    Docente: "docente",
+    Estudiante: "estudiante",
+    Alumno: "estudiante",
+  }
+  return roleMap[descripcion] || descripcion.toLowerCase()
+}
+
+function mapTipoToRolId(tipo) {
+  const roleMap = {
+    administrador: "1",
+    docente: "2",
+    estudiante: "3",
+  }
+  return roleMap[tipo] || "3"
+}
+
 function renderUsers() {
-    const tbody = document.getElementById('usersTableBody');
+  const tbody = document.getElementById("usersTableBody")
 
-    if (filteredUsers.length === 0) {
-        tbody.innerHTML = `
+  if (filteredUsers.length === 0) {
+    tbody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align: center; padding: 2rem; color: #666;">
+                <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
                     No se encontraron usuarios que coincidan con la búsqueda
                 </td>
             </tr>
-        `;
-        return;
-    }
+        `
+    return
+  }
 
-    tbody.innerHTML = filteredUsers.map(user => `
+  tbody.innerHTML = filteredUsers
+    .map(
+      (user) => `
         <tr>
             <td>${user.nombre}</td>
             <td><span class="user-badge badge-${user.tipo}">${user.tipo}</span></td>
             <td>${user.email}</td>
             <td>${user.numero}</td>
-            <td><span class="status-badge status-${user.estado}">${user.estado}</span></td>
             <td>
                 <div class="actions-cell">
-                    <button class="action-btn btn-modificar" onclick="abrirModalEditar(${user.id})">Modificar</button>
-                    <button class="action-btn btn-asignar" onclick="abrirModalRol(${user.id})">Asignar Rol</button>
-                    ${user.estado === 'activo' ? 
-                        `<button class="action-btn btn-desactivar" onclick="toggleEstado(${user.id})">Desactivar</button>` :
-                        `<button class="action-btn btn-activar" onclick="toggleEstado(${user.id})">Activar</button>`
-                    }
+                    <button class="action-btn btn-modificar" onclick="abrirModalEditar('${user.id}')">Modificar</button>
+                    <button class="action-btn btn-asignar" onclick="abrirModalRol('${user.id}')">Asignar Rol</button>
                 </div>
             </td>
         </tr>
-    `).join('');
+    `,
+    )
+    .join("")
 }
 
-// === Modales ===
 function abrirModalEditar(userId) {
-    currentUserId = userId;
-    const user = users.find(u => u.id === userId);
+  currentUserId = userId
+  const user = users.find((u) => u.id === userId)
 
-    document.getElementById('editModalSubtitle').textContent = `Edita la información del usuario ${user.nombre}`;
-    document.getElementById('editNombre').value = user.nombre;
-    document.getElementById('editEmail').value = user.email;
-    document.getElementById('editNumero').value = user.numero;
+  document.getElementById("editModalSubtitle").textContent = `Edita la información del usuario ${user.nombre}`
+  document.getElementById("editNombre").value = user.nombre
+  document.getElementById("editEmail").value = user.email
+  document.getElementById("editNumero").value = user.numero
 
-    document.getElementById('editModalOverlay').classList.add('active');
-    document.body.style.overflow = 'hidden';
+  document.getElementById("editModalOverlay").classList.add("active")
+  document.body.style.overflow = "hidden"
 }
 
 function abrirModalRol(userId) {
-    currentUserId = userId;
-    const user = users.find(u => u.id === userId);
+  currentUserId = userId
+  const user = users.find((u) => u.id === userId)
 
-    document.getElementById('roleModalSubtitle').textContent = `Cambia el rol del usuario ${user.nombre}`;
-    document.getElementById('selectRol').value = user.tipo;
-    document.getElementById('rolActual').textContent = user.tipo;
-    document.getElementById('rolNuevo').textContent = user.tipo;
+  document.getElementById("roleModalSubtitle").textContent = `Cambia el rol del usuario ${user.nombre}`
+  document.getElementById("selectRol").value = user.roles_id_rol || mapTipoToRolId(user.tipo)
+  document.getElementById("rolActual").textContent = user.tipo
+  document.getElementById("rolNuevo").textContent = user.tipo
 
-    document.getElementById('roleModalOverlay').classList.add('active');
-    document.body.style.overflow = 'hidden';
+  document.getElementById("roleModalOverlay").classList.add("active")
+  document.body.style.overflow = "hidden"
 }
 
 function cerrarModal(type) {
-    const modalId = type === 'edit' ? 'editModalOverlay' : 'roleModalOverlay';
-    document.getElementById(modalId).classList.remove('active');
-    document.body.style.overflow = 'auto';
-    currentUserId = null;
+  const modalId = type === "edit" ? "editModalOverlay" : "roleModalOverlay"
+  document.getElementById(modalId).classList.remove("active")
+  document.body.style.overflow = "auto"
+  currentUserId = null
 }
 
 function cerrarModalSiClickFuera(event, type) {
-    if (event.target === event.currentTarget) cerrarModal(type);
+  if (event.target === event.currentTarget) cerrarModal(type)
 }
 
-// === Guardar cambios de usuario ===
-function guardarCambiosUsuario(event) {
-    event.preventDefault();
-    const user = users.find(u => u.id === currentUserId);
-    user.nombre = document.getElementById('editNombre').value;
-    user.email = document.getElementById('editEmail').value;
-    user.numero = document.getElementById('editNumero').value;
+async function guardarCambiosUsuario(event) {
+  event.preventDefault()
 
-    buscarUsuarios();
-    cerrarModal('edit');
-    alert('Datos del usuario actualizados exitosamente');
+  const nombre = document.getElementById("editNombre").value
+  const email = document.getElementById("editEmail").value
+  const numeroControl = document.getElementById("editNumero").value
+
+  try {
+    const response = await fetch(`http://localhost:3000/usuarios/${currentUserId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, email, numeroControl }),
+    })
+
+    if (!response.ok) throw new Error("Error al actualizar usuario")
+
+    await cargarUsuarios()
+    cerrarModal("edit")
+    alert("Datos del usuario actualizados exitosamente")
+  } catch (error) {
+    console.error("Error:", error)
+    alert("Error al actualizar el usuario")
+  }
 }
 
-// === Asignar rol ===
 function actualizarRolInfo() {
-    document.getElementById('rolNuevo').textContent = document.getElementById('selectRol').value;
+  const rolId = document.getElementById("selectRol").value
+  const roleNames = { 1: "administrador", 2: "docente", 3: "estudiante" }
+  document.getElementById("rolNuevo").textContent = roleNames[rolId] || "estudiante"
 }
 
-function asignarRol(event) {
-    event.preventDefault();
-    const user = users.find(u => u.id === currentUserId);
-    const nuevoRol = document.getElementById('selectRol').value;
-    user.tipo = nuevoRol;
+async function asignarRol(event) {
+  event.preventDefault()
 
-    buscarUsuarios();
-    cerrarModal('role');
-    alert(`Rol "${nuevoRol}" asignado exitosamente a ${user.nombre}`);
+  const nuevoRolId = document.getElementById("selectRol").value
+  const user = users.find((u) => u.id === currentUserId)
+
+  try {
+    const response = await fetch(`http://localhost:3000/usuarios/${currentUserId}/rol`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rol: nuevoRolId }),
+    })
+
+    if (!response.ok) throw new Error("Error al actualizar rol")
+
+    await cargarUsuarios()
+    cerrarModal("role")
+    alert(`Rol asignado exitosamente a ${user.nombre}`)
+  } catch (error) {
+    console.error("Error:", error)
+    alert("Error al asignar el rol")
+  }
 }
 
-// === Activar / desactivar usuario ===
-function toggleEstado(userId) {
-    const user = users.find(u => u.id === userId);
-    const nuevoEstado = user.estado === 'activo' ? 'inactivo' : 'activo';
-    const accion = nuevoEstado === 'activo' ? 'activar' : 'desactivar';
-
-    if (confirm(`¿Estás seguro de que deseas ${accion} a ${user.nombre}?`)) {
-        user.estado = nuevoEstado;
-        buscarUsuarios();
-        alert(`Usuario ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} exitosamente`);
-    }
-}
-
-// === Buscar usuarios ===
 function buscarUsuarios() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-    filteredUsers = searchTerm === '' ? [...users] : users.filter(u => u.nombre.toLowerCase().includes(searchTerm));
-    renderUsers();
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase().trim()
+  filteredUsers = searchTerm === "" ? [...users] : users.filter((u) => u.nombre.toLowerCase().includes(searchTerm))
+  renderUsers()
 }
 
-// === Cerrar modales con Escape ===
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        cerrarModal('edit');
-        cerrarModal('role');
-    }
-});
-function cerrarSesion() {
-    localStorage.removeItem('usuarioLogueado');
-    sessionStorage.clear();
-    const inputs = document.querySelectorAll('input, textarea');
-    inputs.forEach(input => input.value = '');
-    document.body.innerHTML = '';
-    window.location.href = 'index.html';
-}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    cerrarModal("edit")
+    cerrarModal("role")
+  }
+})
 
-
-// === Render inicial de usuarios ===
-renderUsers();
