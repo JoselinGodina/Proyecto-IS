@@ -217,8 +217,8 @@ app.post("/inscribir", async (req, res) => {
       return res.status(400).json({ success: false, error: "Ya estás inscrito en esta asesoría" });
 
     // 3️ Revisar cupos
-    if (cuposocupados <= cupo)
-      return res.status(400).json({ success: false, error: "Cupo lleno" });
+    if (cuposocupados >= cupo)
+      return res.status(400).json({ success: false, error: "cupo lleno" });
 
     // 4️ Insertar en inscripciones
     await pool.query(
@@ -258,6 +258,21 @@ app.get("/inscripciones/:id_crear_asesoria", async (req, res) => {
   }
 });
 
+app.get("/asesorias/:id/inscritos", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(`
+      SELECT u.id_usuario, u.nombres, u.apellidos, u.correo
+      FROM inscripciones i
+      JOIN usuarios u ON i.id_usuario = u.id_usuario
+      WHERE i.id_crear_asesoria = $1
+    `, [id]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error al obtener inscritos:", err);
+    res.status(500).json({ error: "Error al obtener los inscritos" });
+  }
+});
 
 
 // ============================

@@ -94,3 +94,5 @@ inputs.forEach((input) => {
     this.style.borderColor = "var(--color-burgundy)";
   });
 });
+
+

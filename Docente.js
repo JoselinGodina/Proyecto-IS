@@ -238,7 +238,7 @@ document
 // ===============================
 async function verEstudiantes(id_crear_asesoria) {
   try {
-    const res = await fetch(`${API_URL}/inscripciones/${id_crear_asesoria}`);
+const res = await fetch(`${API_URL}/asesorias/${id_crear_asesoria}/inscritos`);
     const estudiantes = await res.json();
 
     const container = document.getElementById("estudiantes-list");
