@@ -1,15 +1,12 @@
-// ================================
-// script.js - Login y Navegación
-// ================================
-
-// 1️⃣ Limpiar campos al cargar la página
+// 1️⃣ Limpiar campos de login al cargar la página
 window.addEventListener("load", () => {
   document.getElementById("email").value = "";
   document.getElementById("password").value = "";
 });
 
-// 2️ Evitar cache al usar back/forward
-window.addEventListener("pageshow", (event) => {
+// Evitar que el navegador use cache al volver con <- o ->
+// Esto borra los inputs y limpia localStorage si la página viene del back/forward
+window.addEventListener("pageshow", function (event) {
   if (event.persisted || (window.performance && window.performance.getEntriesByType("navigation")[0].type === "back_forward")) {
     document.getElementById("email").value = "";
     document.getElementById("password").value = "";
@@ -18,19 +15,25 @@ window.addEventListener("pageshow", (event) => {
   }
 });
 
-// 3️⃣ Toggle de visibilidad de contraseña
-const togglePassword = document.getElementById("togglePassword");
-const passwordInput = document.getElementById("password");
-const eyeIcon = document.getElementById("eyeIcon");
+// Toggle password visibility
+const togglePassword = document.getElementById("togglePassword")
+const passwordInput = document.getElementById("password")
+const eyeIcon = document.getElementById("eyeIcon")
 
 togglePassword.addEventListener("click", () => {
-  const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-  passwordInput.setAttribute("type", type);
-  eyeIcon.style.opacity = type === "text" ? "0.5" : "1";
-});
+  const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
+  passwordInput.setAttribute("type", type)
 
-// 4️⃣ Manejo de login
-const loginForm = document.getElementById("loginForm");
+  // Toggle eye icon (you can add eye-slash icon if needed)
+  if (type === "text") {
+    eyeIcon.style.opacity = "0.5"
+  } else {
+    eyeIcon.style.opacity = "1"
+  }
+})
+
+// Handle login form submission
+const loginForm = document.getElementById("loginForm")
 
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -51,48 +54,82 @@ loginForm.addEventListener("submit", async (e) => {
 
     const data = await response.json();
 
-    if (response.ok) {
-      // Guardar usuario en localStorage
-      localStorage.setItem("usuario", JSON.stringify(data.user));
-      alert(`✅ Bienvenido ${data.user.nombres}`);
+   if (response.ok) {
+  // Guardar datos del usuario en localStorage
+  localStorage.setItem("usuario", JSON.stringify(data.user));
 
-      // Redirigir según rol (asegúrate que coincida con tu DB)
-      const rol = typeof data.user.roles_id_rol === "string"
-        ? parseInt(data.user.roles_id_rol)
-        : data.user.roles_id_rol;
+  alert(`✅ Bienvenido ${data.user.nombres}`);
 
-      if (rol === 1) {
-        window.location.href = "usuarios.html"; // Admin
-      } else if (rol === 2) {
-        window.location.href = "Docente.html"; // Docente
-      } else {
-        window.location.href = "alumno.html"; // Alumno
-      }
-    } else {
-      alert("⚠️ Usuario o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo.");
-    }
+  // Redirigir según el rol
+  if (data.user.roles_id_rol === '1') { // Admin
+    window.location.href = "usuarios.html";
+  } 
+  else if(data.user.roles_id_rol === '2')
+  {
+    window.location.href = "Docente.html";
+  }
+  else {
+    window.location.href = "alumno.html"; // Usuario normal
+  }
+}
+
+  else {
+    // Usuario no registrado o contraseña incorrecta
+    alert("⚠️Usuario o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo." );
+  }
+
   } catch (error) {
     console.error("Error al conectar:", error);
     alert("Error al conectar con el servidor.");
   }
-});
+ 
+})
 
-// 5️⃣ Botón de registro
-const registerBtn = document.getElementById("registerBtn");
+// Este código va en tu index.html (o en el JS que usa el login)
+async function loginUsuario(event) {
+    event.preventDefault();
+
+    const id = document.getElementById("usuario").value;
+    const contrasena = document.getElementById("contrasena").value;
+
+    // Aquí harías tu consulta al backend (Node.js o lo que uses)
+    // Supongamos que ya recibes los datos del usuario:
+    const respuesta = {
+        id_usuario: id,
+        nombres: "Admin",
+        apellidos: "Principal",
+        correo: "admin@instituto.edu.mx",
+        roles_id_rol: "1" // si es admin (si es alumno, sería "2")
+    };
+
+    // Guardar sesión en localStorage
+    localStorage.setItem("usuario", JSON.stringify(respuesta));
+
+    
+}
+
+
+
+// Handle register button
+const registerBtn = document.getElementById("registerBtn")
+
 registerBtn.addEventListener("click", () => {
-  window.location.href = "registro.html";
-});
+  window.location.href = "registro.html"
+})
 
-// 6️⃣ Validación visual de inputs
-const inputs = document.querySelectorAll(".form-input");
+// Add input validation feedback
+const inputs = document.querySelectorAll(".form-input")
 
 inputs.forEach((input) => {
   input.addEventListener("blur", function () {
-    this.style.borderColor = this.value.trim() === "" ? "#EF4444" : "#10B981";
-  });
+    if (this.value.trim() === "") {
+      this.style.borderColor = "#EF4444"
+    } else {
+      this.style.borderColor = "#10B981"
+    }
+  })
+
   input.addEventListener("focus", function () {
-    this.style.borderColor = "var(--color-burgundy)";
-  });
-});
-
-
+    this.style.borderColor = "var(--color-burgundy)"
+  })
+})
