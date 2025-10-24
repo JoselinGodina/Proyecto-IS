@@ -57,8 +57,8 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
     await pool.query(
-      `INSERT INTO usuarios (ID_USUARIO, CARRERAS_ID_CARRERAS, NOMBRES, APELLIDOS, CORREO, SEMESTRE, CONTRASENA)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      `INSERT INTO usuarios (ID_USUARIO, CARRERAS_ID_CARRERAS, NOMBRES, APELLIDOS, CORREO, SEMESTRE, CONTRASENA, ROLES_ID_ROL)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 3)`,
       [id_usuario, carreras_id_carreras, nombres, apellidos, correo, semestre, hashedPassword]
     );
 
