@@ -356,6 +356,77 @@ app.get("/asesorias/:id/inscritos", async (req, res) => {
   }
 });
 
+// ============================
+// 📦 CRUD: MATERIALES
+// ============================
+
+app.get("/materiales", async (req, res) => {
+  try {
+    console.log("[v0 Server] GET /materiales - Consultando base de datos...")
+    const result = await pool.query(`
+      SELECT m.nombre, c.descripcion, m.cantidad_disponible, m.cantidad_daniados 
+      FROM materiales m
+      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
+      ORDER BY m.nombre ASC
+    `)
+    console.log("[v0 Server] Materiales encontrados:", result.rows.length)
+    console.log("[v0 Server] Datos:", result.rows)
+    res.json(result.rows)
+  } catch (error) {
+    console.error("[v0 Server] Error al obtener materiales:", error)
+    res.status(500).json({ error: "Error al obtener materiales: " + error.message })
+  }
+})
+
+app.get("/categorias", async (req, res) => {
+  try {
+    console.log("[v0 Server] GET /categorias - Consultando base de datos...")
+    const result = await pool.query(`
+      SELECT id_categoria, descripcion 
+      FROM categoria 
+      ORDER BY descripcion ASC
+    `)
+    console.log("[v0 Server] Categorías encontradas:", result.rows.length)
+    console.log("[v0 Server] Datos:", result.rows)
+    res.json(result.rows)
+  } catch (error) {
+    console.error("[v0 Server] Error al obtener categorías:", error)
+    res.status(500).json({ error: "Error al obtener categorías: " + error.message })
+  }
+})
+
+app.post("/materiales", async (req, res) => {
+  try {
+    console.log("[v0 Server] POST /materiales - Datos recibidos:", req.body)
+    const { id_materiales, nombre, categoria_id_categoria } = req.body
+
+    if (!id_materiales || !nombre || !categoria_id_categoria) {
+      return res.status(400).json({ error: "Faltan datos obligatorios" })
+    }
+
+    // Verificar si el material ya existe
+    const materialExist = await pool.query("SELECT * FROM materiales WHERE id_materiales = $1", [id_materiales])
+
+    if (materialExist.rows.length > 0) {
+      return res.status(400).json({ error: "El código de material ya existe" })
+    }
+
+    // Insertar nuevo material con cantidad_disponible y cantidad_daniados en 0
+    await pool.query(
+      `INSERT INTO materiales (id_materiales, nombre, categoria_id_categoria, cantidad_disponible, cantidad_daniados)
+       VALUES ($1, $2, $3, 0, 0)`,
+      [id_materiales, nombre, categoria_id_categoria],
+    )
+
+    console.log("[v0 Server] Material agregado exitosamente")
+    res.status(201).json({ message: "Material agregado correctamente" })
+  } catch (error) {
+    console.error("[v0 Server] Error al crear material:", error)
+    res.status(500).json({ error: "Error al crear material: " + error.message })
+  }
+})
+
+
 
 // ============================
 // 🚀 Iniciar servidor
