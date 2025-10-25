@@ -465,6 +465,70 @@ app.put("/materiales/:nombre", async (req, res) => {
   }
 });
 
+//crud materiales 3/3
+app.get("/materiales", async (req, res) => {
+  try {
+    console.log("[v0 Server] GET /materiales - Consultando base de datos...")
+    const result = await pool.query(`
+      SELECT m.nombre, c.descripcion, m.cantidad_disponible, m.cantidad_daniados 
+      FROM materiales m
+      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
+      ORDER BY m.nombre ASC
+    `)
+    console.log("[v0 Server] Materiales encontrados:", result.rows.length)
+    console.log("[v0 Server] Datos:", result.rows)
+    res.json(result.rows)
+  } catch (error) {
+    console.error("[v0 Server] Error al obtener materiales:", error)
+    res.status(500).json({ error: "Error al obtener materiales: " + error.message })
+  }
+})
+// Actualizar cantidad de dañados
+// Actualizar material completo (nombre, categoría, cantidades)
+app.put("/materiales/:nombre", async (req, res) => {
+  try {
+    const { nombre } = req.params;
+    const { nuevoNombre, categoria_id, cantidad_daniados, cantidad_disponible } = req.body;
+
+    console.log("[v0 Server] PUT /materiales/:nombre - Material:", nombre);
+    console.log("[v0 Server] Nuevo nombre:", nuevoNombre);
+    console.log("[v0 Server] Nueva categoría:", categoria_id);
+    console.log("[v0 Server] Cantidad dañados:", cantidad_daniados);
+    console.log("[v0 Server] Cantidad disponible:", cantidad_disponible);
+
+    if (!nuevoNombre || !categoria_id) {
+      return res.status(400).json({ error: "Faltan datos obligatorios" });
+    }
+
+    if (cantidad_daniados < 0 || cantidad_disponible < 0) {
+      return res.status(400).json({ error: "Las cantidades no pueden ser negativas" });
+    }
+
+    // Actualizar material completo
+    const result = await pool.query(
+      `UPDATE materiales 
+       SET nombre = $1, categoria_id_categoria = $2, cantidad_daniados = $3, cantidad_disponible = $4
+       WHERE nombre = $5
+       RETURNING *`,
+      [nuevoNombre, categoria_id, cantidad_daniados, cantidad_disponible, nombre]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Material no encontrado" });
+    }
+
+    console.log("[v0 Server] Material actualizado:", result.rows[0]);
+    
+    res.json({ 
+      message: "Material actualizado correctamente",
+      material: result.rows[0]
+    });
+  } catch (error) {
+    console.error("[v0 Server] Error al actualizar material:", error);
+    res.status(500).json({ error: "Error al actualizar: " + error.message });
+  }
+});
+
 // ============================
 // 🚀 Iniciar servidor
 // ============================
