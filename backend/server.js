@@ -426,39 +426,42 @@ app.post("/materiales", async (req, res) => {
   }
 })
 
-// PUT - Actualizar cantidad de material
-app.put('/materiales/:nombre', async (req, res) => {
+//materiales 2/3
+// Actualizar cantidad disponible de material
+app.put("/materiales/:nombre", async (req, res) => {
   try {
     const { nombre } = req.params;
     const { cantidad } = req.body;
-    
-    console.log('[v0 Server] PUT /materiales - Actualizando:', nombre, 'con cantidad:', cantidad);
-    
-    // Validar que la cantidad sea un número positivo
+
+    console.log("[v0 Server] PUT /materiales/:nombre - Material:", nombre);
+    console.log("[v0 Server] Cantidad a agregar:", cantidad);
+
     if (!cantidad || cantidad < 1) {
-      return res.status(400).json({ error: 'La cantidad debe ser mayor a 0' });
+      return res.status(400).json({ error: "Cantidad inválida" });
     }
-    
+
+    // Actualizar cantidad_disponible en la BD
     const result = await pool.query(
-      'UPDATE materiales SET cantidad_disponible = cantidad_disponible + $1 WHERE nombre = $2 RETURNING cantidad_disponible',
+      `UPDATE materiales 
+       SET cantidad_disponible = cantidad_disponible + $1 
+       WHERE nombre = $2
+       RETURNING cantidad_disponible`,
       [cantidad, nombre]
     );
-    
+
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Material no encontrado' });
+      return res.status(404).json({ error: "Material no encontrado" });
     }
+
+    console.log("[v0 Server] Nueva cantidad disponible:", result.rows[0].cantidad_disponible);
     
-    console.log('[v0 Server] Material actualizado. Nueva cantidad:', result.rows[0].cantidad_disponible);
-    
-    // Devolver en el formato que espera el frontend
     res.json({ 
-      message: 'Material actualizado correctamente',
-      nuevaCantidad: result.rows[0].cantidad_disponible 
+      message: "Cantidad actualizada correctamente",
+      nuevaCantidad: result.rows[0].cantidad_disponible
     });
-    
   } catch (error) {
-    console.error('[v0 Server] Error al actualizar material:', error);
-    res.status(500).json({ error: 'Error al actualizar material: ' + error.message });
+    console.error("[v0 Server] Error al actualizar cantidad:", error);
+    res.status(500).json({ error: "Error al actualizar cantidad: " + error.message });
   }
 });
 
