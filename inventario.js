@@ -1,89 +1,90 @@
-let adminLogueado = null;
-let materialEditando = null;
-let cantidadDanados = 0;
-let cantidadDisponibles = 0;
-let categorias = [];
+let adminLogueado = null
+let materialEditando = null
+let cantidadDanados = 0
+let cantidadDisponibles = 0
+let totalMaterial = 0
+let categorias = []
 
 window.addEventListener("DOMContentLoaded", () => {
-  console.log("[v0] Cargando página de inventario...");
-  cargarUsuarioLogueado();
-  cargarCategorias();
-  cargarMateriales();
-});
+  console.log("[v0] Cargando página de inventario...")
+  cargarUsuarioLogueado()
+  cargarCategorias()
+  cargarMateriales()
+})
 
 function cargarUsuarioLogueado() {
   try {
-    const usuarioStr = localStorage.getItem("usuario");
-    console.log("[v0] Usuario en localStorage:", usuarioStr);
+    const usuarioStr = localStorage.getItem("usuario")
+    console.log("[v0] Usuario en localStorage:", usuarioStr)
 
     if (usuarioStr) {
-      adminLogueado = JSON.parse(usuarioStr);
-      mostrarAdminLogueado();
+      adminLogueado = JSON.parse(usuarioStr)
+      mostrarAdminLogueado()
     } else {
-      console.warn("[v0] No hay usuario en localStorage");
-      window.location.href = "index.html";
+      console.warn("[v0] No hay usuario en localStorage")
+      window.location.href = "index.html"
     }
   } catch (error) {
-    console.error("[v0] Error al cargar usuario:", error);
+    console.error("[v0] Error al cargar usuario:", error)
   }
 }
 
 function mostrarAdminLogueado() {
-  if (!adminLogueado) return;
+  if (!adminLogueado) return
 
-  const nombreCompleto = `${adminLogueado.nombres} ${adminLogueado.apellidos}`;
-  const codigoUsuario = adminLogueado.id_usuario;
+  const nombreCompleto = `${adminLogueado.nombres} ${adminLogueado.apellidos}`
+  const codigoUsuario = adminLogueado.id_usuario
 
-  const adminDetailsDiv = document.querySelector(".admin-details");
+  const adminDetailsDiv = document.querySelector(".admin-details")
   if (adminDetailsDiv) {
     adminDetailsDiv.innerHTML = `
       <h3>${nombreCompleto}</h3>
       <p>${codigoUsuario} - Administrador del Sistema</p>
-    `;
+    `
   }
 
-  console.log("[v0] Usuario mostrado en header:", nombreCompleto);
+  console.log("[v0] Usuario mostrado en header:", nombreCompleto)
 }
 
 async function cargarCategorias() {
   try {
-    console.log("[v0] Cargando categorías desde la BD...");
-    const response = await fetch("http://localhost:3000/categorias");
-    
+    console.log("[v0] Cargando categorías desde la BD...")
+    const response = await fetch("http://localhost:3000/categorias")
+
     if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
+      throw new Error(`Error HTTP: ${response.status}`)
     }
 
-    categorias = await response.json();
-    console.log("[v0] Categorías cargadas:", categorias);
+    categorias = await response.json()
+    console.log("[v0] Categorías cargadas:", categorias)
   } catch (error) {
-    console.error("[v0] Error al cargar categorías:", error);
+    console.error("[v0] Error al cargar categorías:", error)
   }
 }
 
 async function cargarMateriales() {
-  const lista = document.getElementById("materialsList");
+  const lista = document.getElementById("materialsList")
 
   if (lista) {
-    lista.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Cargando materiales...</p>';
+    lista.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Cargando materiales...</p>'
   }
 
   try {
-    console.log("[v0] Cargando materiales desde la BD...");
+    console.log("[v0] Cargando materiales desde la BD...")
 
-    const response = await fetch("http://localhost:3000/materiales");
-    console.log("[v0] Respuesta del servidor - Status:", response.status);
+    const response = await fetch("http://localhost:3000/materiales")
+    console.log("[v0] Respuesta del servidor - Status:", response.status)
 
     if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
+      throw new Error(`Error HTTP: ${response.status}`)
     }
 
-    const materiales = await response.json();
-    console.log("[v0] Materiales cargados:", materiales);
+    const materiales = await response.json()
+    console.log("[v0] Materiales cargados:", materiales)
 
-    renderizarMateriales(materiales);
+    renderizarMateriales(materiales)
   } catch (error) {
-    console.error("[v0] Error al cargar materiales:", error);
+    console.error("[v0] Error al cargar materiales:", error)
 
     if (lista) {
       lista.innerHTML = `
@@ -94,34 +95,33 @@ async function cargarMateriales() {
             Reintentar
           </button>
         </div>
-      `;
+      `
     }
   }
 }
 
 function renderizarMateriales(materiales) {
-  const lista = document.getElementById("materialsList");
+  const lista = document.getElementById("materialsList")
 
   if (!lista) {
-    console.error("[v0] No se encontró el contenedor materialsList");
-    return;
+    console.error("[v0] No se encontró el contenedor materialsList")
+    return
   }
 
   if (materiales.length === 0) {
-    lista.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No hay materiales registrados</p>';
-    return;
+    lista.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No hay materiales registrados</p>'
+    return
   }
 
   lista.innerHTML = materiales
     .map((material) => {
-      // Total de material (disponibles + dañados)
-      const total = (material.cantidad_disponible || 0) + (material.cantidad_daniados || 0);
-      const disponibles = material.cantidad_disponible || 0;
-      const danados = material.cantidad_daniados || 0;
-      
+      const disponibles = Number(material.cantidad_disponible) || 0
+      const danados = Number(material.cantidad_daniados) || 0
+      const total = disponibles + danados
+
       // Escapar comillas para evitar problemas en JSON
-      const materialJson = JSON.stringify(material).replace(/'/g, "\\'");
-      
+      const materialJson = JSON.stringify(material).replace(/'/g, "\\'")
+
       return `
         <div class="material-card">
           <div class="material-info">
@@ -131,8 +131,8 @@ function renderizarMateriales(materiales) {
               </svg>
             </div>
             <div class="material-details">
-              <h3>${material.nombre || 'Sin nombre'}</h3>
-              <p>${material.descripcion || 'Sin categoría'}</p>
+              <h3>${material.nombre || "Sin nombre"}</h3>
+              <p>${material.descripcion || "Sin categoría"}</p>
             </div>
           </div>
           <div class="material-stats">
@@ -151,164 +151,177 @@ function renderizarMateriales(materiales) {
             Editar
           </button>
         </div>
-      `;
+      `
     })
-    .join("");
+    .join("")
 
-  console.log("[v0] Materiales renderizados exitosamente:", materiales.length);
+  console.log("[v0] Materiales renderizados exitosamente:", materiales.length)
 }
 
 function abrirModalEditar(material) {
-  materialEditando = material;
-  
-  console.log("[v0] Editando material:", materialEditando);
+  materialEditando = material
 
-  // Habilitar campos de nombre y categoría
-  const nombreInput = document.getElementById("nombreMaterial");
-  const categoriaSelect = document.getElementById("categoria");
-  
-  nombreInput.value = materialEditando.nombre || '';
-  nombreInput.disabled = false;
+  console.log("[v0] Editando material:", materialEditando)
 
-  // Cargar categorías en el select
-  categoriaSelect.innerHTML = '';
-  categoriaSelect.disabled = false;
-  
-  categorias.forEach(cat => {
-    const option = document.createElement('option');
-    option.value = cat.id_categoria;
-    option.textContent = cat.descripcion;
-    
+  // Habilitar campo de nombre
+  const nombreInput = document.getElementById("nombreMaterial")
+  nombreInput.value = materialEditando.nombre || ""
+  nombreInput.disabled = false
+
+  const categoriaInput = document.getElementById("categoria")
+
+  // Crear un select si no existe
+  if (categoriaInput.tagName !== "SELECT") {
+    const select = document.createElement("select")
+    select.id = "categoria"
+    select.className = categoriaInput.className
+    categoriaInput.parentNode.replaceChild(select, categoriaInput)
+  }
+
+  const categoriaSelect = document.getElementById("categoria")
+  categoriaSelect.innerHTML = ""
+  categoriaSelect.disabled = false
+
+  // Agregar opción por defecto
+  const defaultOption = document.createElement("option")
+  defaultOption.value = ""
+  defaultOption.textContent = "Selecciona una categoría"
+  defaultOption.disabled = true
+  categoriaSelect.appendChild(defaultOption)
+
+  // Cargar categorías mostrando "id_categoria - descripcion"
+  categorias.forEach((cat) => {
+    const option = document.createElement("option")
+    option.value = cat.id_categoria
+    option.textContent = `${cat.id_categoria} - ${cat.descripcion}`
+
     // Seleccionar la categoría actual del material
     if (cat.descripcion === materialEditando.descripcion) {
-      option.selected = true;
+      option.selected = true
     }
-    
-    categoriaSelect.appendChild(option);
-  });
 
-  // Inicializar cantidades
-  cantidadDisponibles = materialEditando.cantidad_disponible || 0;
-  cantidadDanados = materialEditando.cantidad_daniados || 0;
-  
-  document.getElementById("disponiblesDisplay").textContent = cantidadDisponibles;
-  document.getElementById("danadosDisplay").textContent = cantidadDanados;
+    categoriaSelect.appendChild(option)
+  })
 
-  document.getElementById("modalOverlay").classList.add("active");
-  document.body.style.overflow = "hidden";
+  cantidadDisponibles = Number(materialEditando.cantidad_disponible) || 0
+  cantidadDanados = Number(materialEditando.cantidad_daniados) || 0
+  totalMaterial = cantidadDisponibles + cantidadDanados
+
+  document.getElementById("disponiblesDisplay").textContent = cantidadDisponibles
+  document.getElementById("danadosDisplay").textContent = cantidadDanados
+
+  console.log("[v0] Total material (constante):", totalMaterial)
+  console.log("[v0] Disponibles iniciales:", cantidadDisponibles)
+  console.log("[v0] Dañados iniciales:", cantidadDanados)
+
+  document.getElementById("modalOverlay").classList.add("active")
+  document.body.style.overflow = "hidden"
 }
 
 function cerrarModal() {
-  document.getElementById("modalOverlay").classList.remove("active");
-  document.body.style.overflow = "auto";
-  materialEditando = null;
-  cantidadDanados = 0;
-  cantidadDisponibles = 0;
+  document.getElementById("modalOverlay").classList.remove("active")
+  document.body.style.overflow = "auto"
+  materialEditando = null
+  cantidadDanados = 0
+  cantidadDisponibles = 0
+  totalMaterial = 0
 }
 
 function cerrarModalSiClickFuera(event) {
   if (event.target === event.currentTarget) {
-    cerrarModal();
+    cerrarModal()
   }
 }
 
 function cambiarCantidad(tipo, cambio) {
-  if (tipo === "disponibles") {
-    const nuevoValor = cantidadDisponibles + cambio;
-    // No permitir valores negativos
-    cantidadDisponibles = Math.max(0, nuevoValor);
-    document.getElementById("disponiblesDisplay").textContent = cantidadDisponibles;
-    console.log("[v0] Cantidad disponibles actualizada:", cantidadDisponibles);
-  } else if (tipo === "danados") {
-    const nuevoValor = cantidadDanados + cambio;
-    // No permitir valores negativos
-    if (nuevoValor >= 0) {
-      // Si aumenta dañados, restar de disponibles
-      if (cambio > 0 && cantidadDisponibles > 0) {
-        cantidadDanados = nuevoValor;
-        cantidadDisponibles--;
-        document.getElementById("disponiblesDisplay").textContent = cantidadDisponibles;
-      } 
-      // Si disminuye dañados, sumar a disponibles
-      else if (cambio < 0 && nuevoValor >= 0) {
-        cantidadDanados = nuevoValor;
-        cantidadDisponibles++;
-        document.getElementById("disponiblesDisplay").textContent = cantidadDisponibles;
-      }
-      document.getElementById("danadosDisplay").textContent = cantidadDanados;
-      console.log("[v0] Cantidad de dañados actualizada:", cantidadDanados);
-      console.log("[v0] Cantidad disponibles actualizada:", cantidadDisponibles);
+  if (tipo === "danados") {
+    const nuevoValorDanados = cantidadDanados + cambio
+
+    // No permitir valores negativos ni exceder el total
+    if (nuevoValorDanados >= 0 && nuevoValorDanados <= totalMaterial) {
+      cantidadDanados = nuevoValorDanados
+      // Los disponibles son el total menos los dañados
+      cantidadDisponibles = totalMaterial - cantidadDanados
+
+      document.getElementById("danadosDisplay").textContent = cantidadDanados
+      document.getElementById("disponiblesDisplay").textContent = cantidadDisponibles
+
+      console.log("[v0] Total constante:", totalMaterial)
+      console.log("[v0] Dañados:", cantidadDanados)
+      console.log("[v0] Disponibles:", cantidadDisponibles)
     }
   }
 }
 
 async function guardarCambios() {
   if (!materialEditando) {
-    console.error("[v0] No hay material seleccionado para editar");
-    return;
+    console.error("[v0] No hay material seleccionado para editar")
+    return
   }
 
   try {
-    const nuevoNombre = document.getElementById("nombreMaterial").value.trim();
-    const nuevaCategoria = document.getElementById("categoria").value;
-    
+    const nuevoNombre = document.getElementById("nombreMaterial").value.trim()
+    const nuevaCategoria = document.getElementById("categoria").value
+
     if (!nuevoNombre) {
-      alert("El nombre del material no puede estar vacío");
-      return;
+      alert("El nombre del material no puede estar vacío")
+      return
     }
 
-    console.log("[v0] Guardando cambios...");
-    console.log("[v0] Material original:", materialEditando.nombre);
-    console.log("[v0] Nuevo nombre:", nuevoNombre);
-    console.log("[v0] Nueva categoría:", nuevaCategoria);
-    console.log("[v0] Cantidad disponible:", cantidadDisponibles);
-    console.log("[v0] Cantidad de dañados:", cantidadDanados);
+    if (!nuevaCategoria) {
+      alert("Debes seleccionar una categoría")
+      return
+    }
 
-    const response = await fetch(
-      `http://localhost:3000/materiales/${encodeURIComponent(materialEditando.nombre)}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nuevoNombre: nuevoNombre,
-          categoria_id: nuevaCategoria,
-          cantidad_daniados: cantidadDanados,
-          cantidad_disponible: cantidadDisponibles
-        }),
-      }
-    );
+    console.log("[v0] Guardando cambios...")
+    console.log("[v0] Material original:", materialEditando.nombre)
+    console.log("[v0] Nuevo nombre:", nuevoNombre)
+    console.log("[v0] Nueva categoría:", nuevaCategoria)
+    console.log("[v0] Cantidad disponible:", cantidadDisponibles)
+    console.log("[v0] Cantidad de dañados:", cantidadDanados)
+
+    const response = await fetch(`http://localhost:3000/materiales/${encodeURIComponent(materialEditando.nombre)}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nuevoNombre: nuevoNombre,
+        categoria_id: nuevaCategoria,
+        cantidad_daniados: cantidadDanados,
+        cantidad_disponible: cantidadDisponibles,
+      }),
+    })
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Error al actualizar material");
+      const errorData = await response.json()
+      throw new Error(errorData.error || "Error al actualizar material")
     }
 
-    const result = await response.json();
-    console.log("[v0] Material actualizado exitosamente:", result);
+    const result = await response.json()
+    console.log("[v0] Material actualizado exitosamente:", result)
 
-    alert("Cambios guardados exitosamente");
-    
-    cerrarModal();
-    await cargarMateriales(); // Recargar la lista
+    alert("Cambios guardados exitosamente")
+
+    cerrarModal()
+    await cargarMateriales()
   } catch (error) {
-    console.error("[v0] Error al guardar cambios:", error);
-    alert("Error al guardar cambios: " + error.message);
+    console.error("[v0] Error al guardar cambios:", error)
+    alert("Error al guardar cambios: " + error.message)
   }
 }
 
 function cerrarSesion() {
   if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("userRole");
-    window.location.href = "index.html";
+    localStorage.removeItem("usuario")
+    localStorage.removeItem("userRole")
+    window.location.href = "index.html"
   }
 }
 
 // Cerrar modal con tecla Escape
-document.addEventListener("keydown", function (event) {
+document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
-    cerrarModal();
+    cerrarModal()
   }
-});
+})
