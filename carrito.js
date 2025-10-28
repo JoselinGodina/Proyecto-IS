@@ -108,9 +108,15 @@ async function confirmLoan() {
   confirmBtn.textContent = "Procesando..."
 
   try {
-    console.log("[v0] Enviando solicitud de préstamo al backend...")
+    console.log("[Carrito] Enviando solicitud de préstamo...")
+    console.log("[Carrito] Materiales:", cart)
 
-    // POST to backend with correct structure for vales_prestamos table
+    // Preparar datos de materiales para el backend
+    const materialesParaEnviar = cart.map((item) => ({
+      id_materiales: item.id,
+      cantidad: item.quantity,
+    }))
+
     const response = await fetch("http://localhost:3000/vales-prestamo", {
       method: "POST",
       headers: {
@@ -118,11 +124,8 @@ async function confirmLoan() {
       },
       body: JSON.stringify({
         id_usuario: usuario.id_usuario,
-        materiales: cart.map((item) => ({
-          id_materiales: item.id,
-          cantidad: item.quantity,
-        })),
-        fecha_entrega: new Date().toISOString(), // Current timestamp
+        materiales: materialesParaEnviar,
+        fecha_entrega: new Date().toISOString(),
         motivo: reason,
       }),
     })
@@ -130,9 +133,9 @@ async function confirmLoan() {
     const data = await response.json()
 
     if (data.success) {
-      console.log("[v0] Vale creado exitosamente con ID:", data.id_vales)
+      console.log("[Carrito] Vale creado exitosamente con ID:", data.id_vales)
 
-      // Save loan data for receipt page
+      // Guardar datos para el recibo
       const loanData = {
         id_vales: data.id_vales,
         materials: cart,
@@ -141,17 +144,17 @@ async function confirmLoan() {
       }
       localStorage.setItem("currentLoan", JSON.stringify(loanData))
 
-      // Clear cart
+      // Limpiar carrito
       cart = []
       localStorage.setItem("cart", JSON.stringify(cart))
 
-      // Redirect to receipt
+      // Redirigir al vale
       window.location.href = "vale-prestamo.html"
     } else {
       throw new Error(data.error || "Error al crear solicitud")
     }
   } catch (error) {
-    console.error("[v0] Error al confirmar préstamo:", error)
+    console.error("[Carrito] Error al confirmar préstamo:", error)
     alert("Error al enviar la solicitud: " + error.message)
     confirmBtn.disabled = false
     confirmBtn.textContent = "Confirmar Préstamo"

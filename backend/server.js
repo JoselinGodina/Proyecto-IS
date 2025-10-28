@@ -380,6 +380,105 @@ app.get("/materiales", async (req, res) => {
 });
 
 // ============================
+// 📋 CRUD: VALES DE PRÉSTAMO
+// ============================
+
+// Obtener vales de préstamo de un usuario
+app.get("/vales-prestamo/:id_usuario", async (req, res) => {
+  try {
+    const { id_usuario } = req.params;
+    console.log("[Server] GET /vales-prestamo - Usuario:", id_usuario);
+    
+    const result = await pool.query(
+      `SELECT 
+        v.id_vales,
+        v.hora_entrega,
+        v.hora_devolucion,
+        v.motivo,
+        v.estado,
+        STRING_AGG(m.nombre || ' (' || vd.cantidad || ')', ', ') as materiales,
+        SUM(vd.cantidad) as cantidad_total
+       FROM vales_prestamos v
+       LEFT JOIN vales_detalles vd ON v.id_vales = vd.vales_prestamos_id_vales
+       LEFT JOIN materiales m ON vd.materiales_id_materiales = m.id_materiales
+       WHERE v.usuarios_id_usuario = $1
+       GROUP BY v.id_vales, v.hora_entrega, v.hora_devolucion, v.motivo, v.estado
+       ORDER BY v.hora_entrega DESC`,
+      [id_usuario]
+    );
+    
+    console.log("[Server] Vales encontrados:", result.rows.length);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("[Server] Error al obtener vales:", error);
+    res.status(500).json({ error: "Error al obtener vales: " + error.message });
+  }
+});
+
+// Crear vale de préstamo
+app.post("/vales-prestamo", async (req, res) => {
+  const client = await pool.connect();
+  
+  try {
+    const { id_usuario, materiales, fecha_entrega, motivo } = req.body;
+    
+    console.log("[Server] POST /vales-prestamo - Datos recibidos:", req.body);
+
+    if (!id_usuario || !materiales || !motivo) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Faltan datos obligatorios" 
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // 1. Generar ID único para el vale
+    const valeIdResult = await client.query(
+      "SELECT COALESCE(MAX(id_vales), 0) + 1 as next_id FROM vales_prestamos"
+    );
+    const id_vales = valeIdResult.rows[0].next_id;
+
+    // 2. Insertar el vale principal
+    await client.query(
+      `INSERT INTO vales_prestamos 
+       (id_vales, usuarios_id_usuario, hora_entrega, motivo, estado)
+       VALUES ($1, $2, NOW(), $3, 'Pendiente')`,
+      [id_vales, id_usuario, motivo]
+    );
+
+    // 3. Insertar los detalles (materiales)
+    for (const material of materiales) {
+      await client.query(
+        `INSERT INTO vales_detalles 
+         (vales_prestamos_id_vales, materiales_id_materiales, cantidad)
+         VALUES ($1, $2, $3)`,
+        [id_vales, material.id_materiales, material.cantidad]
+      );
+    }
+
+    await client.query('COMMIT');
+    
+    console.log("[Server] Vale creado exitosamente con ID:", id_vales);
+    res.json({ 
+      success: true, 
+      message: "Vale creado correctamente",
+      id_vales: id_vales 
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error("[Server] Error al crear vale:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error al crear vale: " + error.message 
+    });
+  } finally {
+    client.release();
+  }
+});
+
+// ============================
 // 📦 CRUD: MATERIALES
 // ============================
 

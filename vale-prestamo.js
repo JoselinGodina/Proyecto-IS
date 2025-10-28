@@ -6,16 +6,22 @@ document.addEventListener("DOMContentLoaded", () => {
 // Load receipt data
 function loadReceiptData() {
   const loanData = JSON.parse(localStorage.getItem("currentLoan"))
-  const studentData = JSON.parse(localStorage.getItem("studentData"))
+  const usuario = JSON.parse(localStorage.getItem("usuario"))
 
-  //if (!loanData || !studentData) {
-    //alert("No se encontraron datos del préstamo")
-    //window.location.href = "alumno.html"
-    //return
-  //}
+  if (!loanData) {
+    alert("No se encontraron datos del préstamo")
+    window.location.href = "alumno.html"
+    return
+  }
+
+  if (!usuario) {
+    alert("No se encontraron datos del usuario")
+    window.location.href = "index.html"
+    return
+  }
 
   // Generate receipt number
-  const receiptNumber = "VP-" + Date.now().toString().slice(-8)
+  const receiptNumber = "VP-" + loanData.id_vales.toString().padStart(8, '0')
   document.getElementById("receiptNumber").textContent = receiptNumber
 
   // Format date and time
@@ -30,10 +36,11 @@ function loadReceiptData() {
   document.getElementById("receiptDateTime").textContent = formattedDate
 
   // Student data
-  document.getElementById("studentNameReceipt").textContent = `${studentData.nombres} ${studentData.apellidos}`
-  document.getElementById("studentControlReceipt").textContent = studentData.numeroControl
-  document.getElementById("studentCareerReceipt").textContent = studentData.carrera
-  document.getElementById("studentSemesterReceipt").textContent = `${studentData.semestre} Semestre`
+  document.getElementById("studentNameReceipt").textContent = `${usuario.nombres} ${usuario.apellidos}`
+  document.getElementById("studentControlReceipt").textContent = usuario.id_usuario
+  document.getElementById("studentCareerReceipt").textContent = usuario.carrera || "N/A"
+  document.getElementById("studentSemesterReceipt").textContent = `${usuario.semestre || "N/A"} Semestre`
+  document.getElementById("studentTeacherReceipt").textContent = "N/A" // Puedes agregar este campo después
 
   // Materials table
   const tableBody = document.getElementById("materialsTableBody")

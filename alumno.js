@@ -5,22 +5,6 @@
 // ================================
 // Seguridad: evitar regresar con flecha <-
 // ================================
-
-// ----------------------
-// Inicialización
-// ----------------------
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("[Alumno] Iniciando carga de datos...")
-  loadStudentData()
-  fetchMaterials() // ← IMPORTANTE: Esto debe estar aquí
-  fetchSolicitudes()
-  fetchAndRenderAsesorias()
-  updateCartBadge()
-  setupTabs()
-  setupCategoryDropdown()
-  setupSearch()
-})
-
 window.addEventListener("pageshow", (event) => {
   if (
     event.persisted ||
@@ -69,21 +53,22 @@ if (logoutBtn) {
 // ----------------------
 let currentCategory = "all"
 let selectedMaterial = null
-const cart = JSON.parse(localStorage.getItem("cart")) || []
+let cart = JSON.parse(localStorage.getItem("cart")) || []
 let materialsData = [] // Almacenar materiales desde BD
 
 // ----------------------
 // Inicialización
 // ----------------------
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("[Alumno] Iniciando aplicación...")
   loadStudentData()
-  fetchMaterials() // Cargar materiales desde backend
-  fetchSolicitudes() // Cargar solicitudes desde backend
+  fetchMaterials()
+  fetchSolicitudes()
   fetchAndRenderAsesorias()
   updateCartBadge()
   setupTabs()
   setupCategoryDropdown()
-  setupSearch() // Agregar búsqueda
+  setupSearch()
 })
 
 // ----------------------
@@ -117,10 +102,11 @@ function setupTabs() {
 }
 
 // ----------------------
+// Cargar materiales desde backend
 // ----------------------
 async function fetchMaterials() {
   try {
-    console.log("[v0] Cargando materiales desde backend...")
+    console.log("[Alumno] Cargando materiales desde backend...")
     const response = await fetch("http://localhost:3000/materiales")
 
     if (!response.ok) {
@@ -128,23 +114,29 @@ async function fetchMaterials() {
     }
 
     materialsData = await response.json()
-    console.log("[v0] Materiales cargados:", materialsData.length)
+    console.log("[Alumno] Materiales cargados:", materialsData.length)
+    console.log("[Alumno] Primer material:", materialsData[0])
     renderMaterials()
   } catch (error) {
-    console.error("[v0] Error al cargar materiales:", error)
+    console.error("[Alumno] Error al cargar materiales:", error)
     document.getElementById("materialsGrid").innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #666;">
         <p>Error al cargar materiales. Por favor, verifica que el servidor esté funcionando.</p>
+        <p style="color: #ef4444; margin-top: 1rem;">${error.message}</p>
       </div>
     `
   }
 }
 
 // ----------------------
+// Renderizar materiales
 // ----------------------
 function renderMaterials() {
   const grid = document.getElementById("materialsGrid")
-  if (!grid) return
+  if (!grid) {
+    console.error("[Alumno] Grid no encontrado")
+    return
+  }
 
   let filteredMaterials = materialsData
 
@@ -170,18 +162,20 @@ function renderMaterials() {
     return
   }
 
+  console.log("[Alumno] Renderizando", filteredMaterials.length, "materiales")
+
   grid.innerHTML = filteredMaterials
     .map(
       (material) => `
-    <div class="material-card" onclick="openAddModal(${material.id_materiales})">
+    <div class="material-card">
       <div class="material-header">
         <div>
           <h3 class="material-title">${material.nombre}</h3>
           <span class="material-category">${material.categoria}</span>
         </div>
       </div>
-      <p class="material-available">Disponible: <strong>${material.cantidad_disponible}</strong> unidades</p>
-      <button class="add-to-cart-btn" onclick="event.stopPropagation(); openAddModal(${material.id_materiales})">
+      <p class="material-available">Disponible: <strong>${material.cantidad_disponible || 0}</strong> unidades</p>
+      <button class="add-to-cart-btn" onclick="openAddModal('${material.nombre.replace(/'/g, "\\'")}')">
         Agregar al préstamo
       </button>
     </div>
@@ -191,6 +185,7 @@ function renderMaterials() {
 }
 
 // ----------------------
+// Búsqueda
 // ----------------------
 function setupSearch() {
   const searchInput = document.getElementById("searchInput")
@@ -208,6 +203,8 @@ function setupCategoryDropdown() {
   const categoryBtn = document.getElementById("categoryBtn")
   const categoryMenu = document.getElementById("categoryMenu")
   const dropdownItems = document.querySelectorAll(".dropdown-item")
+
+  if (!categoryBtn || !categoryMenu) return
 
   categoryBtn.addEventListener("click", (e) => {
     e.stopPropagation()
@@ -231,25 +228,60 @@ function setupCategoryDropdown() {
 // ----------------------
 // Modal materiales
 // ----------------------
-function openAddModal(materialId) {
-  selectedMaterial = materialsData.find((m) => m.id_materiales === materialId)
-  if (!selectedMaterial) return
+function openAddModal(materialNombre) {
+  console.log("[Modal] Intentando abrir modal para:", materialNombre)
+  console.log("[Modal] Materiales disponibles:", materialsData)
+  
+  selectedMaterial = materialsData.find((m) => m.nombre === materialNombre)
+  
+  if (!selectedMaterial) {
+    console.error("[Modal] Material no encontrado:", materialNombre)
+    alert("Error: Material no encontrado")
+    return
+  }
+  
+  console.log("[Modal] Material seleccionado:", selectedMaterial)
+  
+  const modal = document.getElementById("addMaterialModal")
+  if (!modal) {
+    console.error("[Modal] Elemento modal no encontrado en el DOM")
+    alert("Error: El modal no existe en la página")
+    return
+  }
+  
   document.getElementById("modalMaterialName").textContent = selectedMaterial.nombre
   document.getElementById("modalMaterialCategory").textContent = selectedMaterial.categoria
-  document.getElementById("modalAvailable").textContent = selectedMaterial.cantidad_disponible
+  document.getElementById("modalAvailable").textContent = selectedMaterial.cantidad_disponible || 0
   document.getElementById("quantityInput").value = 1
-  document.getElementById("quantityInput").max = selectedMaterial.cantidad_disponible
-  document.getElementById("addMaterialModal").classList.add("show")
+  document.getElementById("quantityInput").max = selectedMaterial.cantidad_disponible || 0
+  
+  updateSelectedBadge()
+  
+  modal.classList.add("show")
+  console.log("[Modal] Modal abierto exitosamente")
 }
 
 function closeAddModal() {
-  document.getElementById("addMaterialModal").classList.remove("show")
+  const modal = document.getElementById("addMaterialModal")
+  if (modal) {
+    modal.classList.remove("show")
+  }
   selectedMaterial = null
+  console.log("[Modal] Modal cerrado")
 }
 
-document.getElementById("addMaterialModal")?.addEventListener("click", function (e) {
-  if (e.target === this) closeAddModal()
-})
+// Cerrar modal al hacer clic fuera
+setTimeout(() => {
+  const modal = document.getElementById("addMaterialModal")
+  if (modal) {
+    modal.addEventListener("click", function (e) {
+      if (e.target === this) {
+        closeAddModal()
+      }
+    })
+    console.log("[Modal] Event listener agregado")
+  }
+}, 500)
 
 // ----------------------
 // Cantidad y carrito
@@ -258,47 +290,92 @@ function increaseQuantity() {
   const input = document.getElementById("quantityInput")
   const max = Number.parseInt(input.max)
   const current = Number.parseInt(input.value)
-  if (current < max) input.value = current + 1
+  if (current < max) {
+    input.value = current + 1
+    updateSelectedBadge()
+  }
 }
 
 function decreaseQuantity() {
   const input = document.getElementById("quantityInput")
   const current = Number.parseInt(input.value)
-  if (current > 1) input.value = current - 1
+  if (current > 1) {
+    input.value = current - 1
+    updateSelectedBadge()
+  }
+}
+
+function updateSelectedBadge() {
+  const quantity = document.getElementById("quantityInput").value
+  const badge = document.getElementById("selectedBadge")
+  if (badge) {
+    badge.textContent = `Seleccionado: ${quantity}`
+    badge.style.display = 'inline-block'
+  }
 }
 
 function confirmAddToCart() {
   const quantity = Number.parseInt(document.getElementById("quantityInput").value)
-  if (!selectedMaterial || quantity < 1) return
+  
+  if (!selectedMaterial) {
+    alert("Error: No hay material seleccionado")
+    return
+  }
+  
+  if (quantity < 1) {
+    alert("La cantidad debe ser mayor a 0")
+    return
+  }
+  
+  if (quantity > selectedMaterial.cantidad_disponible) {
+    alert(`Solo hay ${selectedMaterial.cantidad_disponible} unidades disponibles`)
+    return
+  }
+  
+  console.log("[Carrito] Agregando material:", selectedMaterial)
+  console.log("[Carrito] Cantidad:", quantity)
+  
   const existingItem = cart.find((item) => item.id === selectedMaterial.id_materiales)
-  if (existingItem) existingItem.quantity += quantity
-  else
-    cart.push({
+  
+  if (existingItem) {
+    existingItem.quantity += quantity
+    console.log("[Carrito] Material actualizado:", existingItem)
+  } else {
+    const newItem = {
       id: selectedMaterial.id_materiales,
       name: selectedMaterial.nombre,
       category: selectedMaterial.categoria,
-      quantity,
-    })
+      quantity: quantity,
+    }
+    cart.push(newItem)
+    console.log("[Carrito] Nuevo material agregado:", newItem)
+  }
+  
   localStorage.setItem("cart", JSON.stringify(cart))
   updateCartBadge()
   closeAddModal()
+  
   alert(`${quantity} unidad(es) de ${selectedMaterial.nombre} agregado(s) al carrito`)
 }
 
 function updateCartBadge() {
   const badge = document.getElementById("cartBadge")
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
-  if (badge) badge.textContent = totalItems
+  if (badge) {
+    badge.textContent = totalItems
+    console.log("[Carrito] Badge actualizado:", totalItems)
+  }
 }
 
 // ----------------------
+// Solicitudes
 // ----------------------
 async function fetchSolicitudes() {
   try {
     const usuario = JSON.parse(localStorage.getItem("usuario"))
     if (!usuario) return
 
-    console.log("[v0] Cargando solicitudes desde backend...")
+    console.log("[Alumno] Cargando solicitudes...")
     const response = await fetch(`http://localhost:3000/vales-prestamo/${usuario.id_usuario}`)
 
     if (!response.ok) {
@@ -306,20 +383,21 @@ async function fetchSolicitudes() {
     }
 
     const solicitudesData = await response.json()
-    console.log("[v0] Solicitudes cargadas:", solicitudesData.length)
+    console.log("[Alumno] Solicitudes cargadas:", solicitudesData.length)
     renderSolicitudes(solicitudesData)
   } catch (error) {
-    console.error("[v0] Error al cargar solicitudes:", error)
-    document.getElementById("solicitudesGrid").innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #666;">
-        <p>Error al cargar solicitudes</p>
-      </div>
-    `
+    console.error("[Alumno] Error al cargar solicitudes:", error)
+    const grid = document.getElementById("solicitudesGrid")
+    if (grid) {
+      grid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #666;">
+          <p>Error al cargar solicitudes</p>
+        </div>
+      `
+    }
   }
 }
 
-// ----------------------
-// ----------------------
 function renderSolicitudes(solicitudesData) {
   const grid = document.getElementById("solicitudesGrid")
   if (!grid) return
@@ -360,7 +438,7 @@ function renderSolicitudes(solicitudesData) {
 }
 
 // ----------------------
-// Render asesorías desde backend
+// Asesorías
 // ----------------------
 async function fetchAndRenderAsesorias() {
   try {
@@ -400,7 +478,7 @@ function renderAsesorias(asesoriasData) {
         <div class="material-header">
           <div>
             <h3 class="material-title">${a.titulo}</h3>
-            <span class="material-category">${a.docente}</span>
+            <span class="material-category">${a.docente || 'Docente'}</span>
           </div>
         </div>
         <div style="margin: 1rem 0;">
@@ -421,9 +499,6 @@ function renderAsesorias(asesoriasData) {
     .join("")
 }
 
-// ----------------------
-// Función para solicitar asesoría
-// ----------------------
 async function solicitarAsesoria(id_crear_asesoria) {
   const usuario = JSON.parse(localStorage.getItem("usuario"))
   if (!usuario) return alert("Debes iniciar sesión.")

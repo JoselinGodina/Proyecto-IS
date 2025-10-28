@@ -126,33 +126,43 @@
     </button>
 
     <!-- Modal para Agregar Material -->
-    <div class="modal" id="addMaterialModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Agregar al Préstamo</h2>
-                <button class="modal-close" onclick="closeAddModal()">&times;</button>
+<div class="modal" id="addMaterialModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Agregar al Préstamo</h2>
+            <button class="modal-close" onclick="closeAddModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="material-preview">
+                <h3 id="modalMaterialName">Nombre del Material</h3>
+                <p id="modalMaterialCategory">Categoría</p>
+                <p class="available-units">Disponible: <span id="modalAvailable">0</span> unidades</p>
             </div>
-            <div class="modal-body">
-                <div class="material-preview">
-                    <h3 id="modalMaterialName"></h3>
-                    <p id="modalMaterialCategory"></p>
-                    <p class="available-units">Disponible: <span id="modalAvailable"></span> unidades</p>
+            <div class="form-group">
+                <label for="quantityInput">
+                    Cantidad a solicitar
+                    <span class="selected-badge" id="selectedBadge" style="display: none;">Seleccionado: 1</span>
+                </label>
+                <div class="quantity-control">
+                    <button type="button" class="qty-btn" onclick="decreaseQuantity()">−</button>
+                    <input type="number" id="quantityInput" min="1" value="1" class="quantity-input" readonly>
+                    <button type="button" class="qty-btn" onclick="increaseQuantity()">+</button>
                 </div>
-                <div class="form-group">
-                    <label for="quantityInput">Cantidad a solicitar</label>
-                    <div class="quantity-control">
-                        <button type="button" class="qty-btn" onclick="decreaseQuantity()">-</button>
-                        <input type="number" id="quantityInput" min="1" value="1" class="quantity-input">
-                        <button type="button" class="qty-btn" onclick="increaseQuantity()">+</button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeAddModal()">Cancelar</button>
-                <button class="btn-primary" onclick="confirmAddToCart()">Agregar al Carrito</button>
             </div>
         </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeAddModal()">Cancelar</button>
+            <button class="btn-primary" onclick="confirmAddToCart()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 0.5rem;">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                Agregar al Carrito
+            </button>
+        </div>
     </div>
+</div>
 
     <script src="alumno.js"></script>
 </body>
