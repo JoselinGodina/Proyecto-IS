@@ -82,8 +82,7 @@ function removeItem(index) {
   }
 }
 
-// Confirm loan
-function confirmLoan() {
+async function confirmLoan() {
   const reason = document.getElementById("loanReason").value.trim()
 
   if (!reason) {
@@ -97,19 +96,64 @@ function confirmLoan() {
     return
   }
 
-  // Save loan data
-  const loanData = {
-    materials: cart,
-    reason: reason,
-    timestamp: new Date().toISOString(),
+  const usuario = JSON.parse(localStorage.getItem("usuario"))
+  if (!usuario) {
+    alert("Debes iniciar sesión")
+    window.location.href = "index.html"
+    return
   }
 
-  localStorage.setItem("currentLoan", JSON.stringify(loanData))
+  const confirmBtn = document.getElementById("confirmLoanBtn")
+  confirmBtn.disabled = true
+  confirmBtn.textContent = "Procesando..."
 
-  // Clear cart
-  cart = []
-  localStorage.setItem("cart", JSON.stringify(cart))
+  try {
+    console.log("[v0] Enviando solicitud de préstamo al backend...")
 
-  // Redirect to receipt
-  window.location.href = "vale-prestamo.html"
+    // POST to backend with correct structure for vales_prestamos table
+    const response = await fetch("http://localhost:3000/vales-prestamo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id_usuario: usuario.id_usuario,
+        materiales: cart.map((item) => ({
+          id_materiales: item.id,
+          cantidad: item.quantity,
+        })),
+        fecha_entrega: new Date().toISOString(), // Current timestamp
+        motivo: reason,
+      }),
+    })
+
+    const data = await response.json()
+
+    if (data.success) {
+      console.log("[v0] Vale creado exitosamente con ID:", data.id_vales)
+
+      // Save loan data for receipt page
+      const loanData = {
+        id_vales: data.id_vales,
+        materials: cart,
+        reason: reason,
+        timestamp: new Date().toISOString(),
+      }
+      localStorage.setItem("currentLoan", JSON.stringify(loanData))
+
+      // Clear cart
+      cart = []
+      localStorage.setItem("cart", JSON.stringify(cart))
+
+      // Redirect to receipt
+      window.location.href = "vale-prestamo.html"
+    } else {
+      throw new Error(data.error || "Error al crear solicitud")
+    }
+  } catch (error) {
+    console.error("[v0] Error al confirmar préstamo:", error)
+    alert("Error al enviar la solicitud: " + error.message)
+    confirmBtn.disabled = false
+    confirmBtn.textContent = "Confirmar Préstamo"
+  }
 }

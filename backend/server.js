@@ -356,6 +356,29 @@ app.get("/asesorias/:id/inscritos", async (req, res) => {
   }
 });
 
+// Agrega este endpoint en tu server.js, después de tus rutas de asesorías y antes de los endpoints de materiales existentes
+
+// ============================
+// 📦 OBTENER MATERIALES CON CATEGORÍA
+// ============================
+app.get("/materiales", async (req, res) => {
+  try {
+    console.log("[Server] GET /materiales - Consultando base de datos...")
+    const result = await pool.query(`
+      SELECT m.nombre, m.cantidad_disponible, c.descripcion as categoria, m.id_materiales
+      FROM materiales m
+      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
+      ORDER BY m.nombre ASC
+    `);
+    
+    console.log("[Server] Materiales encontrados:", result.rows.length);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("[Server] Error al obtener materiales:", error);
+    res.status(500).json({ error: "Error al obtener materiales: " + error.message });
+  }
+});
+
 // ============================
 // 📦 CRUD: MATERIALES
 // ============================
