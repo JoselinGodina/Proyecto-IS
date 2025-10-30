@@ -384,36 +384,7 @@ app.get("/materiales", async (req, res) => {
 // ============================
 
 // Obtener vales de préstamo de un usuario
-app.get("/vales-prestamo/:id_usuario", async (req, res) => {
-  try {
-    const { id_usuario } = req.params;
-    console.log("[Server] GET /vales-prestamo - Usuario:", id_usuario);
-    
-    const result = await pool.query(
-      `SELECT 
-        v.id_vales,
-        v.hora_entrega,
-        v.hora_devolucion,
-        v.motivo,
-        v.estado,
-        STRING_AGG(m.nombre || ' (' || vd.cantidad || ')', ', ') as materiales,
-        SUM(vd.cantidad) as cantidad_total
-       FROM vales_prestamos v
-       LEFT JOIN vales_detalles vd ON v.id_vales = vd.vales_prestamos_id_vales
-       LEFT JOIN materiales m ON vd.materiales_id_materiales = m.id_materiales
-       WHERE v.usuarios_id_usuario = $1
-       GROUP BY v.id_vales, v.hora_entrega, v.hora_devolucion, v.motivo, v.estado
-       ORDER BY v.hora_entrega DESC`,
-      [id_usuario]
-    );
-    
-    console.log("[Server] Vales encontrados:", result.rows.length);
-    res.json(result.rows);
-  } catch (error) {
-    console.error("[Server] Error al obtener vales:", error);
-    res.status(500).json({ error: "Error al obtener vales: " + error.message });
-  }
-});
+
 
 // Crear vale de préstamo
 app.post("/vales-prestamo", async (req, res) => {
