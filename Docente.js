@@ -1,28 +1,30 @@
 // ===============================
 // Verificación de sesión
 // ===============================
-window.addEventListener("pageshow", () => {
-  const usuarioActual =
-    JSON.parse(localStorage.getItem("usuarioActual")) ||
-    JSON.parse(localStorage.getItem("usuario"));
+const usuarioActual =
+  JSON.parse(localStorage.getItem("usuarioActual")) ||
+  JSON.parse(localStorage.getItem("usuario")) ||
+  null;
 
-  if (!usuarioActual) {
-    window.location.href = "index.html";
-  }
-});
+if (!usuarioActual) {
+  alert("⚠️ No hay sesión activa. Inicia sesión nuevamente.");
+  window.location.href = "index.html";
+}
+console.log("Usuario actual:", usuarioActual);
+
 
 // ===============================
 // Datos del docente logueado
 // ===============================
-const usuarioActual = JSON.parse(localStorage.getItem("usuarioActual"));
 const API_URL = "http://localhost:3000";
 
 if (usuarioActual) {
   document.querySelector(".profile-name").textContent =
-    usuarioActual.nombres + " " + usuarioActual.apellidos;
+    `${usuarioActual.nombres} ${usuarioActual.apellidos}`;
   document.querySelector(".profile-code").textContent =
     `${usuarioActual.id_usuario} - Electrónica Analógica`;
 }
+
 
 // ===============================
 // Cerrar sesión
@@ -109,12 +111,34 @@ function renderAsesorias() {
           <button class="btn-icon" onclick="editarAsesoria('${
             asesoria.id_crear_asesoria
           }')" title="Editar">✏️</button>
+          <button class="btn-icon btn-delete" onclick="eliminarAsesoria('${
+            asesoria.id_crear_asesoria}')" title="Eliminar">🗑️</button>
         </div>
       </div>
     `
     )
     .join("");
 }
+
+async function eliminarAsesoria(id) {
+  const confirmar = confirm("⚠️ ¿Estás seguro de que quieres eliminar esta asesoría?");
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`${API_URL}/asesorias/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error("Error al eliminar la asesoría");
+
+    alert("🗑️ Asesoría eliminada correctamente");
+    cargarAsesorias(); // recarga la lista
+  } catch (error) {
+    console.error(error);
+    alert("❌ No se pudo eliminar la asesoría");
+  }
+}
+
 
 // ===============================
 // Formatear fecha
@@ -155,16 +179,25 @@ document
   .getElementById("form-crear-asesoria")
   .addEventListener("submit", async (e) => {
     e.preventDefault();
+    console.log("🧠 Evento submit detectado"); // 👈 agrega esta línea
 
-    const nuevaAsesoria = {
-      id_crear_asesoria: `ASES${Date.now()}`,
-      usuarios_id_usuario: usuarioActual.id_usuario,
-      titulo: document.getElementById("crear-titulo").value,
-      descripcion: document.getElementById("crear-descripcion").value,
-      fecha: document.getElementById("crear-fecha").value,
-      horario: document.getElementById("crear-horario").value,
-      cupo: parseInt(document.getElementById("crear-cupos").value),
-    };
+    // Obtener la letra según el rol
+const nuevaAsesoria = {
+  id_crear_asesoria: usuarioActual.roles_id_rol === '2'
+    ? `D${Date.now().toString().slice(-8)}`  // Últimos 8 dígitos
+    : `ASES${Date.now().toString().slice(-7)}`,
+  usuarios_id_usuario: usuarioActual.id_usuario,
+  titulo: document.getElementById("crear-titulo").value,
+  descripcion: document.getElementById("crear-descripcion").value,
+  fecha: document.getElementById("crear-fecha").value,
+  horario: document.getElementById("crear-horario").value,
+  cupo: parseInt(document.getElementById("crear-cupos").value),
+};
+
+
+
+
+    console.log("📦 Datos enviados:", nuevaAsesoria); // 👈 agrega esta también
 
     try {
       const res = await fetch(`${API_URL}/asesorias`, {

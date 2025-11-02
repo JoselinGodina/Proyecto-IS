@@ -147,6 +147,7 @@ app.put("/asesorias/:id", async (req, res) => {
 });
 
 app.delete("/asesorias/:id", async (req, res) => {
+  const { id } = req.params;
   try {
     const { id } = req.params;
     await pool.query("DELETE FROM crear_asesoria WHERE id_crear_asesoria = $1", [id]);
