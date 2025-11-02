@@ -3,7 +3,6 @@ const API_URL = "http://localhost:3000/asesorias"
 // Guardar asesorías en memoria
 let asesorias = []
 let editandoAsesoriaId = null
-
 let adminLogueado = null
 
 // Función para obtener usuario de localStorage
@@ -14,7 +13,12 @@ function obtenerUsuarioLogueado() {
     return {
       id_usuario: usuario.id_usuario,
       nombres: `${usuario.nombres} ${usuario.apellidos}`,
-      rol: usuario.roles_id_rol === "1" ? "Administrador" : usuario.roles_id_rol === "2" ? "Docente" : "Alumno",
+      rol:
+        usuario.roles_id_rol === "1"
+          ? "Administrador"
+          : usuario.roles_id_rol === "2"
+          ? "Docente"
+          : "Alumno",
     }
   }
   // Fallback si no hay usuario en localStorage
@@ -44,7 +48,7 @@ async function inicializarAsesorias() {
       cuposTotal: a.cupo,
       cuposOcupados: a.cuposocupados || 0,
       estado: a.estado || "Programado",
-      instructor: a.instructor || adminLogueado.nombres,
+      instructor: a.instructor || "",
     }))
 
     renderizarAsesorias()
@@ -63,17 +67,19 @@ async function guardarAsesoria(event) {
   const fecha = document.getElementById("fecha").value
   const horario = document.getElementById("horario").value
   const cupos = document.getElementById("cupos").value
+  const instructorField = document.getElementById("instructor")
+  const instructor = instructorField ? instructorField.value : ""
 
   const data = {
     id_crear_asesoria: editandoAsesoriaId || generarID(),
     usuarios_id_usuario: adminLogueado.id_usuario,
     titulo,
     descripcion,
-    instructor: adminLogueado.nombres,
     fecha,
     horario,
     cupo: cupos,
     estado: "Programado",
+    instructor,
   }
 
   try {
@@ -101,8 +107,12 @@ async function guardarAsesoria(event) {
 // 🔹 Cancelar asesoría
 async function cancelarAsesoria(id) {
   if (confirm("¿Seguro que deseas cancelar esta asesoría?")) {
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" })
-    inicializarAsesorias()
+    try {
+      await fetch(`${API_URL}/${id}`, { method: "DELETE" })
+      inicializarAsesorias()
+    } catch (error) {
+      console.error("Error al cancelar asesoría:", error)
+    }
   }
 }
 
@@ -127,8 +137,11 @@ function renderizarAsesorias() {
 
   listContainer.innerHTML = asesorias
     .map((asesoria) => {
-      const porcentajeOcupado = (asesoria.cuposOcupados / asesoria.cuposTotal) * 100
-      const fechaFormateada = new Date(asesoria.fecha).toLocaleDateString("es-MX")
+      const porcentajeOcupado =
+        (asesoria.cuposOcupados / asesoria.cuposTotal) * 100
+      const fechaFormateada = new Date(asesoria.fecha).toLocaleDateString(
+        "es-MX"
+      )
 
       return `
             <div class="asesoria-card">
@@ -139,7 +152,6 @@ function renderizarAsesorias() {
                         <div class="asesoria-title">
                             <h3>${asesoria.titulo}</h3>
                         </div>
-                        <p class="asesoria-instructor">Impartido por: ${asesoria.instructor}</p>
                         <p class="asesoria-description">${asesoria.descripcion}</p>
                     </div>
                 </div>
@@ -183,15 +195,10 @@ function renderizarAsesorias() {
 
 // 🔹 Editar asesoría
 function editarAsesoria(id) {
-  console.log("[v0] editarAsesoria called with id:", id, "type:", typeof id)
-  console.log("[v0] Available asesorias:", asesorias)
-
   const asesoria = asesorias.find((a) => String(a.id) === String(id))
 
-  console.log("[v0] Found asesoria:", asesoria)
-
   if (!asesoria) {
-    console.error("[v0] No se encontró la asesoría con id:", id)
+    console.error("No se encontró la asesoría con id:", id)
     return
   }
 
@@ -203,23 +210,18 @@ function editarAsesoria(id) {
   document.getElementById("cuposLabel").textContent = "Cupos Totales"
 
   const instructorGroup = document.getElementById("instructorGroup")
-  if (instructorGroup) {
-    instructorGroup.style.display = "block"
-  }
+  if (instructorGroup) instructorGroup.style.display = "block"
 
   document.getElementById("titulo").value = asesoria.titulo
   document.getElementById("descripcion").value = asesoria.descripcion
 
   const instructorField = document.getElementById("instructor")
-  if (instructorField) {
-    instructorField.value = asesoria.instructor
-  }
+  if (instructorField) instructorField.value = asesoria.instructor
 
-  document.getElementById("fecha").value = asesoria.fecha.split("T")[0] // Formato YYYY-MM-DD
+  document.getElementById("fecha").value = asesoria.fecha.split("T")[0]
   document.getElementById("horario").value = asesoria.horario
   document.getElementById("cupos").value = asesoria.cuposTotal
 
-  console.log("[v0] About to open modal")
   abrirModal()
 }
 
@@ -236,16 +238,17 @@ function cerrarModal() {
 
   editandoAsesoriaId = null
   document.getElementById("modalTitle").textContent = "Crear Nueva Asesoría"
-  document.getElementById("modalSubtitle").textContent = "Programa una nueva asesoría para los estudiantes"
+  document.getElementById("modalSubtitle").textContent =
+    "Programa una nueva asesoría para los estudiantes"
   document.getElementById("submitBtn").textContent = "Crear Asesoría"
   document.getElementById("cuposLabel").textContent = "Cupos Disponibles"
-  document.getElementById("instructorGroup").style.display = "none"
+
+  const instructorGroup = document.getElementById("instructorGroup")
+  if (instructorGroup) instructorGroup.style.display = "none"
 }
 
 function cerrarModalSiClickFuera(event) {
-  if (event.target === event.currentTarget) {
-    cerrarModal()
-  }
+  if (event.target === event.currentTarget) cerrarModal()
 }
 
 // 🔹 Mostrar admin logueado en la parte superior
@@ -254,7 +257,8 @@ function mostrarAdminLogueado() {
   const adminId = document.querySelector(".admin-details p")
 
   if (adminName) adminName.textContent = adminLogueado.nombres
-  if (adminId) adminId.textContent = `${adminLogueado.id_usuario} - ${adminLogueado.rol}`
+  if (adminId)
+    adminId.textContent = `${adminLogueado.id_usuario} - ${adminLogueado.rol}`
 }
 
 // 🔹 Cerrar sesión
@@ -262,8 +266,6 @@ function cerrarSesion() {
   localStorage.removeItem("usuario")
   localStorage.removeItem("usuarioLogueado")
   sessionStorage.clear()
-  const inputs = document.querySelectorAll("input, textarea")
-  inputs.forEach((input) => (input.value = ""))
   document.body.innerHTML = ""
   window.location.href = "index.html"
 }

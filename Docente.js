@@ -79,6 +79,7 @@ document.querySelectorAll(".modal").forEach((modal) => {
 // ===============================
 // Render asesorías
 // ===============================
+// Mantienes tu función original
 function renderAsesorias() {
   const container = document.getElementById("asesorias-list");
 
@@ -120,23 +121,23 @@ function renderAsesorias() {
     .join("");
 }
 
-async function eliminarAsesoria(id) {
-  const confirmar = confirm("⚠️ ¿Estás seguro de que quieres eliminar esta asesoría?");
-  if (!confirmar) return;
+// Nueva función que agrega lógica extra
+function renderizarAsesorias() {
+  // Primero llamas a la función original
+  renderAsesorias();
 
-  try {
-    const res = await fetch(`${API_URL}/asesorias/${id}`, {
-      method: "DELETE",
-    });
+  // Luego agregas cualquier funcionalidad extra
+  console.log("Asesorías renderizadas:", asesorias.length);
 
-    if (!res.ok) throw new Error("Error al eliminar la asesoría");
-
-    alert("🗑️ Asesoría eliminada correctamente");
-    cargarAsesorias(); // recarga la lista
-  } catch (error) {
-    console.error(error);
-    alert("❌ No se pudo eliminar la asesoría");
-  }
+  // Ejemplo: agregar un highlight a las asesorías con cupos disponibles
+  asesorias.forEach((asesoria) => {
+    if ((asesoria.cupo - (asesoria.cuposocupados || 0)) > 0) {
+      const card = document.querySelector(
+        `.asesoria-card:has(.asesoria-title:contains("${asesoria.titulo}"))`
+      );
+      if (card) card.classList.add("highlight");
+    }
+  });
 }
 
 
