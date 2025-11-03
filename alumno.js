@@ -367,6 +367,7 @@ function updateCartBadge() {
   }
 }
 
+
 // ----------------------
 // Solicitudes
 // ----------------------
@@ -376,7 +377,9 @@ async function fetchSolicitudes() {
     if (!usuario) return
 
     console.log("[Alumno] Cargando solicitudes...")
-    const response = await fetch(`http://localhost:3000/vales-prestamo/${usuario.id_usuario}`)
+
+    // Cambié el endpoint para buscar por ID de usuario
+    const response = await fetch(`http://localhost:3000/vales-prestamo/usuario/${usuario.id_usuario}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -397,6 +400,7 @@ async function fetchSolicitudes() {
     }
   }
 }
+
 
 function renderSolicitudes(solicitudesData) {
   const grid = document.getElementById("solicitudesGrid")

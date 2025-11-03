@@ -74,7 +74,7 @@ function decreaseQuantity(index) {
 
 // Remove item
 function removeItem(index) {
-  if (confirm("¿Estás seguro de eliminar este material del carrito?")) {
+  if (confirm("¿Estás seguro de eliminar este material ?")) {
     cart.splice(index, 1)
     localStorage.setItem("cart", JSON.stringify(cart))
     renderCartItems()
@@ -92,7 +92,7 @@ async function confirmLoan() {
   }
 
   if (cart.length === 0) {
-    alert("El carrito está vacío")
+    alert("Tu solicitud está vacío")
     return
   }
 
@@ -126,7 +126,7 @@ async function confirmLoan() {
         id_usuario: usuario.id_usuario,
         materiales: materialesParaEnviar,
         fecha_entrega: new Date().toISOString(),
-        motivo: reason,
+        motivo: String(reason),
       }),
     })
 

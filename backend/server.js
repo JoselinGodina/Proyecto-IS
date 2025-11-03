@@ -381,73 +381,72 @@ app.get("/materiales", async (req, res) => {
 
 // ============================
 // 📋 CRUD: VALES DE PRÉSTAMO
-// ============================
 
-// Obtener vales de préstamo de un usuario
-
-
-// Crear vale de préstamo
-app.post("/vales-prestamo", async (req, res) => {
-  const client = await pool.connect();
-  
+app.get("/vales-prestamo/usuario/:idUsuario", async (req, res) => {
   try {
-    const { id_usuario, materiales, fecha_entrega, motivo } = req.body;
-    
-    console.log("[Server] POST /vales-prestamo - Datos recibidos:", req.body);
-
-    if (!id_usuario || !materiales || !motivo) {
-      return res.status(400).json({ 
-        success: false, 
-        error: "Faltan datos obligatorios" 
-      });
-    }
-
-    await client.query('BEGIN');
-
-    // 1. Generar ID único para el vale
-    const valeIdResult = await client.query(
-      "SELECT COALESCE(MAX(id_vales), 0) + 1 as next_id FROM vales_prestamos"
-    );
-    const id_vales = valeIdResult.rows[0].next_id;
-
-    // 2. Insertar el vale principal
-    await client.query(
-      `INSERT INTO vales_prestamos 
-       (id_vales, usuarios_id_usuario, hora_entrega, motivo, estado)
-       VALUES ($1, $2, NOW(), $3, 'Pendiente')`,
-      [id_vales, id_usuario, motivo]
+    const { idUsuario } = req.params;
+    const result = await pool.query(
+      `SELECT * FROM vales_prestamos WHERE usuarios_id_usuario = $1 ORDER BY fecha_entrega DESC`,
+      [idUsuario]
     );
 
-    // 3. Insertar los detalles (materiales)
-    for (const material of materiales) {
-      await client.query(
-        `INSERT INTO vales_detalles 
-         (vales_prestamos_id_vales, materiales_id_materiales, cantidad)
-         VALUES ($1, $2, $3)`,
-        [id_vales, material.id_materiales, material.cantidad]
-      );
-    }
-
-    await client.query('COMMIT');
-    
-    console.log("[Server] Vale creado exitosamente con ID:", id_vales);
-    res.json({ 
-      success: true, 
-      message: "Vale creado correctamente",
-      id_vales: id_vales 
-    });
-
-  } catch (error) {
-    await client.query('ROLLBACK');
-    console.error("[Server] Error al crear vale:", error);
-    res.status(500).json({ 
-      success: false, 
-      error: "Error al crear vale: " + error.message 
-    });
-  } finally {
-    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error al obtener vales del usuario:", err);
+    res.status(500).json({ error: "Error al obtener vales" });
   }
 });
+
+
+const { v4: uuidv4 } = require('uuid');
+
+app.post("/vales-prestamo", async (req, res) => {
+  try {
+    const { id_usuario, materiales, fecha_entrega, motivo } = req.body;
+
+    if (!id_usuario || !materiales || materiales.length === 0) {
+      return res.status(400).json({ error: "Datos incompletos para crear el vale" });
+    }
+
+    // Generar ID único
+    const idVale = uuidv4();
+
+    // Estado inicial: pendiente
+    const estadoId = "E01"; // pendiente
+    const horaEntrega = new Date().toLocaleTimeString("en-GB");
+
+    // Insertar el vale
+    await pool.query(`
+      INSERT INTO vales_prestamos 
+        (id_vales, usuarios_id_usuario, estado_id_estado, hora_entrega, motivo)
+      VALUES ($1, $2, $3, $4::time, COALESCE($5::varchar, ''))
+    `, [idVale, id_usuario, estadoId, horaEntrega, motivo?.toString() || '']);
+
+    // Insertar materiales
+    for (const material of materiales) {
+      const cantidad = parseFloat(material.cantidad) || 0;
+
+      if (!material.id_materiales) {
+        console.warn("Material sin id_materiales:", material);
+        continue;
+      }
+
+      await pool.query(`
+        INSERT INTO vales_has_materiales 
+          (vales_prestamos_id_vales, materiales_id_materiales, cantidad)
+        VALUES ($1, $2, $3)
+      `, [idVale, material.id_materiales, cantidad]);
+    }
+
+    res.json({ success: true, message: "Vale registrado correctamente", id_vales: idVale });
+  } catch (err) {
+    console.error("Error al registrar vale:", err);
+    res.status(500).json({ error: "Error al registrar el vale: " + err.message });
+  }
+});
+
+
+
 
 // ============================
 // 📦 CRUD: MATERIALES
