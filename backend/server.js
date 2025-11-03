@@ -382,27 +382,12 @@ app.get("/materiales", async (req, res) => {
 // ============================
 // 📋 CRUD: VALES DE PRÉSTAMO
 
-app.get("/vales-prestamo/usuario/:idUsuario", async (req, res) => {
-  try {
-    const { idUsuario } = req.params;
-    const result = await pool.query(
-      `SELECT * FROM vales_prestamos WHERE usuarios_id_usuario = $1 ORDER BY fecha_entrega DESC`,
-      [idUsuario]
-    );
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Error al obtener vales del usuario:", err);
-    res.status(500).json({ error: "Error al obtener vales" });
-  }
-});
-
 
 const { v4: uuidv4 } = require('uuid');
 
 app.post("/vales-prestamo", async (req, res) => {
   try {
-    const { id_usuario, materiales, fecha_entrega, motivo } = req.body;
+    const { id_usuario, materiales, hora_entrega, motivo } = req.body;
 
     if (!id_usuario || !materiales || materiales.length === 0) {
       return res.status(400).json({ error: "Datos incompletos para crear el vale" });
@@ -444,6 +429,33 @@ app.post("/vales-prestamo", async (req, res) => {
     res.status(500).json({ error: "Error al registrar el vale: " + err.message });
   }
 });
+// ============================
+// 📦 RUTA: Vales de préstamo por usuario
+// ============================
+app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
+  try {
+    const { id_usuario } = req.params;
+    const result = await pool.query(
+      `SELECT v.id_vales, v.hora_entrega, v.hora_devolucion, e.descripcion AS estado, v.motivo,
+              STRING_AGG(m.nombre, ', ') AS materiales
+       FROM vales_prestamos v
+       LEFT JOIN vales_has_materiales vh ON v.id_vales = vh.vales_prestamos_id_vales
+       LEFT JOIN materiales m ON vh.materiales_id_materiales = m.id_materiales
+       LEFT JOIN estado e ON v.estado_id_estado = e.id_estado
+       WHERE v.usuarios_id_usuario = $1
+       GROUP BY v.id_vales, e.descripcion
+       ORDER BY v.hora_entrega DESC`,
+      [id_usuario]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener vales de préstamo:", error);
+    res.status(500).json({ error: "Error al obtener vales de préstamo: " + error.message });
+  }
+});
+
+
 
 
 

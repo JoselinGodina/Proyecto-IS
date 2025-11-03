@@ -228,38 +228,89 @@ function setupCategoryDropdown() {
 // ----------------------
 // Modal materiales
 // ----------------------
+// ----------------------
+// Modal materiales seguro
+// ----------------------
 function openAddModal(materialNombre) {
   console.log("[Modal] Intentando abrir modal para:", materialNombre)
   console.log("[Modal] Materiales disponibles:", materialsData)
-  
+
+  // Buscar material por nombre exacto
   selectedMaterial = materialsData.find((m) => m.nombre === materialNombre)
-  
+
   if (!selectedMaterial) {
     console.error("[Modal] Material no encontrado:", materialNombre)
-    alert("Error: Material no encontrado")
+    alert("Error: Material no encontrado. Por favor, recarga la página.")
     return
   }
-  
+
   console.log("[Modal] Material seleccionado:", selectedMaterial)
-  
+
   const modal = document.getElementById("addMaterialModal")
   if (!modal) {
     console.error("[Modal] Elemento modal no encontrado en el DOM")
     alert("Error: El modal no existe en la página")
     return
   }
-  
+
   document.getElementById("modalMaterialName").textContent = selectedMaterial.nombre
   document.getElementById("modalMaterialCategory").textContent = selectedMaterial.categoria
   document.getElementById("modalAvailable").textContent = selectedMaterial.cantidad_disponible || 0
   document.getElementById("quantityInput").value = 1
   document.getElementById("quantityInput").max = selectedMaterial.cantidad_disponible || 0
-  
+
   updateSelectedBadge()
-  
+
   modal.classList.add("show")
   console.log("[Modal] Modal abierto exitosamente")
 }
+
+function confirmAddToCart() {
+  const input = document.getElementById("quantityInput")
+  const quantity = Number.parseInt(input?.value || 0)
+
+  if (!selectedMaterial) {
+    alert("Error: No hay material seleccionado")
+    return
+  }
+
+  if (quantity < 1) {
+    alert("La cantidad debe ser mayor a 0")
+    return
+  }
+
+  if (quantity > (selectedMaterial.cantidad_disponible || 0)) {
+    alert(`Solo hay ${selectedMaterial.cantidad_disponible || 0} unidades disponibles`)
+    return
+  }
+
+  console.log("[Carrito] Agregando material:", selectedMaterial)
+  console.log("[Carrito] Cantidad:", quantity)
+
+  // Buscar si ya está en el carrito
+  const existingItem = cart.find((item) => item.id === selectedMaterial.id_materiales)
+
+  if (existingItem) {
+    existingItem.quantity += quantity
+    console.log("[Carrito] Material actualizado:", existingItem)
+  } else {
+    const newItem = {
+      id: selectedMaterial.id_materiales,
+      name: selectedMaterial.nombre || "Nombre desconocido",
+      category: selectedMaterial.categoria || "Categoría desconocida",
+      quantity: quantity,
+    }
+    cart.push(newItem)
+    console.log("[Carrito] Nuevo material agregado:", newItem)
+  }
+
+  localStorage.setItem("cart", JSON.stringify(cart))
+  updateCartBadge()
+  closeAddModal()
+
+  alert(`${quantity} unidad(es) de ${selectedMaterial.nombre || "material"} agregado(s) al carrito`)
+}
+
 
 function closeAddModal() {
   const modal = document.getElementById("addMaterialModal")
@@ -314,49 +365,7 @@ function updateSelectedBadge() {
   }
 }
 
-function confirmAddToCart() {
-  const quantity = Number.parseInt(document.getElementById("quantityInput").value)
-  
-  if (!selectedMaterial) {
-    alert("Error: No hay material seleccionado")
-    return
-  }
-  
-  if (quantity < 1) {
-    alert("La cantidad debe ser mayor a 0")
-    return
-  }
-  
-  if (quantity > selectedMaterial.cantidad_disponible) {
-    alert(`Solo hay ${selectedMaterial.cantidad_disponible} unidades disponibles`)
-    return
-  }
-  
-  console.log("[Carrito] Agregando material:", selectedMaterial)
-  console.log("[Carrito] Cantidad:", quantity)
-  
-  const existingItem = cart.find((item) => item.id === selectedMaterial.id_materiales)
-  
-  if (existingItem) {
-    existingItem.quantity += quantity
-    console.log("[Carrito] Material actualizado:", existingItem)
-  } else {
-    const newItem = {
-      id: selectedMaterial.id_materiales,
-      name: selectedMaterial.nombre,
-      category: selectedMaterial.categoria,
-      quantity: quantity,
-    }
-    cart.push(newItem)
-    console.log("[Carrito] Nuevo material agregado:", newItem)
-  }
-  
-  localStorage.setItem("cart", JSON.stringify(cart))
-  updateCartBadge()
-  closeAddModal()
-  
-  alert(`${quantity} unidad(es) de ${selectedMaterial.nombre} agregado(s) al carrito`)
-}
+
 
 function updateCartBadge() {
   const badge = document.getElementById("cartBadge")
