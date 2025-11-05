@@ -7,7 +7,6 @@ function mostrarAdminLogueado() {
     try {
       adminLogueado = JSON.parse(usuarioGuardado)
 
-      // Actualizar el header con los datos del usuario
       const adminNameElement = document.querySelector(".admin-details h3")
       const adminInfoElement = document.querySelector(".admin-details p")
 
@@ -15,7 +14,6 @@ function mostrarAdminLogueado() {
         const nombreCompleto = `${adminLogueado.nombres} ${adminLogueado.apellidos}`
         adminNameElement.textContent = nombreCompleto
 
-        // Determinar el rol
         let rolTexto = "Usuario"
         if (adminLogueado.roles_id_rol === 1) {
           rolTexto = "Administrador"
@@ -47,7 +45,6 @@ function cerrarSesion() {
   }
 }
 
-// Modal functionality
 const modalOverlay = document.getElementById("modalOverlay")
 const openModalBtn = document.getElementById("openModalBtn")
 const cancelBtn = document.getElementById("cancelBtn")
@@ -56,7 +53,6 @@ const materialForm = document.getElementById("materialForm")
 const quantityInput = document.getElementById("quantity")
 const materialsContainer = document.getElementById("materialsContainer")
 
-// Custom select functionality
 const selectTrigger = document.getElementById("selectTrigger")
 const selectOptions = document.getElementById("selectOptions")
 const selectDisplay = document.getElementById("selectDisplay")
@@ -85,10 +81,8 @@ async function cargarCategorias() {
       return
     }
 
-    // Limpiar opciones existentes
     selectOptions.innerHTML = ""
 
-    // Agregar opciones dinámicamente
     categorias.forEach((cat) => {
       const option = document.createElement("div")
       option.className = "select-option"
@@ -96,7 +90,6 @@ async function cargarCategorias() {
       option.textContent = cat.descripcion
       selectOptions.appendChild(option)
 
-      // Agregar event listener a cada opción
       option.addEventListener("click", () => {
         const value = option.getAttribute("data-value")
         const text = option.textContent
@@ -122,6 +115,8 @@ function createMaterialCard(materialName, categoryName, available, defective) {
   const card = document.createElement("div")
   card.className = "material-card"
 
+  const defectiveCount = defective !== undefined && defective !== null ? defective : 0
+
   card.innerHTML = `
         <div class="material-info">
             <div class="material-icon">
@@ -136,11 +131,11 @@ function createMaterialCard(materialName, categoryName, available, defective) {
         </div>
         <div class="material-stats">
             <div class="stat">
-                <div class="stat-value available">${available}</div>
+                <div class="stat-value available">${available || 0}</div>
                 <div class="stat-label">Disponibles</div>
             </div>
             <div class="stat">
-                <div class="stat-value defective">${defective}</div>
+                <div class="stat-value defective">${defectiveCount}</div>
                 <div class="stat-label">Defallidos</div>
             </div>
         </div>
@@ -164,7 +159,6 @@ async function cargarMateriales() {
     const materiales = await response.json()
     console.log("[v0] Materiales cargados:", materiales)
 
-    // Limpiar contenedor
     materialsContainer.innerHTML = ""
 
     if (!materiales || materiales.length === 0) {
@@ -174,13 +168,12 @@ async function cargarMateriales() {
       return
     }
 
-    // Crear tarjetas para cada material
     materiales.forEach((material) => {
       const card = createMaterialCard(
         material.nombre,
         material.descripcion,
         material.cantidad_disponible,
-        material.cantidad_daniados,
+        material.cantidad_daniados, // This field is now returned by the server
       )
       materialsContainer.appendChild(card)
     })
@@ -193,13 +186,11 @@ async function cargarMateriales() {
   }
 }
 
-// Open modal
 openModalBtn.addEventListener("click", () => {
   modalOverlay.classList.add("active")
   quantityInput.value = "0"
 })
 
-// Close modal
 cancelBtn.addEventListener("click", () => {
   modalOverlay.classList.remove("active")
   materialForm.reset()
@@ -210,7 +201,6 @@ cancelBtn.addEventListener("click", () => {
   quantityInput.value = "0"
 })
 
-// Close modal when clicking outside
 modalOverlay.addEventListener("click", (e) => {
   if (e.target === modalOverlay) {
     modalOverlay.classList.remove("active")
@@ -223,14 +213,12 @@ modalOverlay.addEventListener("click", (e) => {
   }
 })
 
-// Toggle dropdown
 selectTrigger.addEventListener("click", (e) => {
   e.stopPropagation()
   selectTrigger.classList.toggle("active")
   selectOptions.classList.toggle("active")
 })
 
-// Close dropdown when clicking outside
 document.addEventListener("click", () => {
   selectTrigger.classList.remove("active")
   selectOptions.classList.remove("active")
@@ -277,10 +265,8 @@ submitBtn.addEventListener("click", async (e) => {
       console.log("[v0] Material agregado exitosamente")
       alert("Material agregado exitosamente")
 
-      // Recargar materiales
       await cargarMateriales()
 
-      // Close modal and reset form
       modalOverlay.classList.remove("active")
       materialForm.reset()
       selectDisplay.textContent = "Selecciona una categoría"

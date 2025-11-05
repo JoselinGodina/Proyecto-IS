@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="entradaMaterial.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="admin-info">
             <svg class="settings-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,10 +29,6 @@
         </div>
     </header>
 
-    <!-- <div class="title-section">
-        <h1>Administrador</h1>
-    </div> -->
-
     <nav class="nav-tabs">
         <a href="solicitudes.html" class="nav-tab">Solicitudes</a>
         <a href="usuarios.html" class="nav-tab">Usuarios</a>
@@ -43,7 +38,7 @@
         <a href="entradaMaterial.html" class="nav-tab active">Entrada de Material</a>
         <a href="pedidoMaterial.html" class="nav-tab">Gestion de Material</a>
     </nav>
-    <!-- Main Content -->
+
     <div class="container">
         <div class="section-header">
             <div>
@@ -57,7 +52,7 @@
                 Agregar Material
             </button>
         </div>
-        <!-- Info Card -->
+
         <div class="info-card">
             <div class="info-card-header">
                 <div class="info-icon">
@@ -74,58 +69,10 @@
                 <li>Indica la cantidad que se ingresará</li>
             </ul>
         </div>
-        <!-- <CHANGE> Container for material cards that will be dynamically populated -->
-        <div id="materialsContainer">
-            <!-- Material Cards -->
-            <div class="material-card">
-                <div class="material-info">
-                    <div class="material-icon">
-                        <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
-                        </svg>
-                    </div>
-                    <div class="material-details">
-                        <h3>Capacitores Electrolíticos</h3>
-                        <p>Componentes Pasivos</p>
-                    </div>
-                </div>
-                <div class="material-stats">
-                    <div class="stat">
-                        <div class="stat-value available">45</div>
-                        <div class="stat-label">Disponibles</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value defective">10</div>
-                        <div class="stat-label">Defallidos</div>
-                    </div>
-                </div>
-            </div>
-            <div class="material-card">
-                <div class="material-info">
-                    <div class="material-icon">
-                        <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </div>
-                    <div class="material-details">
-                        <h3>Transistores 2N2222</h3>
-                        <p>Semiconductores</p>
-                    </div>
-                </div>
-                <div class="material-stats">
-                    <div class="stat">
-                        <div class="stat-value available">25</div>
-                        <div class="stat-label">Disponibles</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value defective">5</div>
-                        <div class="stat-label">Defallidos</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+        <div id="materialsContainer"></div>
     </div>
-    <!-- Modal -->
+
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="modal-header">
@@ -149,12 +96,7 @@
                                 <span class="select-placeholder" id="selectDisplay">Selecciona una categoría</span>
                                 <div class="select-arrow"></div>
                             </div>
-                            <div class="select-options" id="selectOptions">
-                                <div class="select-option" data-value="componentes-pasivos">Componentes Pasivos</div>
-                                <div class="select-option" data-value="semiconductores">Semiconductores</div>
-                                <div class="select-option" data-value="instrumentos">Instrumentos</div>
-                                <div class="select-option" data-value="herramientas">Herramientas</div>
-                            </div>
+                            <div class="select-options" id="selectOptions"></div>
                         </div>
                         <input type="hidden" id="category" required>
                     </div>
@@ -170,6 +112,7 @@
             </div>
         </div>
     </div>
-     <script src="entradaMaterial.js"></script>
+    <script src="entradaMaterial.js"></script>
 </body>
 </html>
+

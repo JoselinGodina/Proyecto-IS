@@ -1,45 +1,128 @@
 let adminLogueado = null
 
-window.addEventListener("DOMContentLoaded", () => {
-  console.log("[v0] Cargando página de pedido de materiales...")
-  cargarUsuarioLogueado()
-  cargarMateriales()
-})
-
-function cargarUsuarioLogueado() {
-  try {
-    const usuarioStr = localStorage.getItem("usuario")
-    console.log("[v0] Usuario en localStorage:", usuarioStr)
-
-    if (usuarioStr) {
-      adminLogueado = JSON.parse(usuarioStr)
-      mostrarAdminLogueado()
-    } else {
-      console.warn("[v0] No hay usuario en localStorage")
-      // Redirigir al login si no hay sesión
-      window.location.href = "index.html"
-    }
-  } catch (error) {
-    console.error("[v0] Error al cargar usuario:", error)
+function mostrarFechaActual() {
+  const fechaElement = document.getElementById("currentDate")
+  const hoy = new Date()
+  const opciones = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+  const fechaFormato = hoy.toLocaleDateString("es-ES", opciones)
+  if (fechaElement) {
+    fechaElement.textContent = fechaFormato
   }
 }
 
 function mostrarAdminLogueado() {
-  if (!adminLogueado) return
+  const usuarioGuardado = localStorage.getItem("usuario")
 
-  const nombreCompleto = `${adminLogueado.nombres} ${adminLogueado.apellidos}`
-  const codigoUsuario = adminLogueado.id_usuario
+  if (usuarioGuardado) {
+    try {
+      adminLogueado = JSON.parse(usuarioGuardado)
 
-  // Actualizar el nombre en el header
-  const adminDetailsDiv = document.querySelector(".admin-details")
-  if (adminDetailsDiv) {
-    adminDetailsDiv.innerHTML = `
-            <h3>${nombreCompleto}</h3>
-            <p>${codigoUsuario} - Administrador del Sistema</p>
-        `
+      const adminNameElement = document.querySelector(".admin-details h3")
+      const adminInfoElement = document.querySelector(".admin-details p")
+
+      if (adminNameElement && adminInfoElement) {
+        const nombreCompleto = `${adminLogueado.nombres} ${adminLogueado.apellidos}`
+        adminNameElement.textContent = nombreCompleto
+
+        let rolTexto = "Usuario"
+        if (adminLogueado.roles_id_rol === 1) {
+          rolTexto = "Administrador"
+        } else if (adminLogueado.roles_id_rol === 2) {
+          rolTexto = "Docente"
+        } else if (adminLogueado.roles_id_rol === 3) {
+          rolTexto = "Alumno"
+        }
+
+        adminInfoElement.textContent = `${adminLogueado.id_usuario} - ${rolTexto}`
+      }
+
+      console.log("[v0] Usuario logueado:", adminLogueado)
+    } catch (error) {
+      console.error("[v0] Error al parsear usuario:", error)
+      window.location.href = "index.html"
+    }
+  } else {
+    console.log("[v0] No hay usuario en localStorage, redirigiendo...")
+    window.location.href = "index.html"
   }
+}
 
-  console.log("[v0] Usuario mostrado en header:", nombreCompleto)
+function cerrarSesion() {
+  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+    localStorage.removeItem("usuario")
+    localStorage.clear()
+    window.location.href = "index.html"
+  }
+}
+
+async function cargarCategorias() {
+  try {
+    console.log("[v0] Cargando categorías...")
+    const response = await fetch("http://localhost:3000/categorias")
+
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`)
+    }
+
+    const categorias = await response.json()
+    console.log("[v0] Categorías cargadas:", categorias)
+
+    const selectElement = document.getElementById("materialCategory")
+    if (selectElement) {
+      categorias.forEach((cat) => {
+        const option = document.createElement("option")
+        option.value = cat.id_categoria
+        option.textContent = cat.descripcion
+        selectElement.appendChild(option)
+      })
+    }
+  } catch (error) {
+    console.error("[v0] Error al cargar categorías:", error)
+  }
+}
+
+async function handleAddMaterial(event) {
+  event.preventDefault()
+
+  const code = document.getElementById("materialCode").value
+  const name = document.getElementById("materialName").value
+  const category = document.getElementById("materialCategory").value
+  const quantity = document.getElementById("materialQuantity").value
+
+  try {
+    console.log("[v0] Enviando nuevo material:", { code, name, category, quantity })
+
+    const response = await fetch("http://localhost:3000/materiales", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id_materiales: code,
+        nombre: name,
+        categoria_id_categoria: category,
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error || "Error al crear material")
+    }
+
+    console.log("[v0] Material creado exitosamente")
+
+    if (Number.parseInt(quantity) > 0) {
+      await agregarCantidad(name, Number.parseInt(quantity))
+    }
+
+    // Reset form and reload materials
+    document.getElementById("addMaterialForm").reset()
+    await cargarMateriales()
+    alert("Material agregado correctamente")
+  } catch (error) {
+    console.error("[v0] Error al agregar material:", error)
+    alert("Error al agregar material: " + error.message)
+  }
 }
 
 async function cargarMateriales() {
@@ -51,42 +134,31 @@ async function cargarMateriales() {
 
   try {
     console.log("[v0] Cargando materiales desde la BD...")
-    console.log("[v0] URL del servidor: http://localhost:3000/materiales")
 
     const response = await fetch("http://localhost:3000/materiales")
-    console.log("[v0] Respuesta del servidor - Status:", response.status, response.statusText)
+    console.log("[v0] Respuesta del servidor - Status:", response.status)
 
     if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`)
+      throw new Error(`Error HTTP: ${response.status}`)
     }
 
     const materiales = await response.json()
     console.log("[v0] Materiales cargados:", materiales)
-    console.log("[v0] Cantidad de materiales:", materiales.length)
-
-    if (materiales.length === 0) {
-      console.warn("[v0] No hay materiales en la base de datos")
-    }
 
     renderizarMateriales(materiales)
   } catch (error) {
     console.error("[v0] Error al cargar materiales:", error)
-    console.error("[v0] Tipo de error:", error.name)
-    console.error("[v0] Mensaje de error:", error.message)
 
     if (lista) {
       lista.innerHTML = `
-        <div style="text-align: center; padding: 2rem; color: #e74c3c;">
-          <h3>Error al cargar materiales</h3>
-          <p>${error.message}</p>
-          <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-            Verifica que el servidor esté corriendo en http://localhost:3000
-          </p>
-          <button onclick="cargarMateriales()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            Reintentar
-          </button>
-        </div>
-      `
+                <div style="text-align: center; padding: 2rem; color: #e74c3c;">
+                    <h3>Error al cargar materiales</h3>
+                    <p>${error.message}</p>
+                    <button onclick="cargarMateriales()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Reintentar
+                    </button>
+                </div>
+            `
     }
   }
 }
@@ -100,51 +172,57 @@ function renderizarMateriales(materiales) {
   }
 
   if (materiales.length === 0) {
-    lista.innerHTML =
-      '<p style="text-align: center; color: #666; padding: 2rem;">No hay materiales registrados en la base de datos</p>'
+    lista.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No hay materiales registrados</p>'
     return
   }
 
   lista.innerHTML = materiales
     .map((material) => {
+      const disponibles = Number(material.cantidad_disponible) || 0
+      const danados = Number(material.cantidad_daniados) || 0
       const nombreSanitizado = material.nombre.replace(/[^a-zA-Z0-9]/g, "_")
+
       return `
-        <div class="material-card">
-            <div class="material-info">
-                <div class="material-icon">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                    </svg>
+                <div class="material-card">
+                    <div class="material-info">
+                        <div class="material-icon">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                        </div>
+                        <div class="material-details">
+                            <h3>${material.nombre || "Sin nombre"}</h3>
+                            <p>${material.descripcion || "Sin categoría"}</p>
+                        </div>
+                    </div>
+                    <div class="material-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Disponibles</div>
+                            <div class="stat-value disponibles" id="disponibles_${nombreSanitizado}">${disponibles}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Dañados</div>
+                            <div class="stat-value danados">${danados}</div>
+                        </div>
+                    </div>
+                    <div class="material-actions">
+                        <input type="number" id="input_${nombreSanitizado}" min="0" value="0" placeholder="Cantidad" class="quantity-input">
+                        <button class="add-btn" onclick="agregarCantidad('${material.nombre.replace(/'/g, "\\'")}')">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Agregar
+                        </button>
+                    </div>
                 </div>
-                <div class="material-details">
-                    <h3>${material.nombre}</h3>
-                    <p>${material.descripcion}</p>
-                </div>
-            </div>
-            <div class="material-stats">
-                <div class="stat-item">
-                    <div class="stat-label">Cantidad</div>
-                    <div class="stat-value" id="disponibles_${nombreSanitizado}">${material.cantidad_disponible}</div>
-                </div>
-            </div>
-            <div class="quantity-controls">
-                <input type="number" class="quantity-input" id="input_${nombreSanitizado}" value="0" min="1" placeholder="1">
-                <button class="add-btn" onclick="agregarCantidad('${material.nombre.replace(/'/g, "\\'")}')">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Agregar
-                </button>
-            </div>
-        </div>
-    `
+            `
     })
     .join("")
 
   console.log("[v0] Materiales renderizados exitosamente:", materiales.length)
 }
 
-async function agregarCantidad(nombreMaterial) {
+async function agregarCantidad(nombreMaterial, cantidadPredefinida = 0) {
   try {
     const nombreSanitizado = nombreMaterial.replace(/[^a-zA-Z0-9]/g, "_")
     const inputId = `input_${nombreSanitizado}`
@@ -156,7 +234,7 @@ async function agregarCantidad(nombreMaterial) {
       return
     }
 
-    const cantidadAgregar = Number.parseInt(inputElement.value) || 0
+    const cantidadAgregar = cantidadPredefinida || Number.parseInt(inputElement.value) || 0
 
     console.log("[v0] Agregando cantidad:", cantidadAgregar, "al material:", nombreMaterial)
 
@@ -193,34 +271,30 @@ async function agregarCantidad(nombreMaterial) {
     if (displayElement) {
       displayElement.textContent = result.nuevaCantidad
       console.log("[v0] Vista actualizada con nueva cantidad:", result.nuevaCantidad)
-    } else {
-      console.error("[v0] No se encontró el elemento de display:", displayId)
     }
 
-    // Resetear input
     inputElement.value = 0
 
-    mostrarMensajeExito()
+    if (cantidadPredefinida === 0) {
+      alert("Cantidad agregada exitosamente")
+    }
   } catch (error) {
     console.error("[v0] Error al agregar cantidad:", error)
     alert("Error al actualizar la cantidad: " + error.message)
   }
 }
 
-function mostrarMensajeExito() {
-  const mensaje = document.getElementById("successMessage")
-  if (mensaje) {
-    mensaje.classList.add("show")
-    setTimeout(() => {
-      mensaje.classList.remove("show")
-    }, 3000)
-  }
-}
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("[v0] Inicializando página de gestión de materiales...")
+  mostrarFechaActual()
+  mostrarAdminLogueado()
+  await cargarCategorias()
+  await cargarMateriales()
 
-function cerrarSesion() {
-  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-    localStorage.removeItem("usuario")
-    localStorage.removeItem("userRole")
-    window.location.href = "index.html"
+  const form = document.getElementById("addMaterialForm")
+  if (form) {
+    form.addEventListener("submit", handleAddMaterial)
   }
-}
+
+  console.log("[v0] Inicialización completa")
+})

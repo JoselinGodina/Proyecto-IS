@@ -27,12 +27,7 @@
                 Cerrar Sesión
             </button>
         </div>
-        
     </header>
-
-    <!-- <div class="title-section">
-        <h1>Administrador</h1>
-    </div> -->
 
     <nav class="nav-tabs">
         <a href="solicitudes.html" class="nav-tab">Solicitudes</a>
@@ -50,12 +45,9 @@
             <p>Gestiona el inventario del laboratorio de electrónica</p>
         </div>
 
-        <div class="materials-list" id="materialsList">
-            <!-- Material cards will be rendered here -->
-        </div>
+        <div class="materials-list" id="materialsList"></div>
     </main>
 
-    <!-- Added edit modal -->
     <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalSiClickFuera(event)">
         <div class="modal" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -66,21 +58,21 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="nombreMaterial">Nombre del Material</label>
-                    <input type="text" id="nombreMaterial" disabled>
+                    <input type="text" id="nombreMaterial">
                 </div>
 
                 <div class="form-group">
                     <label for="categoria">Categoría</label>
-                    <input type="text" id="categoria" disabled>
+                    <select id="categoria"></select>
                 </div>
 
                 <div class="quantity-controls">
                     <div class="quantity-group">
                         <label>Disponibles</label>
                         <div class="quantity-input-wrapper">
-                            <!--<button class="quantity-btn" onclick="cambiarCantidad('disponibles', -1)">−</button>-->
+                            <button class="quantity-btn" onclick="cambiarCantidad('disponibles', -1)">−</button>
                             <div class="quantity-display" id="disponiblesDisplay">0</div>
-                            <!--<button class="quantity-btn" onclick="cambiarCantidad('disponibles', 1)">+</button>-->
+                            <button class="quantity-btn" onclick="cambiarCantidad('disponibles', 1)">+</button>
                         </div>
                     </div>
 

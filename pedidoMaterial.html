@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrada de Material - Administrador</title>
+    <title>Gestión de Material - Administrador</title>
     <link rel="stylesheet" href="pedidoMaterial.css">
 </head>
 <body>
@@ -18,7 +18,9 @@
                 <p>ADM-2024-001 - Administrador del Sistema</p>
             </div>
         </div>
+        <!-- moved date to header right section -->
         <div class="header-right">
+            <div class="current-date" id="currentDate"></div>
             <span class="admin-badge">Administrador</span>
             <button class="logout-btn" onclick="cerrarSesion()">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,10 +30,6 @@
             </button>
         </div>
     </header>
-
-    <!-- <div class="title-section">
-        <h1>Administrador</h1>
-    </div> -->
 
     <nav class="nav-tabs">
         <a href="solicitudes.html" class="nav-tab">Solicitudes</a>
@@ -45,24 +43,45 @@
 
     <main class="main-content">
         <div class="content-header">
-            <h2>Entrada de Material</h2>
-            <p>Registra la entrada de nuevos materiales al inventario del laboratorio</p>
+            <h2>Gestión de Material</h2>
+            <p>Agrega cantidad a materiales existentes en el inventario</p>
         </div>
 
-        <!-- Added success message notification -->
-        <div class="success-message" id="successMessage">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span>Cantidad actualizada correctamente</span>
+        <!-- added form section for adding materials -->
+        <div class="add-material-section">
+            <h3>Agregar Material al Inventario</h3>
+            <form id="addMaterialForm" class="add-material-form">
+                <div class="form-group">
+                    <label for="materialCode">Código de Material</label>
+                    <input type="text" id="materialCode" placeholder="Ej: MAT-001" required>
+                </div>
+                <div class="form-group">
+                    <label for="materialName">Nombre del Material</label>
+                    <input type="text" id="materialName" placeholder="Ej: Pluma blanca" required>
+                </div>
+                <div class="form-group">
+                    <label for="materialCategory">Categoría</label>
+                    <select id="materialCategory" required>
+                        <option value="">Selecciona una categoría</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="materialQuantity">Cantidad Inicial</label>
+                    <input type="number" id="materialQuantity" min="0" value="0" required>
+                </div>
+                <button type="submit" class="submit-btn">Agregar Material</button>
+            </form>
         </div>
 
-        <div class="materials-list" id="materialsList">
-            <!-- Material cards will be rendered here -->
+        <!-- materials list displays below the form -->
+        <div class="materials-section">
+            <h3>Materiales Registrados</h3>
+            <div class="materials-list" id="materialsList">
+                <!-- Material cards will be dynamically loaded here -->
+            </div>
         </div>
     </main>
 
     <script src="pedidoMaterial.js"></script>
 </body>
 </html>
-

@@ -2,7 +2,6 @@ let adminLogueado = null
 let materialEditando = null
 let cantidadDanados = 0
 let cantidadDisponibles = 0
-let totalMaterial = 0
 let categorias = []
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -119,7 +118,6 @@ function renderizarMateriales(materiales) {
       const danados = Number(material.cantidad_daniados) || 0
       const total = disponibles + danados
 
-      // Escapar comillas para evitar problemas en JSON
       const materialJson = JSON.stringify(material).replace(/'/g, "\\'")
 
       return `
@@ -163,14 +161,12 @@ function abrirModalEditar(material) {
 
   console.log("[v0] Editando material:", materialEditando)
 
-  // Habilitar campo de nombre
   const nombreInput = document.getElementById("nombreMaterial")
   nombreInput.value = materialEditando.nombre || ""
   nombreInput.disabled = false
 
   const categoriaInput = document.getElementById("categoria")
 
-  // Crear un select si no existe
   if (categoriaInput.tagName !== "SELECT") {
     const select = document.createElement("select")
     select.id = "categoria"
@@ -182,20 +178,17 @@ function abrirModalEditar(material) {
   categoriaSelect.innerHTML = ""
   categoriaSelect.disabled = false
 
-  // Agregar opción por defecto
   const defaultOption = document.createElement("option")
   defaultOption.value = ""
   defaultOption.textContent = "Selecciona una categoría"
   defaultOption.disabled = true
   categoriaSelect.appendChild(defaultOption)
 
-  // Cargar categorías mostrando "id_categoria - descripcion"
   categorias.forEach((cat) => {
     const option = document.createElement("option")
     option.value = cat.id_categoria
     option.textContent = `${cat.id_categoria} - ${cat.descripcion}`
 
-    // Seleccionar la categoría actual del material
     if (cat.descripcion === materialEditando.descripcion) {
       option.selected = true
     }
@@ -205,12 +198,10 @@ function abrirModalEditar(material) {
 
   cantidadDisponibles = Number(materialEditando.cantidad_disponible) || 0
   cantidadDanados = Number(materialEditando.cantidad_daniados) || 0
-  totalMaterial = cantidadDisponibles + cantidadDanados
 
   document.getElementById("disponiblesDisplay").textContent = cantidadDisponibles
   document.getElementById("danadosDisplay").textContent = cantidadDanados
 
-  console.log("[v0] Total material (constante):", totalMaterial)
   console.log("[v0] Disponibles iniciales:", cantidadDisponibles)
   console.log("[v0] Dañados iniciales:", cantidadDanados)
 
@@ -224,7 +215,6 @@ function cerrarModal() {
   materialEditando = null
   cantidadDanados = 0
   cantidadDisponibles = 0
-  totalMaterial = 0
 }
 
 function cerrarModalSiClickFuera(event) {
@@ -234,21 +224,19 @@ function cerrarModalSiClickFuera(event) {
 }
 
 function cambiarCantidad(tipo, cambio) {
-  if (tipo === "danados") {
-    const nuevoValorDanados = cantidadDanados + cambio
-
-    // No permitir valores negativos ni exceder el total
-    if (nuevoValorDanados >= 0 && nuevoValorDanados <= totalMaterial) {
-      cantidadDanados = nuevoValorDanados
-      // Los disponibles son el total menos los dañados
-      cantidadDisponibles = totalMaterial - cantidadDanados
-
-      document.getElementById("danadosDisplay").textContent = cantidadDanados
+  if (tipo === "disponibles") {
+    const nuevoValor = cantidadDisponibles + cambio
+    if (nuevoValor >= 0) {
+      cantidadDisponibles = nuevoValor
       document.getElementById("disponiblesDisplay").textContent = cantidadDisponibles
-
-      console.log("[v0] Total constante:", totalMaterial)
-      console.log("[v0] Dañados:", cantidadDanados)
-      console.log("[v0] Disponibles:", cantidadDisponibles)
+      console.log("[v0] Disponibles actualizados:", cantidadDisponibles)
+    }
+  } else if (tipo === "danados") {
+    const nuevoValor = cantidadDanados + cambio
+    if (nuevoValor >= 0) {
+      cantidadDanados = nuevoValor
+      document.getElementById("danadosDisplay").textContent = cantidadDanados
+      console.log("[v0] Dañados actualizados:", cantidadDanados)
     }
   }
 }
@@ -319,9 +307,9 @@ function cerrarSesion() {
   }
 }
 
-// Cerrar modal con tecla Escape
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     cerrarModal()
   }
 })
+
