@@ -171,9 +171,9 @@ async function cargarMateriales() {
     materiales.forEach((material) => {
       const card = createMaterialCard(
         material.nombre,
-        material.descripcion,
+        material.categoria || "Sin categoría",
         material.cantidad_disponible,
-        material.cantidad_daniados, // This field is now returned by the server
+        material.cantidad_daniados, 
       )
       materialsContainer.appendChild(card)
     })
