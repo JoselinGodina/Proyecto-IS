@@ -181,38 +181,45 @@ function renderizarMateriales(materiales) {
       const disponibles = Number(material.cantidad_disponible) || 0
       const danados = Number(material.cantidad_daniados) || 0
       const nombreSanitizado = material.nombre.replace(/[^a-zA-Z0-9]/g, "_")
+      const categoria = material.categoria || "Sin categoría"
 
       return `
-                <div class="material-card">
-                    <div class="material-info">
-                        <div class="material-icon">
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg>
-                        </div>
-                        <div class="material-details">
-                            <h3>${material.nombre || "Sin nombre"}</h3>
-                            <p>${material.descripcion || "Sin categoría"}</p>
-                        </div>
-                    </div>
-                    <div class="material-stats">
-                        <div class="stat-item">
-                            <div class="stat-label">Disponibles</div>
-                            <div class="stat-value disponibles" id="disponibles_${nombreSanitizado}">${disponibles}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Dañados</div>
-                            <div class="stat-value danados">${danados}</div>
-                        </div>
-                    </div>
-                   
-                </div>
-            `
+        <div class="material-card">
+          <div class="material-info">
+            <div class="material-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M20 7l-8-4-8 4v10l8 4 8-4V7z"></path>
+              </svg>
+            </div>
+            <div class="material-details">
+              <h3>${material.nombre || "Sin nombre"}</h3>
+              <p style="color:#777; margin:0.3rem 0;">
+                <strong>Categoría:</strong> ${categoria}
+              </p>
+            </div>
+          </div>
+
+          <div class="material-stats">
+            <div class="stat-item">
+              <div class="stat-label">Disponibles</div>
+              <div class="stat-value disponibles" id="disponibles_${nombreSanitizado}">
+                ${disponibles}
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Dañados</div>
+              <div class="stat-value danados">${danados}</div>
+            </div>
+          </div>
+        </div>
+      `
     })
     .join("")
 
   console.log("[v0] Materiales renderizados exitosamente:", materiales.length)
 }
+
 
 async function agregarCantidad(nombreMaterial, cantidadPredefinida = 0) {
   try {
