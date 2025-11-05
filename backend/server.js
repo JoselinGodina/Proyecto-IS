@@ -532,42 +532,42 @@ app.post("/materiales", async (req, res) => {
 
 //materiales 2/3
 // Actualizar cantidad disponible de material
-app.put("/materiales/:nombre", async (req, res) => {
-  try {
-    const { nombre } = req.params;
-    const { cantidad } = req.body;
+//app.put("/materiales/:nombre", async (req, res) => {
+  //try {
+   // const { nombre } = req.params;
+    //const { cantidad } = req.body;
 
-    console.log("[v0 Server] PUT /materiales/:nombre - Material:", nombre);
-    console.log("[v0 Server] Cantidad a agregar:", cantidad);
+    //console.log("[v0 Server] PUT /materiales/:nombre - Material:", nombre);
+    //console.log("[v0 Server] Cantidad a agregar:", cantidad);
 
-    if (!cantidad || cantidad < 1) {
-      return res.status(400).json({ error: "Cantidad inválida" });
-    }
+    //if (!cantidad || cantidad < 1) {
+    //  return res.status(400).json({ error: "Cantidad inválida" });
+    //}
 
     // Actualizar cantidad_disponible en la BD
-    const result = await pool.query(
-      `UPDATE materiales 
-       SET cantidad_disponible = cantidad_disponible + $1 
-       WHERE nombre = $2
-       RETURNING cantidad_disponible`,
-      [cantidad, nombre]
-    );
+    //const result = await pool.query(
+      //`UPDATE materiales 
+      // SET cantidad_disponible = cantidad_disponible + $1 
+       //WHERE nombre = $2
+       //RETURNING cantidad_disponible`,
+      //[cantidad, nombre]
+    //);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Material no encontrado" });
-    }
+    //if (result.rows.length === 0) {
+     // return res.status(404).json({ error: "Material no encontrado" });
+    //}
 
-    console.log("[v0 Server] Nueva cantidad disponible:", result.rows[0].cantidad_disponible);
+    //console.log("[v0 Server] Nueva cantidad disponible:", result.rows[0].cantidad_disponible);
     
-    res.json({ 
-      message: "Cantidad actualizada correctamente",
-      nuevaCantidad: result.rows[0].cantidad_disponible
-    });
-  } catch (error) {
-    console.error("[v0 Server] Error al actualizar cantidad:", error);
-    res.status(500).json({ error: "Error al actualizar cantidad: " + error.message });
-  }
-});
+    //res.json({ 
+     // message: "Cantidad actualizada correctamente",
+      //nuevaCantidad: result.rows[0].cantidad_disponible
+    //});
+  //} catch (error) {
+  //console.error("[v0 Server] Error al actualizar cantidad:", error);
+   // res.status(500).json({ error: "Error al actualizar cantidad: " + error.message });
+  //}
+//});
 
 //crud materiales 3/3
 // app.get("/materiales", async (req, res) => {

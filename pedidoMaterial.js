@@ -205,15 +205,7 @@ function renderizarMateriales(materiales) {
                             <div class="stat-value danados">${danados}</div>
                         </div>
                     </div>
-                    <div class="material-actions">
-                        <input type="number" id="input_${nombreSanitizado}" min="0" value="0" placeholder="Cantidad" class="quantity-input">
-                        <button class="add-btn" onclick="agregarCantidad('${material.nombre.replace(/'/g, "\\'")}')">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            Agregar
-                        </button>
-                    </div>
+                   
                 </div>
             `
     })
