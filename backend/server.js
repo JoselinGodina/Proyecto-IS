@@ -466,26 +466,26 @@ app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
 
 app.get("/materiales", async (req, res) => {
   try {
-    console.log("[v0 Server] GET /materiales - Consultando base de datos...")
+    console.log("[v0 Server] GET /materiales - Consultando base de datos...");
     const result = await pool.query(`
-        SELECT 
-          m.nombre,
-          c.descripcion AS descripcion,
-          m.cantidad_disponible,
-          m.cantidad_daniados
-        FROM materiales m
-        JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
-        ORDER BY m.nombre ASC
-      `)
+      SELECT 
+        m.id_materiales,
+        m.nombre,
+        c.descripcion AS categoria,
+        m.cantidad_disponible,
+        m.cantidad_daniados
+      FROM materiales m
+      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
+      ORDER BY m.nombre ASC
+    `);
 
-    console.log("[v0 Server] Materiales encontrados:", result.rows.length)
-    console.log("[v0 Server] Datos:", result.rows)
-    res.json(result.rows)
+    res.json(result.rows);
   } catch (error) {
-    console.error("[v0 Server] Error al obtener materiales:", error)
-    res.status(500).json({ error: "Error al obtener materiales: " + error.message })
+    console.error("[v0 Server] Error al obtener materiales:", error);
+    res.status(500).json({ error: "Error al obtener materiales: " + error.message });
   }
-})
+});
+
 
 app.get("/categorias", async (req, res) => {
   try {
@@ -535,44 +535,32 @@ app.post("/materiales", async (req, res) => {
   }
 })
 
-//materiales 2/3
-// Actualizar cantidad disponible de material
-//app.put("/materiales/:nombre", async (req, res) => {
-  //try {
-   // const { nombre } = req.params;
-    //const { cantidad } = req.body;
+app.put("/materiales/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { cantidad } = req.body;
 
-    //console.log("[v0 Server] PUT /materiales/:nombre - Material:", nombre);
-    //console.log("[v0 Server] Cantidad a agregar:", cantidad);
+    const result = await pool.query(
+      `UPDATE materiales 
+       SET cantidad_disponible = cantidad_disponible + $1
+       WHERE id_materiales = $2
+       RETURNING *`,
+      [cantidad, id]
+    );
 
-    //if (!cantidad || cantidad < 1) {
-    //  return res.status(400).json({ error: "Cantidad inválida" });
-    //}
+    if (result.rowCount === 0) {
+      // ⚠️ Asegúrate de devolver JSON aquí, no HTML
+      return res.status(404).json({ error: "Material no encontrado" });
+    }
 
-    // Actualizar cantidad_disponible en la BD
-    //const result = await pool.query(
-      //`UPDATE materiales 
-      // SET cantidad_disponible = cantidad_disponible + $1 
-       //WHERE nombre = $2
-       //RETURNING cantidad_disponible`,
-      //[cantidad, nombre]
-    //);
+    res.json({ message: "Cantidad actualizada correctamente", material: result.rows[0] });
+  } catch (error) {
+    console.error("Error al actualizar material:", error);
+    res.status(500).json({ error: "Error al actualizar el material" });
+  }
+});
 
-    //if (result.rows.length === 0) {
-     // return res.status(404).json({ error: "Material no encontrado" });
-    //}
 
-    //console.log("[v0 Server] Nueva cantidad disponible:", result.rows[0].cantidad_disponible);
-    
-    //res.json({ 
-     // message: "Cantidad actualizada correctamente",
-      //nuevaCantidad: result.rows[0].cantidad_disponible
-    //});
-  //} catch (error) {
-  //console.error("[v0 Server] Error al actualizar cantidad:", error);
-   // res.status(500).json({ error: "Error al actualizar cantidad: " + error.message });
-  //}
-//});
 
 
 

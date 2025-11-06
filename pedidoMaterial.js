@@ -82,48 +82,46 @@ async function cargarCategorias() {
 }
 
 async function handleAddMaterial(event) {
-  event.preventDefault()
+  event.preventDefault();
 
-  const code = document.getElementById("materialCode").value
-  const name = document.getElementById("materialName").value
-  const category = document.getElementById("materialCategory").value
-  const quantity = document.getElementById("materialQuantity").value
+const materialId = document.getElementById("materialCode").value; // toma el código real
+  const quantity = parseInt(document.getElementById("materialQuantity").value);
+
+  if (!materialName) {
+    alert("Selecciona un material");
+    return;
+  }
+
+  if (isNaN(quantity) || quantity <= 0) {
+    alert("La cantidad debe ser mayor que 0");
+    return;
+  }
 
   try {
-    console.log("[v0] Enviando nuevo material:", { code, name, category, quantity })
-
-    const response = await fetch("http://localhost:3000/materiales", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id_materiales: code,
-        nombre: name,
-        categoria_id_categoria: category,
-      }),
-    })
+const response = await fetch(`http://localhost:3000/materiales/${encodeURIComponent(materialId)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cantidad: quantity }),
+    });
 
     if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || "Error al crear material")
-    }
+  const text = await response.text(); // lee texto, no JSON
+  throw new Error(text || `Error HTTP: ${response.status}`);
+}
 
-    console.log("[v0] Material creado exitosamente")
+const data = await response.json();
+alert("Cantidad actualizada correctamente");
 
-    if (Number.parseInt(quantity) > 0) {
-      await agregarCantidad(name, Number.parseInt(quantity))
-    }
 
-    // Reset form and reload materials
-    document.getElementById("addMaterialForm").reset()
-    await cargarMateriales()
-    alert("Material agregado correctamente")
+    // Refresca lista en pantalla si tienes una función que la recarga
+    await cargarMateriales();
+
   } catch (error) {
-    console.error("[v0] Error al agregar material:", error)
-    alert("Error al agregar material: " + error.message)
+    console.error("Error al agregar cantidad:", error);
+    alert("Error al agregar cantidad: " + error.message);
   }
 }
+
 
 async function cargarMateriales() {
   const lista = document.getElementById("materialsList")
@@ -221,79 +219,63 @@ function renderizarMateriales(materiales) {
 }
 
 
-async function agregarCantidad(nombreMaterial, cantidadPredefinida = 0) {
+async function cargarMaterialesSelect() {
   try {
-    const nombreSanitizado = nombreMaterial.replace(/[^a-zA-Z0-9]/g, "_")
-    const inputId = `input_${nombreSanitizado}`
-    const inputElement = document.getElementById(inputId)
+    const response = await fetch("http://localhost:3000/materiales");
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
-    if (!inputElement) {
-      console.error("[v0] No se encontró el input:", inputId)
-      alert("Error: No se encontró el campo de cantidad")
-      return
-    }
+    const materiales = await response.json();
+    console.log("[v0] Materiales para select:", materiales);
 
-    const cantidadAgregar = cantidadPredefinida || Number.parseInt(inputElement.value) || 0
+    const select = document.getElementById("materialName");
+    if (!select) return;
 
-    console.log("[v0] Agregando cantidad:", cantidadAgregar, "al material:", nombreMaterial)
+    // Limpiar opciones previas
+    select.innerHTML = '<option value="">Selecciona un material</option>';
 
-    if (cantidadAgregar < 1) {
-      alert("Por favor ingresa una cantidad válida mayor a 0")
-      return
-    }
+    materiales.forEach((mat) => {
+      const option = document.createElement("option");
+      option.value = mat.id_materiales; // el código del material
+      option.textContent = mat.nombre;
+      option.dataset.categoria = mat.categoria; // guardamos descripción
+      select.appendChild(option);
+    });
 
-    console.log("[v0] Enviando PUT a:", `http://localhost:3000/materiales/${encodeURIComponent(nombreMaterial)}`)
-
-    const response = await fetch(`http://localhost:3000/materiales/${encodeURIComponent(nombreMaterial)}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cantidad: cantidadAgregar,
-      }),
-    })
-
-    console.log("[v0] Respuesta del servidor - Status:", response.status)
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      console.error("[v0] Error del servidor:", errorData)
-      throw new Error(errorData.error || "Error al actualizar material")
-    }
-
-    const result = await response.json()
-    console.log("[v0] Material actualizado exitosamente:", result)
-
-    const displayId = `disponibles_${nombreSanitizado}`
-    const displayElement = document.getElementById(displayId)
-    if (displayElement) {
-      displayElement.textContent = result.nuevaCantidad
-      console.log("[v0] Vista actualizada con nueva cantidad:", result.nuevaCantidad)
-    }
-
-    inputElement.value = 0
-
-    if (cantidadPredefinida === 0) {
-      alert("Cantidad agregada exitosamente")
-    }
+    // Guardar materiales en memoria para búsquedas rápidas
+    window.materialesData = materiales;
   } catch (error) {
-    console.error("[v0] Error al agregar cantidad:", error)
-    alert("Error al actualizar la cantidad: " + error.message)
+    console.error("[v0] Error al cargar materiales en select:", error);
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  console.log("[v0] Inicializando página de gestión de materiales...")
-  mostrarFechaActual()
-  mostrarAdminLogueado()
-  await cargarCategorias()
-  await cargarMateriales()
 
-  const form = document.getElementById("addMaterialForm")
-  if (form) {
-    form.addEventListener("submit", handleAddMaterial)
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("[v0] Inicializando página de gestión de materiales...");
+  mostrarFechaActual();
+  mostrarAdminLogueado();
+  await cargarMateriales();
+  await cargarMaterialesSelect(); // 👈 nuevo
+
+  const form = document.getElementById("addMaterialForm");
+  if (form) form.addEventListener("submit", handleAddMaterial);
+
+  // 👇 Autocompletar campos al seleccionar material
+  const materialSelect = document.getElementById("materialName");
+  if (materialSelect) {
+    materialSelect.addEventListener("change", (e) => {
+      const selectedId = e.target.value;
+      const material = window.materialesData?.find((m) => m.id_materiales === selectedId);
+
+      if (material) {
+        document.getElementById("materialCode").value = material.id_materiales;
+        document.getElementById("materialCategory").value = material.categoria;
+      } else {
+        document.getElementById("materialCode").value = "";
+        document.getElementById("materialCategory").value = "";
+      }
+    });
   }
 
-  console.log("[v0] Inicialización completa")
-})
+  console.log("[v0] Inicialización completa");
+});
+
