@@ -451,3 +451,46 @@
                 justify-content: space-around;
             }
         }
+
+        .pending-list {
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.pending-list h4 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: #333;
+}
+
+.pending-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pending-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #555;
+}
+
+.pending-list li:last-child {
+  border-bottom: none;
+}
+
+.pending-list .remove-btn {
+  background: none;
+  border: none;
+  color: #d33;
+  cursor: pointer;
+  font-weight: bold;
+}

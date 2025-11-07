@@ -561,6 +561,49 @@ app.put("/materiales/:id", async (req, res) => {
 });
 
 
+//Inevntario
+app.post("/materiales/multiples", async (req, res) => {
+  try {
+    const materiales = req.body.materiales
+
+    if (!materiales || materiales.length === 0) {
+      return res.status(400).json({ error: "No se recibieron materiales" })
+    }
+
+    for (const mat of materiales) {
+      const { id_materiales, nombre, categoria_id_categoria } = mat
+
+      if (!id_materiales || !nombre || !categoria_id_categoria) {
+        return res.status(400).json({ error: "Faltan datos obligatorios" })
+      }
+
+      // Verificar si ya existe
+      const materialExist = await pool.query(
+        "SELECT * FROM materiales WHERE id_materiales = $1",
+        [id_materiales]
+      )
+
+      if (materialExist.rows.length > 0) {
+        continue // saltar si ya existe
+      }
+
+      await pool.query(
+        `INSERT INTO materiales 
+          (id_materiales, nombre, categoria_id_categoria, cantidad_disponible, cantidad_daniados)
+         VALUES ($1, $2, $3, 0, 0)`,
+        [id_materiales, nombre, categoria_id_categoria]
+      )
+    }
+
+    res.json({ success: true, message: "Materiales guardados correctamente" })
+  } catch (error) {
+    console.error("Error al guardar múltiples materiales:", error)
+    res.status(500).json({ error: error.message })
+  }
+})
+
+
+
 
 
 

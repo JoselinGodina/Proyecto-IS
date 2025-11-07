@@ -1,4 +1,6 @@
 let adminLogueado = null
+let materialesPendientes = []
+
 
 function mostrarAdminLogueado() {
   const usuarioGuardado = localStorage.getItem("usuario")
@@ -224,7 +226,7 @@ document.addEventListener("click", () => {
   selectOptions.classList.remove("active")
 })
 
-submitBtn.addEventListener("click", async (e) => {
+submitBtn.addEventListener("click", (e) => {
   e.preventDefault()
 
   if (materialForm.checkValidity()) {
@@ -237,51 +239,30 @@ submitBtn.addEventListener("click", async (e) => {
       return
     }
 
-    try {
-      console.log("[v0] Enviando material:", {
-        id_materiales: materialCode,
-        nombre: materialName,
-        categoria_id_categoria: Number.parseInt(categoryId),
-      })
+    // Agregar al arreglo temporal
+    materialesPendientes.push({
+      id_materiales: materialCode,
+      nombre: materialName,
+      categoria_id_categoria: Number.parseInt(categoryId),
+    })
 
-      const response = await fetch("http://localhost:3000/materiales", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id_materiales: materialCode,
-          nombre: materialName,
-          categoria_id_categoria: Number.parseInt(categoryId),
-        }),
-      })
+    alert("Material agregado a la lista temporal")
 
-      const data = await response.json()
+    // Limpiar el formulario para poder agregar otro
+    materialForm.reset()
+    selectDisplay.textContent = "Selecciona una categoría"
+    selectDisplay.className = "select-placeholder"
+    categoryInput.value = ""
+    document.querySelectorAll(".select-option").forEach((opt) => opt.classList.remove("selected"))
+    quantityInput.value = "0"
 
-      if (!response.ok) {
-        throw new Error(data.error || "Error al agregar material")
-      }
-
-      console.log("[v0] Material agregado exitosamente")
-      alert("Material agregado exitosamente")
-
-      await cargarMateriales()
-
-      modalOverlay.classList.remove("active")
-      materialForm.reset()
-      selectDisplay.textContent = "Selecciona una categoría"
-      selectDisplay.className = "select-placeholder"
-      categoryInput.value = ""
-      document.querySelectorAll(".select-option").forEach((opt) => opt.classList.remove("selected"))
-      quantityInput.value = "0"
-    } catch (error) {
-      console.error("[v0] Error al agregar material:", error)
-      alert(error.message || "Error al agregar el material")
-    }
+    console.log("Materiales pendientes:", materialesPendientes)
+    actualizarListaTemporal() // ✅ DEJA SOLO ESTA
   } else {
     alert("Por favor completa todos los campos requeridos")
   }
 })
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("[v0] Inicializando página de materiales...")
@@ -295,3 +276,68 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   console.log("[v0] Inicialización completa")
 })
+
+
+const saveAllBtn = document.getElementById("saveAllBtn")
+
+saveAllBtn.addEventListener("click", async () => {
+  if (materialesPendientes.length === 0) {
+    alert("No hay materiales pendientes para guardar")
+    return
+  }
+
+  try {
+    const response = await fetch("http://localhost:3000/materiales/multiples", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ materiales: materialesPendientes }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) throw new Error(data.error || "Error al guardar materiales")
+
+    alert("Todos los materiales se guardaron correctamente")
+
+    materialesPendientes = [] // limpiar lista temporal
+    modalOverlay.classList.remove("active")
+    await cargarMateriales()
+  } catch (error) {
+    console.error("Error al guardar múltiples materiales:", error)
+    alert(error.message)
+  }
+})
+
+
+function actualizarListaTemporal() {
+  const list = document.getElementById("pendingList")
+  list.innerHTML = ""
+
+  if (materialesPendientes.length === 0) {
+    list.innerHTML = '<li style="text-align:center; color:#777;">No hay materiales en la lista</li>'
+    return
+  }
+
+  materialesPendientes.forEach((mat, index) => {
+    // Buscar el nombre de la categoría según su ID
+    const categoria = categorias.find(cat => Number(cat.id_categoria) === Number(mat.categoria_id_categoria))
+    const nombreCategoria = categoria ? categoria.descripcion : "Sin categoría"
+
+    const li = document.createElement("li")
+
+    // Crear contenido del li
+    li.innerHTML = `
+      <span><strong>${mat.nombre}</strong> (${mat.id_materiales}) - ${nombreCategoria}</span>
+      <button class="remove-btn">✖</button>
+    `
+
+    // Agregar listener al botón de eliminar
+    li.querySelector("button").addEventListener("click", () => {
+      materialesPendientes.splice(index, 1)
+      actualizarListaTemporal()
+    })
+
+    list.appendChild(li)
+  })
+}
+
