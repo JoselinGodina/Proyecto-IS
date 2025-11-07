@@ -184,6 +184,7 @@ function renderizarAsesorias() {
                 </div>
 
                 <div class="asesoria-actions">
+                    <button class="btn-ver" onclick="verInscritos('${asesoria.id}')">Ver inscritos</button>
                     <button class="btn-editar" onclick="editarAsesoria('${asesoria.id}')">Editar</button>
                     <button class="btn-cancelar" onclick="cancelarAsesoria('${asesoria.id}')">Cancelar</button>
                 </div>
@@ -250,6 +251,64 @@ function cerrarModal() {
 function cerrarModalSiClickFuera(event) {
   if (event.target === event.currentTarget) cerrarModal()
 }
+
+
+//ver inscritos
+async function verInscritos(idAsesoria) {
+  try {
+    const res = await fetch(`${API_URL}/${idAsesoria}/inscritos`)
+    const inscritos = await res.json()
+
+    let contenido = ""
+
+    if (inscritos.length === 0) {
+      contenido = "<p>No hay alumnos inscritos en esta asesoría.</p>"
+    } else {
+      contenido = `
+        <table class="tabla-inscritos">
+          <thead>
+            <tr>
+              <th>ID Usuario</th>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Fecha de inscripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${inscritos
+              .map(
+                (alumno) => `
+              <tr>
+                <td>${alumno.id_usuario}</td>
+                <td>${alumno.nombres} ${alumno.apellidos}</td>
+                <td>${alumno.correo}</td>
+                <td>${new Date(alumno.fecha_inscripcion).toLocaleString("es-MX")}</td>
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      `
+    }
+
+    mostrarModalInscritos(contenido)
+  } catch (error) {
+    console.error("Error al obtener inscritos:", error)
+    alert("No se pudieron cargar los alumnos inscritos.")
+  }
+}
+
+function mostrarModalInscritos(contenidoHTML) {
+  const modal = document.getElementById("modalInscritos");
+  const lista = document.getElementById("listaInscritos");
+
+  lista.innerHTML = contenidoHTML; // mostramos el HTML generado
+
+  modal.style.display = "flex";
+}
+
+
 
 // 🔹 Mostrar admin logueado en la parte superior
 function mostrarAdminLogueado() {

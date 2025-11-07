@@ -157,6 +157,36 @@ app.delete("/asesorias/:id", async (req, res) => {
   }
 });
 
+
+app.get("/asesorias/:id/inscritos", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      `SELECT 
+         u.id_usuario, 
+         u.nombres, 
+         u.apellidos, 
+         u.correo, 
+         i.fecha_inscripcion
+       FROM inscripciones i
+       INNER JOIN usuarios u ON u.id_usuario = i.id_usuario
+       WHERE i.id_crear_asesoria = $1`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      console.log("No se encontraron inscritos para la asesoría:", id);
+    }
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener inscritos:", error);
+    res.status(500).json({ error: "Error al obtener inscritos" });
+  }
+});
+
+
+
 // ============================
 // 👩‍🎓 Asesorías visibles para alumnos
 // ============================
