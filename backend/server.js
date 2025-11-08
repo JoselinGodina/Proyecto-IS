@@ -1,12 +1,13 @@
 // backend/server.js
-const express = require("express");
-const cors = require("cors");
-const { Pool } = require("pg");
-const bcrypt = require("bcrypt");
-const path = require("path");
+const express = require("express")
+const cors = require("cors")
+const { Pool } = require("pg")
+const bcrypt = require("bcrypt")
+const path = require("path")
+const { v4: uuidv4 } = require("uuid")
 
-const app = express();
-const PORT = 3000;
+const app = express()
+const PORT = 3000
 
 // ============================
 // Configuración PostgreSQL
@@ -17,72 +18,72 @@ const pool = new Pool({
   database: "ProyectoIs",
   password: "270704",
   port: 5432,
-});
+})
 
 // ============================
 // Middlewares
 // ============================
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "../")));
+app.use(cors())
+app.use(express.json())
+app.use(express.static(path.join(__dirname, "../")))
 
 // ============================
 // Rutas base
 // ============================
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../index.html"));
-});
+  res.sendFile(path.join(__dirname, "../index.html"))
+})
 
-app.get("/ping", (req, res) => res.send("Servidor funcionando correctamente 🚀"));
+app.get("/ping", (req, res) => res.send("Servidor funcionando correctamente 🚀"))
 
 // ============================
 // 🧍 Registro de usuario
 // ============================
 app.post("/register", async (req, res) => {
   try {
-    const { id_usuario, nombres, apellidos, carreras_id_carreras, correo, semestre, contrasena } = req.body;
+    const { id_usuario, nombres, apellidos, carreras_id_carreras, correo, semestre, contrasena } = req.body
 
     if (!id_usuario || !nombres || !apellidos || !carreras_id_carreras || !correo || !semestre || !contrasena) {
-      return res.status(400).json({ error: "Faltan datos obligatorios" });
+      return res.status(400).json({ error: "Faltan datos obligatorios" })
     }
 
-    const userExist = await pool.query(
-      "SELECT * FROM usuarios WHERE id_usuario = $1 OR correo = $2",
-      [id_usuario, correo]
-    );
+    const userExist = await pool.query("SELECT * FROM usuarios WHERE id_usuario = $1 OR correo = $2", [
+      id_usuario,
+      correo,
+    ])
     if (userExist.rows.length > 0) {
-      return res.status(400).json({ error: "El usuario o correo ya están registrados" });
+      return res.status(400).json({ error: "El usuario o correo ya están registrados" })
     }
 
-    const hashedPassword = await bcrypt.hash(contrasena, 10);
+    const hashedPassword = await bcrypt.hash(contrasena, 10)
 
     await pool.query(
       `INSERT INTO usuarios (ID_USUARIO, CARRERAS_ID_CARRERAS, NOMBRES, APELLIDOS, CORREO, SEMESTRE, CONTRASENA, ROLES_ID_ROL)
        VALUES ($1, $2, $3, $4, $5, $6, $7, 3)`,
-      [id_usuario, carreras_id_carreras, nombres, apellidos, correo, semestre, hashedPassword]
-    );
+      [id_usuario, carreras_id_carreras, nombres, apellidos, correo, semestre, hashedPassword],
+    )
 
-    res.status(201).json({ message: "Usuario registrado correctamente" });
+    res.status(201).json({ message: "Usuario registrado correctamente" })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error en el servidor" });
+    console.error(error)
+    res.status(500).json({ error: "Error en el servidor" })
   }
-});
+})
 
 // ============================
 // 🔐 Login
 // ============================
 app.post("/login", async (req, res) => {
   try {
-    const { correo, contrasena } = req.body;
-    if (!correo || !contrasena) return res.status(400).json({ error: "Faltan datos" });
+    const { correo, contrasena } = req.body
+    if (!correo || !contrasena) return res.status(400).json({ error: "Faltan datos" })
 
-    const result = await pool.query("SELECT * FROM usuarios WHERE correo = $1", [correo]);
-    if (result.rows.length === 0) return res.status(401).json({ error: "Correo no registrado" });
+    const result = await pool.query("SELECT * FROM usuarios WHERE correo = $1", [correo])
+    if (result.rows.length === 0) return res.status(401).json({ error: "Correo no registrado" })
 
-    const user = result.rows[0];
-    const passwordMatch = await bcrypt.compare(contrasena, user.contrasena);
-    if (!passwordMatch) return res.status(401).json({ error: "Contraseña incorrecta" });
+    const user = result.rows[0]
+    const passwordMatch = await bcrypt.compare(contrasena, user.contrasena)
+    if (!passwordMatch) return res.status(401).json({ error: "Contraseña incorrecta" })
 
     res.json({
       message: "Inicio de sesión exitoso",
@@ -94,73 +95,72 @@ app.post("/login", async (req, res) => {
         roles_id_rol: user.roles_id_rol,
         semestre: user.semestre,
       },
-    });
+    })
   } catch (error) {
-    console.error("❌ Error en /login:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    console.error("❌ Error en /login:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
   }
-});
+})
 
 // ============================
 // 📘 CRUD: CREAR_ASESORIA
 // ============================
 app.get("/asesorias", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM crear_asesoria ORDER BY fecha ASC");
-    res.json(result.rows);
+    const result = await pool.query("SELECT * FROM crear_asesoria ORDER BY fecha ASC")
+    res.json(result.rows)
   } catch (error) {
-    console.error("Error al obtener asesorías:", error);
-    res.status(500).json({ error: "Error al obtener asesorías" });
+    console.error("Error al obtener asesorías:", error)
+    res.status(500).json({ error: "Error al obtener asesorías" })
   }
-});
+})
 
 app.post("/asesorias", async (req, res) => {
   try {
-    const { id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo } = req.body;
+    const { id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo } = req.body
     await pool.query(
       `INSERT INTO crear_asesoria (id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo, cuposocupados)
        VALUES ($1, $2, $3, $4, $5, $6, $7, 0)`,
-      [id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo]
-    );
-    res.status(201).json({ message: "Asesoría creada correctamente" });
+      [id_crear_asesoria, usuarios_id_usuario, titulo, descripcion, fecha, horario, cupo],
+    )
+    res.status(201).json({ message: "Asesoría creada correctamente" })
   } catch (error) {
-    console.error("Error al crear asesoría:", error);
-    res.status(500).json({ error: "Error al crear asesoría" });
+    console.error("Error al crear asesoría:", error)
+    res.status(500).json({ error: "Error al crear asesoría" })
   }
-});
+})
 
 app.put("/asesorias/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const { titulo, descripcion, fecha, horario, cupo } = req.body;
+    const { id } = req.params
+    const { titulo, descripcion, fecha, horario, cupo } = req.body
     await pool.query(
       `UPDATE crear_asesoria 
        SET titulo=$1, descripcion=$2, fecha=$3, horario=$4, cupo=$5 
        WHERE id_crear_asesoria=$6`,
-      [titulo, descripcion, fecha, horario, cupo, id]
-    );
-    res.json({ message: "Asesoría actualizada correctamente" });
+      [titulo, descripcion, fecha, horario, cupo, id],
+    )
+    res.json({ message: "Asesoría actualizada correctamente" })
   } catch (error) {
-    console.error("Error al editar asesoría:", error);
-    res.status(500).json({ error: "Error al editar asesoría" });
+    console.error("Error al editar asesoría:", error)
+    res.status(500).json({ error: "Error al editar asesoría" })
   }
-});
+})
 
 app.delete("/asesorias/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-    await pool.query("DELETE FROM crear_asesoria WHERE id_crear_asesoria = $1", [id]);
-    res.json({ message: "Asesoría cancelada correctamente" });
+    const { id } = req.params
+    await pool.query("DELETE FROM crear_asesoria WHERE id_crear_asesoria = $1", [id])
+    res.json({ message: "Asesoría cancelada correctamente" })
   } catch (error) {
-    console.error("Error al cancelar asesoría:", error);
-    res.status(500).json({ error: "Error al cancelar asesoría" });
+    console.error("Error al cancelar asesoría:", error)
+    res.status(500).json({ error: "Error al cancelar asesoría" })
   }
-});
-
+})
 
 app.get("/asesorias/:id/inscritos", async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     const result = await pool.query(
       `SELECT 
          u.id_usuario, 
@@ -171,111 +171,97 @@ app.get("/asesorias/:id/inscritos", async (req, res) => {
        FROM inscripciones i
        INNER JOIN usuarios u ON u.id_usuario = i.id_usuario
        WHERE i.id_crear_asesoria = $1`,
-      [id]
-    );
+      [id],
+    )
 
     if (result.rows.length === 0) {
-      console.log("No se encontraron inscritos para la asesoría:", id);
+      console.log("No se encontraron inscritos para la asesoría:", id)
     }
 
-    res.json(result.rows);
+    res.json(result.rows)
   } catch (error) {
-    console.error("Error al obtener inscritos:", error);
-    res.status(500).json({ error: "Error al obtener inscritos" });
+    console.error("Error al obtener inscritos:", error)
+    res.status(500).json({ error: "Error al obtener inscritos" })
   }
-});
-
-
+})
 
 // ============================
 // 👩‍🎓 Asesorías visibles para alumnos
 // ============================
 app.get("/alumno/asesorias", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM crear_asesoria ORDER BY fecha ASC");
-    res.json(result.rows);
+    const result = await pool.query("SELECT * FROM crear_asesoria ORDER BY fecha ASC")
+    res.json(result.rows)
   } catch (error) {
-    console.error("Error al obtener asesorías para alumno:", error);
-    res.status(500).json({ error: "Error al obtener asesorías" });
+    console.error("Error al obtener asesorías para alumno:", error)
+    res.status(500).json({ error: "Error al obtener asesorías" })
   }
-});
+})
 
 // ============================
 // 🧾 Tabla INSCRIPCIONES
 // ============================
 
-// Listar inscripciones de un alumno
 app.get("/inscripciones/:id_usuario", async (req, res) => {
   try {
-    const { id_usuario } = req.params;
+    const { id_usuario } = req.params
     const result = await pool.query(
       `SELECT i.id_inscripcion, i.fecha_inscripcion, c.titulo, c.descripcion, c.fecha, c.horario 
        FROM inscripciones i
        JOIN crear_asesoria c ON i.id_crear_asesoria = c.id_crear_asesoria
        WHERE i.id_usuario = $1`,
-      [id_usuario]
-    );
-    res.json(result.rows);
+      [id_usuario],
+    )
+    res.json(result.rows)
   } catch (error) {
-    console.error("Error al obtener inscripciones:", error);
-    res.status(500).json({ error: "Error al obtener inscripciones" });
+    console.error("Error al obtener inscripciones:", error)
+    res.status(500).json({ error: "Error al obtener inscripciones" })
   }
-});
+})
 
-// Registrar inscripción
 app.post("/inscribir", async (req, res) => {
-  const { id_usuario, id_crear_asesoria } = req.body;
+  const { id_usuario, id_crear_asesoria } = req.body
 
   try {
-    // 1️⃣ Verificar que la asesoría exista
     const asesoriaResult = await pool.query(
       "SELECT cupo, cuposocupados FROM crear_asesoria WHERE id_crear_asesoria = $1",
-      [id_crear_asesoria]
-    );
+      [id_crear_asesoria],
+    )
 
     if (asesoriaResult.rows.length === 0)
-      return res.status(404).json({ success: false, error: "Asesoría no encontrada" });
+      return res.status(404).json({ success: false, error: "Asesoría no encontrada" })
 
-    const { cupo, cuposocupados } = asesoriaResult.rows[0];
+    const { cupo, cuposocupados } = asesoriaResult.rows[0]
 
-    // 2️ Revisar si el alumno ya está inscrito
-    const existe = await pool.query(
-      "SELECT * FROM inscripciones WHERE id_usuario = $1 AND id_crear_asesoria = $2",
-      [id_usuario, id_crear_asesoria]
-    );
+    const existe = await pool.query("SELECT * FROM inscripciones WHERE id_usuario = $1 AND id_crear_asesoria = $2", [
+      id_usuario,
+      id_crear_asesoria,
+    ])
     if (existe.rows.length > 0)
-      return res.status(400).json({ success: false, error: "Ya estás inscrito en esta asesoría" });
+      return res.status(400).json({ success: false, error: "Ya estás inscrito en esta asesoría" })
 
-    // 3️ Revisar cupos
-    if (cuposocupados >= cupo)
-      return res.status(400).json({ success: false, error: "cupo lleno" });
+    if (cuposocupados >= cupo) return res.status(400).json({ success: false, error: "cupo lleno" })
 
-    // 4️ Insertar en inscripciones
     await pool.query(
       `INSERT INTO inscripciones (id_usuario, id_crear_asesoria, fecha_inscripcion)
        VALUES ($1, $2, NOW())`,
-      [id_usuario, id_crear_asesoria]
-    );
+      [id_usuario, id_crear_asesoria],
+    )
 
-    // 5️⃣ Actualizar contador
-    await pool.query(
-      "UPDATE crear_asesoria SET cuposocupados = cuposocupados + 1 WHERE id_crear_asesoria = $1",
-      [id_crear_asesoria]
-    );
+    await pool.query("UPDATE crear_asesoria SET cuposocupados = cuposocupados + 1 WHERE id_crear_asesoria = $1", [
+      id_crear_asesoria,
+    ])
 
-    res.json({ success: true, message: "Inscripción realizada correctamente" });
+    res.json({ success: true, message: "Inscripción realizada correctamente" })
   } catch (error) {
-    console.error("❌ Error en /inscribir:", error);
-    res.status(500).json({ success: false, error: "Error en el servidor" });
+    console.error("❌ Error en /inscribir:", error)
+    res.status(500).json({ success: false, error: "Error en el servidor" })
   }
-});
+})
 
-//select de usuarios
-app.use(express.json())
-
-// ===========================================
-// 📋 OBTENER USUARIOS CON ROLES
-// ===========================================
+// ============================
+// 📋 USUARIOS CON ROLES
+// ============================
 app.get("/usuarios", async (req, res) => {
   try {
     const result = await pool.query(`
@@ -298,15 +284,11 @@ app.get("/usuarios", async (req, res) => {
   }
 })
 
-// ===========================================
-// 📝 ACTUALIZAR DATOS DE USUARIO
-// ===========================================
 app.put("/usuarios/:id", async (req, res) => {
   try {
     const { id } = req.params
     const { nombre, email, numeroControl } = req.body
 
-    // Separar nombre completo en nombres y apellidos
     const nombreParts = nombre.trim().split(" ")
     const nombres = nombreParts.slice(0, Math.ceil(nombreParts.length / 2)).join(" ")
     const apellidos = nombreParts.slice(Math.ceil(nombreParts.length / 2)).join(" ")
@@ -325,9 +307,6 @@ app.put("/usuarios/:id", async (req, res) => {
   }
 })
 
-// ===========================================
-// 🔄 CAMBIAR ROL DE USUARIO
-// ===========================================
 app.put("/usuarios/:id/rol", async (req, res) => {
   try {
     const { id } = req.params
@@ -347,215 +326,46 @@ app.put("/usuarios/:id/rol", async (req, res) => {
   }
 })
 
-// ... existing code here ...
-
-app.listen(3000, () => {
-  console.log("Server is running on port 3000")
-})
-// Ver inscritos por asesoría (para docente)
-app.get("/inscripciones/:id_crear_asesoria", async (req, res) => {
-  try {
-    const { id_crear_asesoria } = req.params;
-    const result = await pool.query(
-      `SELECT u.id_usuario, u.nombres, u.apellidos, u.correo
-       FROM inscripciones i
-       JOIN usuarios u ON u.id_usuario = i.id_usuario
-       WHERE i.id_crear_asesoria = $1`,
-      [id_crear_asesoria]
-    );
-    res.json(result.rows);
-  } catch (error) {
-    console.error("Error al obtener inscritos:", error);
-    res.status(500).json({ error: "Error al obtener inscritos" });
-  }
-});
-
-//visibilidad del material para el docente
-// 📦 Mostrar materiales disponibles
-app.get("/materiales", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        m.id_materiales,
-        m.nombre,
-        m.descripcion,
-        m.cantidad_disponible,
-        m.cantidad_daniados,
-        m.estado,
-        c.nombre AS categoria
-      FROM materiales m
-      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
-      ORDER BY m.nombre ASC
-    `);
-    res.json(result.rows);
-  } catch (error) {
-    console.error("Error al obtener materiales:", error);
-    res.status(500).json({ error: "Error al obtener materiales" });
-  }
-});
-
-
-app.get("/asesorias/:id/inscritos", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await pool.query(`
-      SELECT u.id_usuario, u.nombres, u.apellidos, u.correo
-      FROM inscripciones i
-      JOIN usuarios u ON i.id_usuario = u.id_usuario
-      WHERE i.id_crear_asesoria = $1
-    `, [id]);
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Error al obtener inscritos:", err);
-    res.status(500).json({ error: "Error al obtener los inscritos" });
-  }
-});
-
-// Agrega este endpoint en tu server.js, después de tus rutas de asesorías y antes de los endpoints de materiales existentes
-
 // ============================
-// 📦 OBTENER MATERIALES CON CATEGORÍA
+// 📦 CRUD: CATEGORÍAS Y MATERIALES
 // ============================
-app.get("/materiales", async (req, res) => {
-  try {
-    console.log("[Server] GET /materiales - Consultando base de datos...")
-    const result = await pool.query(`
-      SELECT m.nombre, m.cantidad_disponible, c.nombre as categoria, m.id_materiales
-      FROM materiales m
-      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
-      ORDER BY m.nombre ASC
-    `);
-    
-    console.log("[Server] Materiales encontrados:", result.rows.length);
-    res.json(result.rows);
-  } catch (error) {
-    console.error("[Server] Error al obtener materiales:", error);
-    res.status(500).json({ error: "Error al obtener materiales: " + error.message });
-  }
-});
-
-// ============================
-// 📋 CRUD: VALES DE PRÉSTAMO
-
-
-const { v4: uuidv4 } = require('uuid');
-
-app.post("/vales-prestamo", async (req, res) => {
-  try {
-    const { id_usuario, materiales, hora_entrega, motivo } = req.body;
-
-    if (!id_usuario || !materiales || materiales.length === 0) {
-      return res.status(400).json({ error: "Datos incompletos para crear el vale" });
-    }
-
-    // Generar ID único
-    const idVale = uuidv4();
-
-    // Estado inicial: pendiente
-    const estadoId = "E01"; // pendiente
-    const horaEntrega = new Date().toLocaleTimeString("en-GB");
-
-    // Insertar el vale
-    await pool.query(`
-      INSERT INTO vales_prestamos 
-        (id_vales, usuarios_id_usuario, estado_id_estado, hora_entrega, motivo)
-      VALUES ($1, $2, $3, $4::time, COALESCE($5::varchar, ''))
-    `, [idVale, id_usuario, estadoId, horaEntrega, motivo?.toString() || '']);
-
-    // Insertar materiales
-    for (const material of materiales) {
-      const cantidad = parseFloat(material.cantidad) || 0;
-
-      if (!material.id_materiales) {
-        console.warn("Material sin id_materiales:", material);
-        continue;
-      }
-
-      await pool.query(`
-        INSERT INTO vales_has_materiales 
-          (vales_prestamos_id_vales, materiales_id_materiales, cantidad)
-        VALUES ($1, $2, $3)
-      `, [idVale, material.id_materiales, cantidad]);
-    }
-
-    res.json({ success: true, message: "Vale registrado correctamente", id_vales: idVale });
-  } catch (err) {
-    console.error("Error al registrar vale:", err);
-    res.status(500).json({ error: "Error al registrar el vale: " + err.message });
-  }
-});
-// ============================
-// 📦 RUTA: Vales de préstamo por usuario
-// ============================
-app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
-  try {
-    const { id_usuario } = req.params;
-    const result = await pool.query(
-      `SELECT v.id_vales, v.hora_entrega, v.hora_devolucion, e.descripcion AS estado, v.motivo,
-              STRING_AGG(m.nombre, ', ') AS materiales
-       FROM vales_prestamos v
-       LEFT JOIN vales_has_materiales vh ON v.id_vales = vh.vales_prestamos_id_vales
-       LEFT JOIN materiales m ON vh.materiales_id_materiales = m.id_materiales
-       LEFT JOIN estado e ON v.estado_id_estado = e.id_estado
-       WHERE v.usuarios_id_usuario = $1
-       GROUP BY v.id_vales, e.descripcion
-       ORDER BY v.hora_entrega DESC`,
-      [id_usuario]
-    );
-
-    res.json(result.rows);
-  } catch (error) {
-    console.error("Error al obtener vales de préstamo:", error);
-    res.status(500).json({ error: "Error al obtener vales de préstamo: " + error.message });
-  }
-});
-
-
-
-
-
-
-// ============================
-// 📦 CRUD: MATERIALES
-// ============================
-
-app.get("/materiales", async (req, res) => {
-  try {
-    console.log("[v0 Server] GET /materiales - Consultando base de datos...");
-    const result = await pool.query(`
-      SELECT 
-        m.id_materiales,
-        m.nombre,
-        c.descripcion AS categoria,
-        m.cantidad_disponible,
-        m.cantidad_daniados
-      FROM materiales m
-      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
-      ORDER BY m.nombre ASC
-    `);
-
-    res.json(result.rows);
-  } catch (error) {
-    console.error("[v0 Server] Error al obtener materiales:", error);
-    res.status(500).json({ error: "Error al obtener materiales: " + error.message });
-  }
-});
-
 
 app.get("/categorias", async (req, res) => {
   try {
     console.log("[v0 Server] GET /categorias - Consultando base de datos...")
     const result = await pool.query(`
-      SELECT id_categoria, nombre 
+      SELECT id_categoria, nombre
       FROM categoria 
       ORDER BY id_categoria ASC
     `)
     console.log("[v0 Server] Categorías encontradas:", result.rows.length)
-    console.log("[v0 Server] Datos:", result.rows)
     res.json(result.rows)
   } catch (error) {
     console.error("[v0 Server] Error al obtener categorías:", error)
     res.status(500).json({ error: "Error al obtener categorías: " + error.message })
+  }
+})
+
+app.get("/materiales", async (req, res) => {
+  try {
+    console.log("[v0 Server] GET /materiales - Consultando base de datos...")
+    const result = await pool.query(`
+      SELECT 
+        m.id_materiales,
+        m.nombre,
+        c.nombre AS categoria,
+        m.cantidad_disponible,
+        m.cantidad_daniados
+      FROM materiales m
+      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
+      ORDER BY m.nombre ASC
+    `)
+
+    console.log("[v0 Server] Materiales encontrados:", result.rows.length)
+    res.json(result.rows)
+  } catch (error) {
+    console.error("[v0 Server] Error al obtener materiales:", error)
+    res.status(500).json({ error: "Error al obtener materiales: " + error.message })
   }
 })
 
@@ -568,14 +378,12 @@ app.post("/materiales", async (req, res) => {
       return res.status(400).json({ error: "Faltan datos obligatorios" })
     }
 
-    // Verificar si el material ya existe
     const materialExist = await pool.query("SELECT * FROM materiales WHERE id_materiales = $1", [id_materiales])
 
     if (materialExist.rows.length > 0) {
       return res.status(400).json({ error: "El código de material ya existe" })
     }
 
-    // Insertar nuevo material con cantidad_disponible y cantidad_daniados en 0
     await pool.query(
       `INSERT INTO materiales (id_materiales, nombre, categoria_id_categoria, cantidad_disponible, cantidad_daniados)
        VALUES ($1, $2, $3, 0, 0)`,
@@ -592,31 +400,64 @@ app.post("/materiales", async (req, res) => {
 
 app.put("/materiales/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const { cantidad } = req.body;
+    const { id } = req.params
+    const { cantidad } = req.body
 
     const result = await pool.query(
       `UPDATE materiales 
        SET cantidad_disponible = cantidad_disponible + $1
        WHERE id_materiales = $2
        RETURNING *`,
-      [cantidad, id]
-    );
+      [cantidad, id],
+    )
 
     if (result.rowCount === 0) {
-      // ⚠️ Asegúrate de devolver JSON aquí, no HTML
-      return res.status(404).json({ error: "Material no encontrado" });
+      return res.status(404).json({ error: "Material no encontrado" })
     }
 
-    res.json({ message: "Cantidad actualizada correctamente", material: result.rows[0] });
+    res.json({ message: "Cantidad actualizada correctamente", material: result.rows[0] })
   } catch (error) {
-    console.error("Error al actualizar material:", error);
-    res.status(500).json({ error: "Error al actualizar el material" });
+    console.error("Error al actualizar material:", error)
+    res.status(500).json({ error: "Error al actualizar el material" })
   }
-});
+})
 
+app.put("/materiales/editar/:id_materiales", async (req, res) => {
+  try {
+    const { id_materiales } = req.params
+    const { nuevoNombre, categoria_id, cantidad_daniados, cantidad_disponible } = req.body
 
-//Inevntario
+    console.log("[v0 Server] PUT /materiales/editar/:id_materiales", {
+      id_materiales,
+      nuevoNombre,
+      categoria_id,
+      cantidad_daniados,
+      cantidad_disponible,
+    })
+
+    const result = await pool.query(
+      `UPDATE materiales 
+       SET nombre = $1, 
+           categoria_id_categoria = $2, 
+           cantidad_daniados = $3, 
+           cantidad_disponible = $4
+       WHERE id_materiales = $5
+       RETURNING *`,
+      [nuevoNombre, categoria_id, cantidad_daniados, cantidad_disponible, id_materiales],
+    )
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Material no encontrado" })
+    }
+
+    console.log("[v0 Server] Material actualizado exitosamente:", result.rows[0])
+    res.json({ message: "Material actualizado exitosamente", material: result.rows[0] })
+  } catch (error) {
+    console.error("[v0 Server] Error al actualizar material:", error)
+    res.status(500).json({ error: "Error al actualizar material: " + error.message })
+  }
+})
+
 app.post("/materiales/multiples", async (req, res) => {
   try {
     const materiales = req.body.materiales
@@ -632,21 +473,17 @@ app.post("/materiales/multiples", async (req, res) => {
         return res.status(400).json({ error: "Faltan datos obligatorios" })
       }
 
-      // Verificar si ya existe
-      const materialExist = await pool.query(
-        "SELECT * FROM materiales WHERE id_materiales = $1",
-        [id_materiales]
-      )
+      const materialExist = await pool.query("SELECT * FROM materiales WHERE id_materiales = $1", [id_materiales])
 
       if (materialExist.rows.length > 0) {
-        continue // saltar si ya existe
+        continue
       }
 
       await pool.query(
         `INSERT INTO materiales 
           (id_materiales, nombre, categoria_id_categoria, cantidad_disponible, cantidad_daniados)
          VALUES ($1, $2, $3, 0, 0)`,
-        [id_materiales, nombre, categoria_id_categoria]
+        [id_materiales, nombre, categoria_id_categoria],
       )
     }
 
@@ -657,15 +494,83 @@ app.post("/materiales/multiples", async (req, res) => {
   }
 })
 
+// ============================
+// 📋 VALES DE PRÉSTAMO
+// ============================
 
+app.post("/vales-prestamo", async (req, res) => {
+  try {
+    const { id_usuario, materiales, hora_entrega, motivo } = req.body
 
+    if (!id_usuario || !materiales || materiales.length === 0) {
+      return res.status(400).json({ error: "Datos incompletos para crear el vale" })
+    }
 
+    const idVale = uuidv4()
+    const estadoId = "E01"
+    const horaEntrega = new Date().toLocaleTimeString("en-GB")
 
+    await pool.query(
+      `
+      INSERT INTO vales_prestamos 
+        (id_vales, usuarios_id_usuario, estado_id_estado, hora_entrega, motivo)
+      VALUES ($1, $2, $3, $4::time, COALESCE($5::varchar, ''))
+    `,
+      [idVale, id_usuario, estadoId, horaEntrega, motivo?.toString() || ""],
+    )
 
+    for (const material of materiales) {
+      const cantidad = Number.parseFloat(material.cantidad) || 0
+
+      if (!material.id_materiales) {
+        console.warn("Material sin id_materiales:", material)
+        continue
+      }
+
+      await pool.query(
+        `
+        INSERT INTO vales_has_materiales 
+          (vales_prestamos_id_vales, materiales_id_materiales, cantidad)
+        VALUES ($1, $2, $3)
+      `,
+        [idVale, material.id_materiales, cantidad],
+      )
+    }
+
+    res.json({ success: true, message: "Vale registrado correctamente", id_vales: idVale })
+  } catch (err) {
+    console.error("Error al registrar vale:", err)
+    res.status(500).json({ error: "Error al registrar el vale: " + err.message })
+  }
+})
+
+app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
+  try {
+    const { id_usuario } = req.params
+    const result = await pool.query(
+      `SELECT v.id_vales, v.hora_entrega, v.hora_devolucion, e.descripcion AS estado, v.motivo,
+              STRING_AGG(m.nombre, ', ') AS materiales
+       FROM vales_prestamos v
+       LEFT JOIN vales_has_materiales vh ON v.id_vales = vh.vales_prestamos_id_vales
+       LEFT JOIN materiales m ON vh.materiales_id_materiales = m.id_materiales
+       LEFT JOIN estado e ON v.estado_id_estado = e.id_estado
+       WHERE v.usuarios_id_usuario = $1
+       GROUP BY v.id_vales, e.descripcion
+       ORDER BY v.hora_entrega DESC`,
+      [id_usuario],
+    )
+
+    res.json(result.rows)
+  } catch (error) {
+    console.error("Error al obtener vales de préstamo:", error)
+    res.status(500).json({ error: "Error al obtener vales de préstamo: " + error.message })
+  }
+})
 
 // ============================
 // 🚀 Iniciar servidor
 // ============================
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+  console.log(`Servidor corriendo en http://localhost:${PORT}`)
+})
+

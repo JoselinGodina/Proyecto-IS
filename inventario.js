@@ -268,17 +268,24 @@ async function guardarCambios() {
     console.log("[v0] Cantidad disponible:", cantidadDisponibles)
     console.log("[v0] Cantidad de dañados:", cantidadDanados)
 
-    const response = await fetch(`http://localhost:3000/materiales/${encodeURIComponent(materialEditando.nombre)}`, {
+const response = await fetch(`http://localhost:3000/materiales/editar/${materialEditando.id_materiales}`, {
+    //const response = await fetch(`http://localhost:3000/materiales/${encodeURIComponent(materialEditando.nombre)}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        nuevoNombre: nuevoNombre,
-        categoria_id: nuevaCategoria,
-        cantidad_daniados: cantidadDanados,
-        cantidad_disponible: cantidadDisponibles,
-      }),
+  nuevoNombre: nuevoNombre,
+  categoria_id: nuevaCategoria,
+  cantidad_daniados: cantidadDanados,
+  cantidad_disponible: cantidadDisponibles,
+}),
+      // body: JSON.stringify({
+      //   nuevoNombre: nuevoNombre,
+      //   categoria_id: nuevaCategoria,
+      //   cantidad_daniados: cantidadDanados,
+      //   cantidad_disponible: cantidadDisponibles,
+      // }),
     })
 
     if (!response.ok) {
