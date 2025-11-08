@@ -420,7 +420,7 @@ app.get("/materiales", async (req, res) => {
   try {
     console.log("[Server] GET /materiales - Consultando base de datos...")
     const result = await pool.query(`
-      SELECT m.nombre, m.cantidad_disponible, c.descripcion as categoria, m.id_materiales
+      SELECT m.nombre, m.cantidad_disponible, c.nombre as categoria, m.id_materiales
       FROM materiales m
       JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
       ORDER BY m.nombre ASC
@@ -546,9 +546,9 @@ app.get("/categorias", async (req, res) => {
   try {
     console.log("[v0 Server] GET /categorias - Consultando base de datos...")
     const result = await pool.query(`
-      SELECT id_categoria, descripcion 
+      SELECT id_categoria, nombre 
       FROM categoria 
-      ORDER BY descripcion ASC
+      ORDER BY id_categoria ASC
     `)
     console.log("[v0 Server] Categorías encontradas:", result.rows.length)
     console.log("[v0 Server] Datos:", result.rows)
