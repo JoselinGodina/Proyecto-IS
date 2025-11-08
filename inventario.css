@@ -460,3 +460,32 @@
                 width: 100%;
             }
         }
+
+        /* Estilo del select de categoría */
+#categoria {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+  color: #333;
+  appearance: none; /* Quita el estilo nativo */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%23666' height='24' viewBox='0 0 24 24' width='24'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 20px;
+  transition: border-color 0.2s ease;
+}
+
+#categoria:hover {
+  border-color: #b30059;
+}
+
+#categoria:focus {
+  outline: none;
+  border-color: #800040;
+  box-shadow: 0 0 0 3px rgba(179, 0, 89, 0.2);
+}
