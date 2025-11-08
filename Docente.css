@@ -593,3 +593,25 @@ body {
     font-size: 0.875rem;
   }
 }
+
+
+.filters-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-input,
+.filter-select {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  flex: 1;
+}
+
+.filter-select {
+  max-width: 250px;
+}

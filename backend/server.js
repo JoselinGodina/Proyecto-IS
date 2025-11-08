@@ -370,6 +370,31 @@ app.get("/inscripciones/:id_crear_asesoria", async (req, res) => {
   }
 });
 
+//visibilidad del material para el docente
+// 📦 Mostrar materiales disponibles
+app.get("/materiales", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        m.id_materiales,
+        m.nombre,
+        m.descripcion,
+        m.cantidad_disponible,
+        m.cantidad_daniados,
+        m.estado,
+        c.nombre AS categoria
+      FROM materiales m
+      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
+      ORDER BY m.nombre ASC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener materiales:", error);
+    res.status(500).json({ error: "Error al obtener materiales" });
+  }
+});
+
+
 app.get("/asesorias/:id/inscritos", async (req, res) => {
   const { id } = req.params;
   try {

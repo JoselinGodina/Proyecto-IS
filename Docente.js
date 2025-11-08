@@ -197,7 +197,6 @@ const nuevaAsesoria = {
 
 
 
-
     console.log("📦 Datos enviados:", nuevaAsesoria); // 👈 agrega esta también
 
     try {
@@ -302,8 +301,129 @@ const res = await fetch(`${API_URL}/asesorias/${id_crear_asesoria}/inscritos`);
     console.error("Error al cargar estudiantes:", err);
   }
 }
+// ===============================
+// Cargar y filtrar materiales
+// ===============================
+let todosLosMateriales = [];
+
+async function cargarMateriales() {
+  try {
+    const res = await fetch(`${API_URL}/materiales`);
+    if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+    todosLosMateriales = await res.json();
+
+    console.log("📦 Materiales cargados:", todosLosMateriales);
+    mostrarMateriales(todosLosMateriales);
+    llenarCategorias(todosLosMateriales);
+  } catch (error) {
+    console.error("Error al cargar materiales:", error);
+  }
+}
+
+// ===============================
+// Mostrar materiales en tarjetas
+// ===============================
+function mostrarMateriales(lista) {
+  const contenedor = document.querySelector(".materials-grid");
+  contenedor.innerHTML = "";
+
+  if (!lista || lista.length === 0) {
+    contenedor.innerHTML = `<p style="text-align:center; color:#666;">No se encontraron materiales</p>`;
+    return;
+  }
+
+  lista.forEach((m) => {
+    const disponibles = Number(m.cantidad_disponible) || 0;
+    const danados = Number(m.cantidad_daniados) || 0;
+    const total = disponibles + danados;
+    const porcentaje = total > 0 ? Math.round((disponibles / total) * 100) : 0;
+
+    let badgeClass = "badge-disponible";
+    let badgeText = "Disponible";
+    if (disponibles === 0) {
+      badgeClass = "badge-agotado";
+      badgeText = "Agotado";
+    } else if (danados > 0 && disponibles > 0) {
+      badgeClass = "badge-danado";
+      badgeText = "Con Dañados";
+    }
+
+    const card = document.createElement("div");
+    card.className = "material-card";
+    card.innerHTML = `
+      <div class="material-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        </svg>
+      </div>
+      <div class="material-info">
+        <h3 class="material-name">${m.nombre || "—"}</h3>
+        <p class="material-category">${m.categoria || "Sin categoría"}</p>
+      </div>
+      <div class="material-status">
+        <div class="material-availability">
+          <span class="availability-text">${disponibles}/${total} disponibles</span>
+          <div class="progress-bar"><div class="progress-fill" style="width:${porcentaje}%"></div></div>
+        </div>
+        <span class="badge ${badgeClass}">${badgeText}</span>
+      </div>
+    `;
+    contenedor.appendChild(card);
+  });
+}
+
+// ===============================
+// Llenar select de categorías
+// ===============================
+function llenarCategorias(materiales) {
+  const select = document.getElementById("filtroCategoria");
+  if (!select) return;
+
+  const categorias = [
+    ...new Set(materiales.map((m) => m.categoria || "Sin categoría")),
+  ];
+
+  select.innerHTML =
+    `<option value="">Todas las categorías</option>` +
+    categorias.map((cat) => `<option value="${cat}">${cat}</option>`).join("");
+}
+
+// ===============================
+// Filtrar materiales (nombre o categoría)
+// ===============================
+function aplicarFiltros() {
+  const texto = document.getElementById("buscarMaterial").value.toLowerCase().trim();
+  const categoriaSel = document.getElementById("filtroCategoria").value.toLowerCase().trim();
+
+  const filtrados = todosLosMateriales.filter((m) => {
+    const nombre = (m.nombre || "").toLowerCase();
+    const categoria = (m.categoria || "Sin categoría").toLowerCase();
+
+    // Coincide si:
+    // - el texto está en el nombre o la categoría
+    // - y además coincide con la categoría seleccionada (si hay una)
+    const coincideTexto = nombre.includes(texto) || categoria.includes(texto);
+    const coincideCategoria = !categoriaSel || categoria === categoriaSel;
+    return coincideTexto && coincideCategoria;
+  });
+
+  mostrarMateriales(filtrados);
+}
+
+// ===============================
+// Inicialización de filtros
+// ===============================
+document.addEventListener("DOMContentLoaded", () => {
+  const inputBuscar = document.getElementById("buscarMaterial");
+  const selectCategoria = document.getElementById("filtroCategoria");
+
+  inputBuscar.addEventListener("input", aplicarFiltros);
+  selectCategoria.addEventListener("change", aplicarFiltros);
+});
+
 
 // ===============================
 // Inicialización
 // ===============================
 cargarAsesorias();
+cargarMateriales();
