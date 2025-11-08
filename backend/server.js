@@ -567,6 +567,89 @@ app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
   }
 })
 
+// Codigos para la parte de solicitudes en la pantalla del administrador
+
+// 1. GET - Obtener todas las solicitudes pendientes con los datos de la consulta
+app.get('/solicitudes-prestamo', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+  (u.nombres || ' ' || u.apellidos) as nombre,
+  u.id_usuario,
+  m.nombre as nombre_material,  -- ← ALIAS DIFERENTE
+  vp.hora_entrega,
+  vp.motivo,
+  vm.cantidad,
+  e.descripcion,
+  vp.id_vales
+FROM usuarios u
+JOIN vales_prestamos vp ON vp.usuarios_id_usuario = u.id_usuario
+JOIN vales_has_materiales vm ON vm.vales_prestamos_id_vales = vp.id_vales
+JOIN materiales m ON vm.materiales_id_materiales = m.id_materiales
+JOIN estado e ON e.id_estado = vp.estado_id_estado
+WHERE vp.estado_id_estado = 'E01'
+    `;
+    
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener solicitudes:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 2. PUT - Aprobar solicitud (cambiar E01 a E02)
+app.put('/solicitudes-prestamo/:id/aprobar', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const query = `
+      UPDATE vales_prestamos 
+      SET estado_id_estado = 'E02' 
+      WHERE id_vales = $1
+    `;
+    
+    await pool.query(query, [id]);
+    
+    res.json({ 
+      success: true, 
+      message: 'Solicitud aprobada exitosamente' 
+    });
+  } catch (error) {
+    console.error('Error al aprobar solicitud:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// 3. PUT - Rechazar solicitud (cambiar E01 a E03)
+app.put('/solicitudes-prestamo/:id/rechazar', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const query = `
+      UPDATE vales_prestamos 
+      SET estado_id_estado = 'E03' 
+      WHERE id_vales = $1
+    `;
+    
+    await pool.query(query, [id]);
+    
+    res.json({ 
+      success: true, 
+      message: 'Solicitud rechazada' 
+    });
+  } catch (error) {
+    console.error('Error al rechazar solicitud:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 // ============================
 // 🚀 Iniciar servidor
 // ============================
