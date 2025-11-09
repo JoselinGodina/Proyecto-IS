@@ -346,6 +346,7 @@ app.get("/categorias", async (req, res) => {
   }
 })
 
+//inventario (cambiar desc por nombre)
 app.get("/materiales", async (req, res) => {
   try {
     console.log("[v0 Server] GET /materiales - Consultando base de datos...")
@@ -493,6 +494,7 @@ app.post("/materiales/multiples", async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 })
+//creo hasta aqui y luego aqui ya empiezan los vales
 
 // ============================
 // 📋 VALES DE PRÉSTAMO
@@ -543,6 +545,8 @@ app.post("/vales-prestamo", async (req, res) => {
     res.status(500).json({ error: "Error al registrar el vale: " + err.message })
   }
 })
+
+//inventario
 
 app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
   try {
