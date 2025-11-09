@@ -489,3 +489,65 @@
   border-color: #800040;
   box-shadow: 0 0 0 3px rgba(179, 0, 89, 0.2);
 }
+
+.filtros {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.filtros select,
+.filtros input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.filtros button {
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.filtros button:hover {
+  background-color: #005bb5;
+}
+
+
+.filtros {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filtros select,
+.filtros input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.filtros button {
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.filtros button:hover {
+  background-color: #005bb5;
+}

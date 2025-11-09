@@ -45,59 +45,112 @@ function mostrarAdminLogueado() {
   console.log("[v0] Usuario mostrado en header:", nombreCompleto)
 }
 
+//Categorías 
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await cargarCategorias();
+  await cargarMateriales();
+
+  document
+    .getElementById("filtroCategoria")
+    .addEventListener("change", filtrarMateriales);
+  document
+    .getElementById("busquedaNombre")
+    .addEventListener("input", filtrarMateriales);
+});
+
+
+
 async function cargarCategorias() {
   try {
-    console.log("[v0] Cargando categorías desde la BD...")
-    const response = await fetch("http://localhost:3000/categorias")
+    const res = await fetch("http://localhost:3000/categorias");
+    if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
 
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`)
-    }
+    const categorias = await res.json();
+    console.log("Categorías recibidas:", categorias);
 
-    categorias = await response.json()
-    console.log("[v0] Categorías cargadas:", categorias)
+    const categoriaSelect = document.getElementById("filtroCategoria");
+    categoriaSelect.innerHTML = `
+      <option value="">Todas las categorías</option>
+    `;
+
+    categorias.forEach(cat => {
+      const option = document.createElement("option");
+      option.value = cat.id_categoria || cat.ID_CATEGORIA || cat.id;
+      option.textContent = cat.descripcion || cat.DESCRIPCION;
+      categoriaSelect.appendChild(option);
+    });
   } catch (error) {
-    console.error("[v0] Error al cargar categorías:", error)
+    console.error("[v0] Error al cargar categorías:", error);
   }
 }
 
-async function cargarMateriales() {
-  const lista = document.getElementById("materialsList")
 
-  if (lista) {
-    lista.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Cargando materiales...</p>'
-  }
+
+async function cargarMateriales(categoria = "", nombre = "") {
+  const lista = document.getElementById("materialsList");
+  lista.innerHTML =
+    '<p style="text-align:center; color:#666; padding:2rem;">Cargando materiales...</p>';
 
   try {
-    console.log("[v0] Cargando materiales desde la BD...")
+    const res = await fetch("http://localhost:3000/materiales");
+    const materiales = await res.json();
 
-    const response = await fetch("http://localhost:3000/materiales")
-    console.log("[v0] Respuesta del servidor - Status:", response.status)
+    // 🔍 Filtrar
+    const filtrados = materiales.filter((mat) => {
+      const coincideCategoria =
+        !categoria || mat.categoria_id_categoria === categoria;
+      const coincideNombre = mat.nombre
+        .toLowerCase()
+        .includes(nombre.toLowerCase());
+      return coincideCategoria && coincideNombre;
+    });
 
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`)
-    }
-
-    const materiales = await response.json()
-    console.log("[v0] Materiales cargados:", materiales)
-
-    renderizarMateriales(materiales)
+    renderizarMateriales(filtrados);
+    agregarEventosMateriales();
   } catch (error) {
-    console.error("[v0] Error al cargar materiales:", error)
-
-    if (lista) {
-      lista.innerHTML = `
-        <div style="text-align: center; padding: 2rem; color: #e74c3c;">
-          <h3>Error al cargar materiales</h3>
-          <p>${error.message}</p>
-          <button onclick="cargarMateriales()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            Reintentar
-          </button>
-        </div>
-      `
-    }
+    console.error("Error al cargar materiales:", error);
+    lista.innerHTML =
+      '<p style="color:red; text-align:center;">Error al cargar materiales</p>';
   }
 }
+
+function renderizarMateriales(materiales) {
+  const lista = document.getElementById("materialsList");
+  if (materiales.length === 0) {
+    lista.innerHTML =
+      '<p style="text-align:center; color:#666; padding:2rem;">No hay materiales disponibles</p>';
+    return;
+  }
+
+  lista.innerHTML = materiales
+    .map(
+      (mat) => `
+      <div class="material-card">
+        <h3>${mat.nombre}</h3>
+        <p><strong>Categoría:</strong> ${mat.categoria_id_categoria}</p>
+        <p><strong>Disponibles:</strong> ${mat.cantidad_disponible}</p>
+        <p><strong>Dañados:</strong> ${mat.cantidad_daniada}</p>
+        <button class="btn-editar" data-id="${mat.id_materiales}">Editar</button>
+      </div>
+    `
+    )
+    .join("");
+}
+
+function agregarEventosMateriales() {
+  const botonesEditar = document.querySelectorAll(".btn-editar");
+  botonesEditar.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      console.log("Seleccionaste el material con ID:", id);
+      // aquí puedes llamar tu función abrirModalEditar(id);
+    });
+  });
+}
+
+
+/////// hasta aqui es lo de categorias
 
 function renderizarMateriales(materiales) {
   const lista = document.getElementById("materialsList")
@@ -130,7 +183,7 @@ function renderizarMateriales(materiales) {
             </div>
             <div class="material-details">
               <h3>${material.nombre || "Sin nombre"}</h3>
-              <p>${material.descripcion || "Sin categoría"}</p>
+              <p>${material.categoria || "Sin categoría"}</p>
             </div>
           </div>
           <div class="material-stats">

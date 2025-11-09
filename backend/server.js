@@ -332,35 +332,31 @@ app.put("/usuarios/:id/rol", async (req, res) => {
 
 app.get("/categorias", async (req, res) => {
   try {
-    console.log("[v0 Server] GET /categorias - Consultando base de datos...")
-    const result = await pool.query(`
-      SELECT id_categoria, nombre
-      FROM categoria 
-      ORDER BY id_categoria ASC
-    `)
-    console.log("[v0 Server] Categorías encontradas:", result.rows.length)
-    res.json(result.rows)
+    console.log("[v0 Server] GET /categorias - Consultando BD...");
+    const result = await pool.query("SELECT id_categoria, descripcion FROM categoria ORDER BY descripcion ASC");
+    res.json(result.rows);
   } catch (error) {
-    console.error("[v0 Server] Error al obtener categorías:", error)
-    res.status(500).json({ error: "Error al obtener categorías: " + error.message })
+    console.error("[v0 Server] Error al obtener categorías:", error);
+    res.status(500).json({ error: "Error al obtener categorías: " + error.message });
   }
-})
+});
 
 //inventario (cambiar desc por nombre)
 app.get("/materiales", async (req, res) => {
   try {
     console.log("[v0 Server] GET /materiales - Consultando base de datos...")
     const result = await pool.query(`
-      SELECT 
-        m.id_materiales,
-        m.nombre,
-        c.nombre AS categoria,
-        m.cantidad_disponible,
-        m.cantidad_daniados
-      FROM materiales m
-      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
-      ORDER BY m.nombre ASC
-    `)
+  SELECT 
+    m.id_materiales,
+    m.nombre,
+    c.descripcion AS categoria,
+    m.cantidad_disponible,
+    m.cantidad_daniados
+  FROM materiales m
+  JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
+  ORDER BY m.nombre ASC
+`);
+
 
     console.log("[v0 Server] Materiales encontrados:", result.rows.length)
     res.json(result.rows)
@@ -369,6 +365,27 @@ app.get("/materiales", async (req, res) => {
     res.status(500).json({ error: "Error al obtener materiales: " + error.message })
   }
 })
+
+app.get("/materiales", async (req, res) => {
+  const { categoria, nombre } = req.query;
+
+  let sql = "SELECT * FROM materiales WHERE 1=1";
+  const params = [];
+
+  if (categoria) {
+    sql += " AND categoria_id_categoria = ?";
+    params.push(categoria);
+  }
+
+  if (nombre) {
+    sql += " AND LOWER(nombre) LIKE ?";
+    params.push(`%${nombre.toLowerCase()}%`);
+  }
+
+  const [rows] = await db.query(sql, params);
+  res.json(rows);
+});
+
 
 app.post("/materiales", async (req, res) => {
   try {
@@ -546,7 +563,6 @@ app.post("/vales-prestamo", async (req, res) => {
   }
 })
 
-//inventario
 
 app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
   try {

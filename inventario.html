@@ -45,8 +45,31 @@
             <p>Gestiona el inventario del laboratorio de electrónica</p>
         </div>
 
+        <div class="filtros" style="display:flex; gap:1rem; align-items:center; margin: 1rem;">
+  <select id="filtroCategoria" style="padding:0.5rem; border-radius:6px; border:1px solid #ccc;">
+    <option value="">Todas las categorías</option>
+  </select>
+
+  <input
+    type="text"
+    id="filtroNombre"
+    placeholder="Buscar por nombre..."
+    style="padding:0.5rem; border-radius:6px; border:1px solid #ccc; flex:1;"
+  />
+
+  <button
+    id="btnBuscar"
+    style="padding:0.5rem 1rem; border:none; border-radius:6px; background:#3498db; color:white; cursor:pointer;"
+  >
+    Buscar
+  </button>
+</div>
+
+
         <div class="materials-list" id="materialsList"></div>
     </main>
+    
+
 
     <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalSiClickFuera(event)">
         <div class="modal" onclick="event.stopPropagation()">
