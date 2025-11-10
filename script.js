@@ -4,8 +4,7 @@ window.addEventListener("load", () => {
   document.getElementById("password").value = "";
 });
 
-// Evitar que el navegador use cache al volver con <- o ->
-// Esto borra los inputs y limpia localStorage si la página viene del back/forward
+// Evitar cache al volver con <- o ->
 window.addEventListener("pageshow", function (event) {
   if (event.persisted || (window.performance && window.performance.getEntriesByType("navigation")[0].type === "back_forward")) {
     document.getElementById("email").value = "";
@@ -16,32 +15,32 @@ window.addEventListener("pageshow", function (event) {
 });
 
 // Toggle password visibility
-const togglePassword = document.getElementById("togglePassword")
-const passwordInput = document.getElementById("password")
-const eyeIcon = document.getElementById("eyeIcon")
+const togglePassword = document.getElementById("togglePassword");
+const passwordInput = document.getElementById("password");
+const eyeIcon = document.getElementById("eyeIcon");
 
 togglePassword.addEventListener("click", () => {
-  const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
-  passwordInput.setAttribute("type", type)
-
-  // Toggle eye icon (you can add eye-slash icon if needed)
-  if (type === "text") {
-    eyeIcon.style.opacity = "0.5"
-  } else {
-    eyeIcon.style.opacity = "1"
-  }
-})
+  const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+  passwordInput.setAttribute("type", type);
+  eyeIcon.style.opacity = type === "text" ? "0.5" : "1";
+});
 
 // Handle login form submission
-const loginForm = document.getElementById("loginForm")
+const loginForm = document.getElementById("loginForm");
 
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const correo = document.getElementById("email").value.trim();
   const contrasena = document.getElementById("password").value.trim();
 
+  // 🚨 Alerta con SweetAlert2 si hay campos vacíos
   if (!correo || !contrasena) {
-    alert("Por favor, completa todos los campos");
+    Swal.fire({
+      icon: "warning",
+      title: "Campos vacíos",
+      text: "Por favor, completa todos los campos.",
+      confirmButtonColor: "#d33"
+    });
     return;
   }
 
@@ -54,82 +53,74 @@ loginForm.addEventListener("submit", async (e) => {
 
     const data = await response.json();
 
-   if (response.ok) {
-  // Guardar datos del usuario en localStorage
-  localStorage.setItem("usuario", JSON.stringify(data.user));
+    if (response.ok) {
+      // Guardar datos del usuario
+      localStorage.setItem("usuario", JSON.stringify(data.user));
 
-  alert(`✅ Bienvenido ${data.user.nombres}`);
-
-  // Redirigir según el rol
-  if (data.user.roles_id_rol === '1') { // Admin
-    window.location.href = "usuarios.html";
-  } 
-  else if(data.user.roles_id_rol === '2')
-  {
-    window.location.href = "Docente.html";
-  }
-  else {
-    window.location.href = "alumno.html"; // Usuario normal
-  }
-}
-
-  else {
-    // Usuario no registrado o contraseña incorrecta
-    alert("⚠️Usuario o contraseña incorrectos. Verifica tus datos e inténtalo de nuevo." );
-  }
+      // ✅ SweetAlert de éxito
+      Swal.fire({
+        icon: "success",
+        title: `¡Bienvenido ${data.user.nombres}!`,
+        text: "Inicio de sesión exitoso.",
+        confirmButtonColor: "#3085d6"
+      }).then(() => {
+        // Redirigir según el rol
+        if (data.user.roles_id_rol === "1") {
+          window.location.href = "usuarios.html";
+        } else if (data.user.roles_id_rol === "2") {
+          window.location.href = "Docente.html";
+        } else {
+          window.location.href = "alumno.html";
+        }
+      });
+    } else {
+      // ❌ SweetAlert de error de credenciales
+      Swal.fire({
+        icon: "error",
+        title: "Credenciales incorrectas",
+        text: "Usuario o contraseña no válidos. Intenta de nuevo.",
+        confirmButtonColor: "#d33"
+      });
+    }
 
   } catch (error) {
     console.error("Error al conectar:", error);
-    alert("Error al conectar con el servidor.");
+    Swal.fire({
+      icon: "error",
+      title: "Error de conexión",
+      text: "No se pudo conectar con el servidor.",
+      confirmButtonColor: "#d33"
+    });
   }
- 
-})
-
-// Este código va en tu index.html (o en el JS que usa el login)
-async function loginUsuario(event) {
-    event.preventDefault();
-
-    const id = document.getElementById("usuario").value;
-    const contrasena = document.getElementById("contrasena").value;
-
-    // Aquí harías tu consulta al backend (Node.js o lo que uses)
-    // Supongamos que ya recibes los datos del usuario:
-    const respuesta = {
-        id_usuario: id,
-        nombres: "Admin",
-        apellidos: "Principal",
-        correo: "admin@instituto.edu.mx",
-        roles_id_rol: "1" // si es admin (si es alumno, sería "2")
-    };
-
-    // Guardar sesión en localStorage
-    localStorage.setItem("usuario", JSON.stringify(respuesta));
-
-    
-}
-
-
+});
 
 // Handle register button
-const registerBtn = document.getElementById("registerBtn")
+const registerBtn = document.getElementById("registerBtn");
 
 registerBtn.addEventListener("click", () => {
-  window.location.href = "registro.html"
-})
+  Swal.fire({
+    title: "¿Deseas crear una cuenta nueva?",
+    text: "Serás redirigido a la página de registro.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sí, continuar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "registro.html";
+    }
+  });
+});
 
-// Add input validation feedback
-const inputs = document.querySelectorAll(".form-input")
-
+// Input validation feedback
+const inputs = document.querySelectorAll(".form-input");
 inputs.forEach((input) => {
   input.addEventListener("blur", function () {
-    if (this.value.trim() === "") {
-      this.style.borderColor = "#EF4444"
-    } else {
-      this.style.borderColor = "#10B981"
-    }
-  })
-
+    this.style.borderColor = this.value.trim() === "" ? "#EF4444" : "#10B981";
+  });
   input.addEventListener("focus", function () {
-    this.style.borderColor = "var(--color-burgundy)"
-  })
-})
+    this.style.borderColor = "var(--color-burgundy)";
+  });
+});
