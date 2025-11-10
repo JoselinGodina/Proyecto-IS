@@ -519,31 +519,52 @@ app.post("/materiales/multiples", async (req, res) => {
 
 app.post("/vales-prestamo", async (req, res) => {
   try {
-    const { id_usuario, materiales, hora_entrega, motivo } = req.body
+    const { id_usuario, materiales, hora_entrega, motivo } = req.body;
 
     if (!id_usuario || !materiales || materiales.length === 0) {
-      return res.status(400).json({ error: "Datos incompletos para crear el vale" })
+      return res.status(400).json({ error: "Datos incompletos para crear el vale" });
     }
 
-    const idVale = uuidv4()
-    const estadoId = "E01"
-    const horaEntrega = new Date().toLocaleTimeString("en-GB")
+    // 🔢 Obtener último número de vale registrado
+    const resultado = await pool.query(`
+  SELECT id_vales
+FROM vales_prestamos
+WHERE id_vales ~ '^VALE[0-9]+$'
+ORDER BY CAST(SUBSTRING(id_vales FROM 5) AS INTEGER) DESC
+LIMIT 1
+    `);
 
+    let nuevoNumero = 1;
+
+    if (resultado.rows.length > 0) {
+      // Extraer número (por ejemplo, de "VALE007" → 7)
+      const ultimoVale = resultado.rows[0].id_vales;
+      const numero = parseInt(ultimoVale.replace("VALE", ""), 10);
+      nuevoNumero = numero + 1;
+    }
+
+    // Crear nuevo ID con formato VALE###
+    const idVale = `VALE${nuevoNumero.toString().padStart(3, "0")}`;
+    const estadoId = "E01";
+    const horaEntrega = new Date().toLocaleTimeString("en-GB");
+
+    // Insertar vale en la base de datos
     await pool.query(
       `
       INSERT INTO vales_prestamos 
         (id_vales, usuarios_id_usuario, estado_id_estado, hora_entrega, motivo)
       VALUES ($1, $2, $3, $4::time, COALESCE($5::varchar, ''))
-    `,
-      [idVale, id_usuario, estadoId, horaEntrega, motivo?.toString() || ""],
-    )
+      `,
+      [idVale, id_usuario, estadoId, horaEntrega, motivo?.toString() || ""]
+    );
 
+    // Insertar materiales asociados al vale
     for (const material of materiales) {
-      const cantidad = Number.parseFloat(material.cantidad) || 0
+      const cantidad = Number.parseFloat(material.cantidad) || 0;
 
       if (!material.id_materiales) {
-        console.warn("Material sin id_materiales:", material)
-        continue
+        console.warn("Material sin id_materiales:", material);
+        continue;
       }
 
       await pool.query(
@@ -551,17 +572,36 @@ app.post("/vales-prestamo", async (req, res) => {
         INSERT INTO vales_has_materiales 
           (vales_prestamos_id_vales, materiales_id_materiales, cantidad)
         VALUES ($1, $2, $3)
-      `,
-        [idVale, material.id_materiales, cantidad],
-      )
+        `,
+        [idVale, material.id_materiales, cantidad]
+      );
     }
 
-    res.json({ success: true, message: "Vale registrado correctamente", id_vales: idVale })
+    res.json({ success: true, message: "Vale registrado correctamente", id_vales: idVale });
   } catch (err) {
-    console.error("Error al registrar vale:", err)
-    res.status(500).json({ error: "Error al registrar el vale: " + err.message })
+    console.error("Error al registrar vale:", err);
+    res.status(500).json({ error: "Error al registrar el vale: " + err.message });
   }
-})
+});
+
+//para que se seleccione el docente en el vale
+// 📚 Obtener todos los docentes (usuarios con rol 2)
+app.get("/docentes", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id_usuario, (nombres || ' ' || apellidos) AS nombre_completo
+      FROM usuarios
+      WHERE roles_id_rol = '2'
+      ORDER BY nombres
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error al obtener docentes:", err);
+    res.status(500).json({ error: "Error al obtener docentes" });
+  }
+});
+
+
 
 
 app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
@@ -720,6 +760,87 @@ app.put("/solicitudes-prestamo/:id/rechazar", async (req, res) => {
     })
   }
 })
+
+
+//reportes
+
+// 🔹 Reporte: Material Disponible
+app.get('/reporte/material-disponible', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        m.nombre, 
+        c.descripcion AS categoria, 
+        m.cantidad_disponible AS cantidad
+      FROM materiales m
+      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
+      WHERE COALESCE(m.cantidad_disponible, 0) > 0;
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al obtener materiales disponibles');
+  }
+});
+
+
+app.get('/reporte/inventario', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        m.nombre, 
+        c.descripcion AS categoria, 
+        (COALESCE(m.cantidad_disponible, 0) + COALESCE(m.cantidad_daniados, 0)) AS cantidad
+      FROM materiales m
+      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria;
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al obtener inventario completo');
+  }
+});
+
+
+
+// 🔹 Reporte: Material Dañado
+app.get('/reporte/material-danado', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        m.nombre, 
+        c.descripcion AS categoria, 
+        m.cantidad_daniados AS cantidad
+      FROM materiales m
+      JOIN categoria c ON m.categoria_id_categoria = c.id_categoria
+      WHERE m.cantidad_daniados > 0 OR m.estado = 'Dañado';
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al obtener materiales dañados');
+  }
+});
+
+// ✅ Reporte: Carreras con Mayor Visita
+app.get('/reporte/carreras-visitas', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT c.descripcion AS nombre, 'Carrera' AS categoria, COUNT(u.id_usuario) AS cantidad
+      FROM usuarios u
+      JOIN carreras c ON u.carreras_id_carreras = c.id_carreras
+      GROUP BY c.descripcion
+      ORDER BY cantidad DESC;
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al obtener reporte de visitas');
+  }
+});
+
+
+
 
 
 // ============================

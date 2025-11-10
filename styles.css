@@ -1324,4 +1324,51 @@ body {
 }
  
 
-/* Alumnos */
+/* carrito */
+/* 🎨 Estilo general del select */
+#docenteSelect {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #6b7280; /* gris elegante */
+  border-radius: 8px;
+  background-color: #f9fafb;
+  font-size: 15px;
+  color: #111827;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%236b7280" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 20px;
+}
+
+/* 🔹 Efecto hover */
+#docenteSelect:hover {
+  border-color: #4f46e5; /* azul suave */
+  background-color: #eef2ff;
+}
+
+/* 🔹 Efecto focus */
+#docenteSelect:focus {
+  outline: none;
+  border-color: #4338ca;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+/* Etiqueta del select */
+label[for="docenteSelect"] {
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+label[for="docenteSelect"]::before {
+  content: "👩‍🏫";
+  font-size: 20px;
+}
+
+
+

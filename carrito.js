@@ -4,7 +4,25 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 document.addEventListener("DOMContentLoaded", () => {
   renderCartItems()
   updateSummary()
+  cargarDocentes() 
+   mostrarUsuario();
 })
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderCartItems();
+  updateSummary();
+  cargarDocentes();
+  mostrarUsuario(); // 👈
+});
+
+function mostrarUsuario() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario) return;
+
+  document.getElementById("userName").textContent = `${usuario.nombres} ${usuario.apellidos}`;
+  document.getElementById("userCareer").textContent = usuario.carrera || "No registrada";
+}
+
 
 // Render cart items
 function renderCartItems() {
@@ -82,81 +100,127 @@ function removeItem(index) {
   }
 }
 
+
+// Cargar lista de docentes en el select
+
+
+
+
 async function confirmLoan() {
-  const reason = document.getElementById("loanReason").value.trim()
+  const reason = document.getElementById("loanReason").value.trim();
+  const docenteId = document.getElementById("docenteSelect").value;
 
   if (!reason) {
-    alert("Por favor, ingresa el motivo del préstamo")
-    document.getElementById("loanReason").focus()
-    return
+    alert("Por favor, ingresa el motivo del préstamo");
+    return;
   }
+
+const teacherSelect = document.getElementById("docenteSelect");
+const id_docente = teacherSelect.value;
+
+
+if (!id_docente) {
+  alert("Por favor, selecciona un docente");
+  teacherSelect.focus();
+  return;
+}
+
 
   if (cart.length === 0) {
-    alert("Tu solicitud está vacío")
-    return
+    alert("Tu solicitud está vacía");
+    return;
   }
 
-  const usuario = JSON.parse(localStorage.getItem("usuario"))
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
   if (!usuario) {
-    alert("Debes iniciar sesión")
-    window.location.href = "index.html"
-    return
+    alert("Debes iniciar sesión");
+    window.location.href = "index.html";
+    return;
   }
 
-  const confirmBtn = document.getElementById("confirmLoanBtn")
-  confirmBtn.disabled = true
-  confirmBtn.textContent = "Procesando..."
+  const confirmBtn = document.getElementById("confirmLoanBtn");
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = "Procesando...";
 
   try {
-    console.log("[Carrito] Enviando solicitud de préstamo...")
-    console.log("[Carrito] Materiales:", cart)
-
-    // Preparar datos de materiales para el backend
     const materialesParaEnviar = cart.map((item) => ({
       id_materiales: item.id,
       cantidad: item.quantity,
-    }))
+    }));
 
     const response = await fetch("http://localhost:3000/vales-prestamo", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id_usuario: usuario.id_usuario,
-        materiales: materialesParaEnviar,
-        fecha_entrega: new Date().toISOString(),
-        motivo: String(reason),
-      }),
-    })
+      headers: { "Content-Type": "application/json" },
+     body: JSON.stringify({
+  id_usuario: usuario.id_usuario,
+  id_docente: id_docente, // 👈 lo agregamos aquí
+  materiales: materialesParaEnviar,
+  fecha_entrega: new Date().toISOString(),
+  motivo: String(reason),
+}),
 
-    const data = await response.json()
+    });
+
+    const data = await response.json();
 
     if (data.success) {
-      console.log("[Carrito] Vale creado exitosamente con ID:", data.id_vales)
+      console.log("[Carrito] Vale creado exitosamente con ID:", data.id_vales);
 
-      // Guardar datos para el recibo
-      const loanData = {
-        id_vales: data.id_vales,
-        materials: cart,
-        reason: reason,
-        timestamp: new Date().toISOString(),
-      }
-      localStorage.setItem("currentLoan", JSON.stringify(loanData))
+  // 👇 AQUI VA EL BLOQUE NUEVO 👇
+  const teacherName = teacherSelect.options[teacherSelect.selectedIndex].text;
 
-      // Limpiar carrito
-      cart = []
-      localStorage.setItem("cart", JSON.stringify(cart))
+  const loanData = {
+    id_vales: data.id_vales,
+    materials: cart,
+    reason: reason,
+    docente: { id: id_docente, nombre: teacherName }, // 👈 guardamos esto
+    timestamp: new Date().toISOString(),
+  };
+  localStorage.setItem("currentLoan", JSON.stringify(loanData));
 
-      // Redirigir al vale
-      window.location.href = "vale-prestamo.html"
+  // ✅ Todo lo que ya tenías después
+  // Limpiar carrito
+  cart = [];
+  localStorage.setItem("cart", JSON.stringify(cart));
+
+  // Redirigir al vale
+  window.location.href = "vale-prestamo.html";
     } else {
-      throw new Error(data.error || "Error al crear solicitud")
+      throw new Error(data.error);
     }
+  } 
+  catch (error) {
+    console.error("[Carrito] Error:", error);
+    alert("Error al enviar la solicitud: " + error.message);
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = "Confirmar Préstamo";
+  }
+}
+
+
+
+// Cargar docentes para el select
+async function cargarDocentes() {
+  const select = document.getElementById("docenteSelect");
+
+  try {
+    const res = await fetch("http://localhost:3000/docentes");
+    const docentes = await res.json();
+
+    if (docentes.length === 0) {
+      select.innerHTML = `<option value="">No hay docentes registrados</option>`;
+      return;
+    }
+
+    select.innerHTML = docentes
+      .map(
+        (d) =>
+          `<option value="${d.id_usuario}">${d.nombre_completo}</option>`
+      )
+      .join("");
   } catch (error) {
-    console.error("[Carrito] Error al confirmar préstamo:", error)
-    alert("Error al enviar la solicitud: " + error.message)
-    confirmBtn.disabled = false
-    confirmBtn.textContent = "Confirmar Préstamo"
+    console.error("Error al cargar docentes:", error);
+    select.innerHTML = `<option value="">Error al cargar docentes</option>`;
   }
 }

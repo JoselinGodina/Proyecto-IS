@@ -38,9 +38,11 @@ function loadReceiptData() {
   // Student data
   document.getElementById("studentNameReceipt").textContent = `${usuario.nombres} ${usuario.apellidos}`
   document.getElementById("studentControlReceipt").textContent = usuario.id_usuario
-  document.getElementById("studentCareerReceipt").textContent = usuario.carrera || "N/A"
+document.getElementById("studentCareerReceipt").textContent =
+  usuario.carrera || usuario.nombre_carrera || "N/A";
   document.getElementById("studentSemesterReceipt").textContent = `${usuario.semestre || "N/A"} Semestre`
-  document.getElementById("studentTeacherReceipt").textContent = "N/A" // Puedes agregar este campo después
+document.getElementById("studentTeacherReceipt").textContent =
+  loanData.docente?.nombre || "No asignado";
 
   // Materials table
   const tableBody = document.getElementById("materialsTableBody")
