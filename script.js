@@ -57,7 +57,7 @@ loginForm.addEventListener("submit", async (e) => {
       // Guardar datos del usuario
       localStorage.setItem("usuario", JSON.stringify(data.user));
 
-      // ✅ SweetAlert de éxito
+      
       Swal.fire({
         icon: "success",
         title: `¡Bienvenido ${data.user.nombres}!`,
