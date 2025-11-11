@@ -20,12 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })
 
 function cerrarSesion() {
-  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-    localStorage.removeItem("usuario")
-    localStorage.removeItem("rol")
-    localStorage.removeItem("token")
-    window.location.replace("index.html")
-  }
+  
 }
 
 let users = []
@@ -164,10 +159,10 @@ async function guardarCambiosUsuario(event) {
 
     await cargarUsuarios()
     cerrarModal("edit")
-    alert("Datos del usuario actualizados exitosamente")
+   Swal.fire("Éxito", "Datos del usuario actualizados exitosamente.", "success")
   } catch (error) {
     console.error("Error:", error)
-    alert("Error al actualizar el usuario")
+    Swal.fire("Error al actualizar el usuario")
   }
 }
 
@@ -194,11 +189,9 @@ async function asignarRol(event) {
 
     await cargarUsuarios()
     cerrarModal("role")
-    alert(`Rol asignado exitosamente a ${user.nombre}`)
-  } catch (error) {
+    Swal.fire("Éxito", `Rol asignado exitosamente a ${user.nombre}.`, "success")  } catch (error) {
     console.error("Error:", error)
-    alert("Error al asignar el rol")
-  }
+Swal.fire("Error", "No se pudo asignar el rol.", "error")  }
 }
 
 function buscarUsuarios() {
