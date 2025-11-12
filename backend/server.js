@@ -41,34 +41,47 @@ app.get("/ping", (req, res) => res.send("Servidor funcionando correctamente 🚀
 // ============================
 app.post("/register", async (req, res) => {
   try {
-    const { id_usuario, nombres, apellidos, carreras_id_carreras, correo, semestre, contrasena } = req.body
+    const { id_usuario, nombres, apellidos, carreras_id_carreras, correo, semestre, contrasena } = req.body;
 
     if (!id_usuario || !nombres || !apellidos || !carreras_id_carreras || !correo || !semestre || !contrasena) {
-      return res.status(400).json({ error: "Faltan datos obligatorios" })
+      return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
-    const userExist = await pool.query("SELECT * FROM usuarios WHERE id_usuario = $1 OR correo = $2", [
-      id_usuario,
-      correo,
-    ])
+    // ✅ Validar correo con regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(correo)) {
+      return res.status(400).json({ error: "Correo electrónico no válido" });
+    }
+
+    // ✅ Validar longitud mínima de contraseña
+    if (contrasena.length < 8) {
+      return res.status(400).json({ error: "La contraseña debe tener al menos 8 caracteres" });
+    }
+
+    // ✅ Verificar si ya existe usuario/correo
+    const userExist = await pool.query(
+      "SELECT * FROM usuarios WHERE id_usuario = $1 OR correo = $2",
+      [id_usuario, correo]
+    );
     if (userExist.rows.length > 0) {
-      return res.status(400).json({ error: "El usuario o correo ya están registrados" })
+      return res.status(400).json({ error: "El usuario o correo ya están registrados" });
     }
 
-    const hashedPassword = await bcrypt.hash(contrasena, 10)
+    // ✅ Hashear contraseña
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
 
     await pool.query(
       `INSERT INTO usuarios (ID_USUARIO, CARRERAS_ID_CARRERAS, NOMBRES, APELLIDOS, CORREO, SEMESTRE, CONTRASENA, ROLES_ID_ROL)
        VALUES ($1, $2, $3, $4, $5, $6, $7, 3)`,
-      [id_usuario, carreras_id_carreras, nombres, apellidos, correo, semestre, hashedPassword],
-    )
+      [id_usuario, carreras_id_carreras, nombres, apellidos, correo, semestre, hashedPassword]
+    );
 
-    res.status(201).json({ message: "Usuario registrado correctamente" })
+    res.status(201).json({ message: "Usuario registrado correctamente" });
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Error en el servidor" })
+    console.error(error);
+    res.status(500).json({ error: "Error en el servidor" });
   }
-})
+});
 
 // ============================
 // 🔐 Login

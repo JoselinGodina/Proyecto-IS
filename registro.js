@@ -1,3 +1,4 @@
+
 // Obtener los elementos del formulario
 const registerForm = document.getElementById("registerForm");
 const passwordRegistroInput = document.getElementById("passwordRegistro");
@@ -42,39 +43,91 @@ numeroControlInput.addEventListener("input", function () {
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const id_usuario = document.getElementById("numeroControl").value.trim();
-  const nombres = document.getElementById("nombres").value.trim();
-  const apellidos = document.getElementById("apellidos").value.trim();
-  const correo = document.getElementById("emailRegistro").value.trim();
-  const contrasena = passwordRegistroInput.value;
-  const confirmPassword = confirmPasswordInput.value;
+  const id_usuario = document.getElementById("numeroControl");
+  const nombres = document.getElementById("nombres");
+  const apellidos = document.getElementById("apellidos");
+  const correo = document.getElementById("emailRegistro");
+  const contrasena = passwordRegistroInput;
+  const confirmPassword = confirmPasswordInput;
+  const carrera = document.getElementById("carrera");
+  const semestre = document.getElementById("semestre");
 
-  // Validar contraseñas
-  if (contrasena !== confirmPassword) {
-    alert("Las contraseñas no coinciden");
+  // Función para marcar campos en error o éxito
+  const marcarError = (input, mensaje) => {
+    input.style.borderColor = "#EF4444"; // rojo
+    Swal.fire("⚠️ " + mensaje);
+  };
+
+  const marcarCorrecto = (input) => {
+    input.style.borderColor = "#10B981"; // verde
+  };
+
+  // ✅ Validar campos vacíos
+  if (!id_usuario.value.trim() || !nombres.value.trim() || !apellidos.value.trim() || 
+      !correo.value.trim() || !carrera.value || !semestre.value || 
+      !contrasena.value.trim() || !confirmPassword.value.trim()) {
+    Swal.fire("⚠️ Todos los campos son obligatorios");
     return;
   }
 
-  // Obtener valores de select
-  const carreraSelect = document.getElementById("carrera");
-  const carrera = carreraSelect.value;
-  const semestreSelect = document.getElementById("semestre");
-  const semestre = semestreSelect.value;
-
-  // Validación básica antes de enviar
-  if (!id_usuario || !nombres || !apellidos || !correo || !carrera || !semestre) {
-    alert("Todos los campos son obligatorios");
+  // ✅ Validar correo
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(correo.value)) {
+    marcarError(correo, "Ingresa un correo electrónico válido");
     return;
+  } else {
+    marcarCorrecto(correo);
   }
 
+  // ✅ Validar longitud de contraseña
+  if (contrasena.value.length < 8) {
+    marcarError(contrasena, "La contraseña debe tener al menos 8 caracteres");
+    return;
+  } else {
+    marcarCorrecto(contrasena);
+  }
+
+  // ✅ Validar confirmación de contraseña
+  if (contrasena.value !== confirmPassword.value) {
+    marcarError(confirmPassword, "Las contraseñas no coinciden");
+    return;
+  } else {
+    marcarCorrecto(confirmPassword);
+  }
+
+  // ✅ Validar número de control (solo números)
+  const numeroRegex = /^[0-9]+$/;
+  if (!numeroRegex.test(id_usuario.value)) {
+    marcarError(id_usuario, "El número de control solo puede contener dígitos");
+    return;
+  } else {
+    marcarCorrecto(id_usuario);
+  }
+
+  // ✅ Validar selects
+  if (!carrera.value) {
+    marcarError(carrera, "Selecciona una carrera");
+    return;
+  } else {
+    marcarCorrecto(carrera);
+  }
+
+  if (!semestre.value) {
+    marcarError(semestre, "Selecciona un semestre");
+    return;
+  } else {
+    marcarCorrecto(semestre);
+  }
+
+  // ✅ Si pasa todas las validaciones
   const formData = {
-    id_usuario,
-    nombres,
-    apellidos,
-    carreras_id_carreras: carrera,
-    correo,
-    semestre,
-    contrasena,
+    id_usuario: id_usuario.value.trim(),
+    nombres: nombres.value.trim(),
+    apellidos: apellidos.value.trim(),
+    carreras_id_carreras: carrera.value,
+    correo: correo.value.trim(),
+    semestre: semestre.value,
+    contrasena: contrasena.value,
   };
 
   try {
@@ -87,13 +140,42 @@ registerForm.addEventListener("submit", async (e) => {
     const data = await response.json();
 
     if (response.ok) {
-      alert("✅ " + data.message);
-      window.location.href = "index.html";
+      Swal.fire({
+        title: "✅ Registro exitoso",
+        text: data.message,
+        icon: "success",
+        confirmButtonColor: "#10B981",
+      }).then(() => {
+        window.location.href = "index.html";
+      });
     } else {
-      alert("⚠️ " + (data.error || "Error al registrar"));
+      Swal.fire("⚠️ " + (data.error || "Error al registrar"));
     }
   } catch (error) {
     console.error(error);
-    alert("❌ Error al conectar con el servidor");
+    Swal.fire("❌ Error al conectar con el servidor");
   }
+
 });
+
+// 🔙 Botón "Volver al inicio"
+const backToLoginBtn = document.getElementById("backToLoginBtn");
+
+backToLoginBtn.addEventListener("click", () => {
+  Swal.fire({
+    title: "¿Deseas volver al inicio?",
+    text: "Se perderá la información ingresada.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sí, volver",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#10B981",
+    cancelButtonColor: "#EF4444",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "index.html";
+    }
+  });
+});
+
+
