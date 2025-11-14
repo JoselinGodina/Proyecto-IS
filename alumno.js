@@ -456,8 +456,9 @@ function renderSolicitudes(solicitudesData) {
 async function fetchAndRenderAsesorias() {
   try {
     const res = await fetch("http://localhost:3000/asesorias")
-    const asesoriasData = await res.json()
-    renderAsesorias(asesoriasData)
+    allAsesoriasData = await res.json()
+    setupAsesoriasSearch()
+    renderAsesorias(allAsesoriasData)
   } catch (err) {
     console.error(err)
   }
@@ -534,6 +535,29 @@ async function solicitarAsesoria(id_crear_asesoria) {
     console.error(err)
     alert("Error al inscribirse. Revisa la consola.")
   }
+}
+
+// ============================================
+// BÚSQUEDA DE ASESORÍAS POR TÍTULO
+// ============================================
+let allAsesoriasData = []
+
+function setupAsesoriasSearch() {
+  const searchInput = document.getElementById("searchAsesoriasInput")
+  if (searchInput) {
+    searchInput.addEventListener("input", filterAndRenderAsesorias)
+  }
+}
+
+function filterAndRenderAsesorias() {
+  const searchTerm = document.getElementById("searchAsesoriasInput").value.toLowerCase()
+  
+  let filtered = allAsesoriasData
+  if (searchTerm) {
+    filtered = allAsesoriasData.filter(a => a.titulo.toLowerCase().includes(searchTerm))
+  }
+  
+  renderAsesorias(filtered)
 }
 
 // ----------------------
