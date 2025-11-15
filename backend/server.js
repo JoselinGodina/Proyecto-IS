@@ -677,6 +677,7 @@ app.get("/solicitudes-prestamo", async (req, res) => {
 })
 
 // 2. PUT - Aprobar solicitud (cambiar E01 a E02)
+// 2. PUT - Aprobar solicitud (cambiar E01 a E02)
 app.put("/solicitudes-prestamo/:id/aprobar", async (req, res) => {
   res.header("Access-Control-Allow-Origin", "*")
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS")
@@ -694,6 +695,18 @@ app.put("/solicitudes-prestamo/:id/aprobar", async (req, res) => {
 
     console.log("[v0 Server] Aprobando solicitud:", id)
 
+    // <CHANGE> Actualizar cantidad_disponible de materiales al restar la cantidad prestada
+    const updateMaterialesQuery = `
+      UPDATE materiales m
+      SET cantidad_disponible = m.cantidad_disponible - vm.cantidad
+      FROM vales_has_materiales vm
+      WHERE vm.materiales_id_materiales = m.id_materiales 
+      AND vm.vales_prestamos_id_vales = $1
+    `
+
+    await pool.query(updateMaterialesQuery, [id])
+
+    // Actualizar estado del vale
     const query = `
       UPDATE vales_prestamos 
       SET estado_id_estado = 'E02' 
