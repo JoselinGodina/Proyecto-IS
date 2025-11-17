@@ -1,4 +1,5 @@
 let adminLogueado = null
+let materialesPendientes = []  // <CHANGE> Array para almacenar materiales temporalmente
 
 function mostrarFechaActual() {
   const fechaElement = document.getElementById("currentDate")
@@ -81,14 +82,58 @@ async function cargarCategorias() {
   }
 }
 
-async function handleAddMaterial(event) {
+// async function handleAddMaterial(event) {
+//   event.preventDefault();
+
+// const materialId = document.getElementById("materialCode").value; // toma el código real
+//   const quantity = parseInt(document.getElementById("materialQuantity").value);
+
+//   if (!materialName) {
+//     alert("Selecciona un material");
+//     return;
+//   }
+
+//   if (isNaN(quantity) || quantity <= 0) {
+//     alert("La cantidad debe ser mayor que 0");
+//     return;
+//   }
+
+//   try {
+// const response = await fetch(`http://localhost:3000/materiales/${encodeURIComponent(materialId)}`, {
+//       method: "PUT",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ cantidad: quantity }),
+//     });
+
+//     if (!response.ok) {
+//   const text = await response.text(); // lee texto, no JSON
+//   throw new Error(text || `Error HTTP: ${response.status}`);
+// }
+
+// const data = await response.json();
+// alert("Cantidad actualizada correctamente");
+
+
+//     // Refresca lista en pantalla si tienes una función que la recarga
+//     await cargarMateriales();
+
+//   } catch (error) {
+//     console.error("Error al agregar cantidad:", error);
+//     alert("Error al agregar cantidad: " + error.message);
+//   }
+// }
+
+// <CHANGE> Modificada para agregar a lista temporal en lugar de enviar directamente
+function handleAddMaterial(event) {
   event.preventDefault();
 
-const materialId = document.getElementById("materialCode").value; // toma el código real
+  const materialId = document.getElementById("materialCode").value;
+  const materialName = document.getElementById("materialName").value;
+  const materialCategory = document.getElementById("materialCategory").value;
   const quantity = parseInt(document.getElementById("materialQuantity").value);
 
-  if (!materialName) {
-    alert("Selecciona un material");
+  if (!materialId || !materialName) {
+    alert("Selecciona un material válido");
     return;
   }
 
@@ -97,31 +142,24 @@ const materialId = document.getElementById("materialCode").value; // toma el có
     return;
   }
 
-  try {
-const response = await fetch(`http://localhost:3000/materiales/${encodeURIComponent(materialId)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cantidad: quantity }),
-    });
+  // Agregar al arreglo temporal
+  materialesPendientes.push({
+    id_materiales: materialId,
+    nombre: materialName,
+    categoria: materialCategory,
+    cantidad: quantity,
+  });
 
-    if (!response.ok) {
-  const text = await response.text(); // lee texto, no JSON
-  throw new Error(text || `Error HTTP: ${response.status}`);
+  alert("Material agregado a la lista temporal");
+
+  // Limpiar formulario
+  document.getElementById("addMaterialForm").reset();
+  document.getElementById("materialCode").value = "";
+  document.getElementById("materialCategory").value = "";
+  document.getElementById("materialQuantity").value = "0";
+
+  actualizarListaTemporal();
 }
-
-const data = await response.json();
-alert("Cantidad actualizada correctamente");
-
-
-    // Refresca lista en pantalla si tienes una función que la recarga
-    await cargarMateriales();
-
-  } catch (error) {
-    console.error("Error al agregar cantidad:", error);
-    alert("Error al agregar cantidad: " + error.message);
-  }
-}
-
 
 async function cargarMateriales() {
   const lista = document.getElementById("materialsList")
@@ -248,6 +286,64 @@ async function cargarMaterialesSelect() {
   }
 }
 
+// <CHANGE> Actualiza la visualización de la lista temporal
+function actualizarListaTemporal() {
+  const list = document.getElementById("pendingList");
+  list.innerHTML = "";
+
+  if (materialesPendientes.length === 0) {
+    list.innerHTML = '<li style="text-align:center; color:#777;">No hay materiales en la lista</li>';
+    return;
+  }
+
+  materialesPendientes.forEach((mat, index) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span><strong>${mat.nombre}</strong> - ${mat.cantidad} unid. (${mat.categoria})</span>
+      <button class="remove-btn" type="button">✖</button>
+    `;
+
+    li.querySelector("button").addEventListener("click", () => {
+      materialesPendientes.splice(index, 1);
+      actualizarListaTemporal();
+    });
+
+    list.appendChild(li);
+  });
+}
+
+// <CHANGE> Guarda todos los materiales usando el endpoint PUT /materiales/:id
+async function guardarTodosMateriales() {
+  if (materialesPendientes.length === 0) {
+    alert("No hay materiales pendientes para guardar");
+    return;
+  }
+
+  try {
+    // Guardar cada material individualmente
+    for (const mat of materialesPendientes) {
+      const response = await fetch(`http://localhost:3000/materiales/${mat.id_materiales}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cantidad: mat.cantidad }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Error al guardar ${mat.nombre}: ${error}`);
+      }
+    }
+
+    alert("✅ Todos los materiales se guardaron correctamente");
+    materialesPendientes = [];
+    actualizarListaTemporal();
+    await cargarMateriales();
+
+  } catch (error) {
+    console.error("[v0] Error al guardar:", error);
+    alert("❌ Error: " + error.message);
+  }
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("[v0] Inicializando página de gestión de materiales...");
@@ -256,8 +352,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarMateriales();
   await cargarMaterialesSelect(); // 👈 nuevo
 
-  const form = document.getElementById("addMaterialForm");
-  if (form) form.addEventListener("submit", handleAddMaterial);
+  // const form = document.getElementById("addMaterialForm");
+  // if (form) form.addEventListener("submit", handleAddMaterial);
+
+// <CHANGE> Agregar listeners para los nuevos botones
+const addToListBtn = document.getElementById("addToListBtn");
+if (addToListBtn) {
+  addToListBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    handleAddMaterial(e);
+  });
+}
+
+const saveAllBtn = document.getElementById("saveAllBtn");
+if (saveAllBtn) {
+  saveAllBtn.addEventListener("click", guardarTodosMateriales);
+}
 
   // 👇 Autocompletar campos al seleccionar material
   const materialSelect = document.getElementById("materialName");
@@ -278,4 +388,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   console.log("[v0] Inicialización completa");
 });
-

@@ -73,7 +73,15 @@
     <input type="number" id="materialQuantity" min="0" value="0" required>
   </div>
 
-  <button type="submit" class="submit-btn">Agregar Cantidad</button>
+<!-- AGREGAR ESTA SECCIÓN -->
+<div id="pendingListContainer" class="pending-list">
+  <h4>📋 Materiales en lista temporal</h4>
+  <ul id="pendingList"></ul>
+</div>
+
+    <button type="button" id="addToListBtn" class="submit-btn">Agregar a Lista</button>
+    <button type="button" id="saveAllBtn" class="submit-btn" style="background-color: #28a745; margin-left: 0.5rem;">Guardar Todos</button>
+  <!-- <button type="submit" class="submit-btn">Agregar Cantidad</button> -->
 </form>
 
         </div>
