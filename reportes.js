@@ -6,15 +6,76 @@
         }
 
         function generarReporte(tipo, categoria) {
-            console.log('[v0] Generando reporte:', tipo, categoria);
-            
-            if (tipo === 'pdf') {
-                // Generate and show print preview
-                mostrarVistaPrevia(categoria);
-            } else if (tipo === 'excel') {
-                generarExcel(categoria);
-            }
+    console.log('[v0] Generando reporte:', tipo, categoria);
+
+    if (tipo === 'pdf') {
+
+        // 👉 Si el reporte es de visitas, generar PDF con gráfica
+        if (categoria === 'visitas') {
+            fetch('http://localhost:3000/reporte/carreras-visitas')
+                .then(res => res.json())
+                .then(data => generarPDFConGrafica(data))
+                .catch(err => console.error('Error cargando datos:', err));
+            return; // ❗ Evitamos mostrarVistaPrevia()
         }
+
+        // Para los demás reportes
+        mostrarVistaPrevia(categoria);
+
+    } else if (tipo === 'excel') {
+        generarExcel(categoria);
+    }
+}
+
+
+async function generarPDFConGrafica(data) {
+
+    // 1️⃣ Preparar arrays
+    const labels = data.map(item => item.nombre);
+    const valores = data.map(item => item.cantidad);
+
+    // 2️⃣ Crear gráfica en canvas oculto
+    const ctx = document.getElementById('graficaCarreras').getContext('2d');
+
+    // Destruir gráfica previa si existe
+    if (window.graficaReporte) {
+        window.graficaReporte.destroy();
+    }
+
+    window.graficaReporte = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Visitas',
+                data: valores,
+                backgroundColor: "#4A90E2"
+            }]
+        },
+        options: { responsive: false }
+    });
+
+    // Esperar a que la gráfica se dibuje
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // 3️⃣ Convertir gráfica a imagen
+    const imagenGrafica = document.getElementById('graficaCarreras').toDataURL('image/png');
+
+    // 4️⃣ Crear PDF con jsPDF
+    const pdf = new jspdf.jsPDF();
+
+    pdf.setFontSize(16);
+    pdf.text("Reporte de Carreras con Mayor Visita", 10, 15);
+
+    pdf.setFontSize(12);
+    pdf.text("Gráfica generada automáticamente con estadísticas actuales.", 10, 25);
+
+    // Insertar la gráfica en el PDF
+    pdf.addImage(imagenGrafica, 'PNG', 10, 40, 180, 110);
+
+    pdf.save("reporte_carreras_visitas.pdf");
+}
+
 
        async function generarExcel(categoria) {
   const now = new Date();

@@ -65,7 +65,7 @@
                     </div>
                 </div>
                 <div class="report-stats">
-                    <p>Total de componentes disponibles: <strong>197</strong></p>
+                <!--<p>Total de componentes disponibles: <strong>197</strong></p>-->
                 </div>
                 <div class="report-actions">
                     <button class="report-btn" onclick="generarReporte('pdf', 'disponible')">
@@ -97,7 +97,7 @@
                     </div>
                 </div>
                 <div class="report-stats">
-                    <p>Total de componentes dañados: <strong>53</strong></p>
+                   <!---- <p>Total de componentes dañados: <strong>53</strong></p>-->
                 </div>
                 <div class="report-actions">
                     <button class="report-btn" onclick="generarReporte('pdf', 'danado')">
@@ -129,7 +129,7 @@
                     </div>
                 </div>
                 <div class="report-stats">
-                    <p>Total de visitas este mes: <strong>85</strong></p>
+                   <!-- <p>Total de visitas este mes: <strong>85</strong></p>-->
                 </div>
                 <div class="report-actions">
                     <button class="report-btn" onclick="generarReporte('pdf', 'visitas')">
@@ -226,6 +226,14 @@
         </div>
     </div>
 
+    <canvas id="graficaCarreras" width="600" height="400" style="display:none"></canvas>
+
+
+    <!-- Librería Chart.js para generar la gráfica -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Librería jsPDF para generar el PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="reportes.js"></script>
 </body>
 </html>
