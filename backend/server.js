@@ -616,7 +616,7 @@ app.get("/docentes", async (req, res) => {
 
 
 
-
+//vales en la pantalla del alumno
 app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
   try {
     const { id_usuario } = req.params
