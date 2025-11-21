@@ -200,22 +200,31 @@ function renderSolicitudes() {
       .join("")
   }
 
+  // <CHANGE> Attachment de event listeners DESPUÉS de renderizar el DOM
   attachButtonEventListeners()
 }
 
 function attachButtonEventListeners() {
+  console.log("[v0] Attachando event listeners...")
+  
+  // <CHANGE> Agregados eventos para los botones de Aprobar
   document.querySelectorAll(".btn-aprobar").forEach((btn) => {
     btn.addEventListener("click", function (e) {
       e.preventDefault()
+      e.stopPropagation()
       const id = this.getAttribute("data-id")
+      console.log("[v0] Click en Aprobar con ID:", id)
       aprobarSolicitud(id)
     })
   })
 
+  // <CHANGE> Agregados eventos para los botones de Rechazar
   document.querySelectorAll(".btn-rechazar").forEach((btn) => {
     btn.addEventListener("click", function (e) {
       e.preventDefault()
+      e.stopPropagation()
       const id = this.getAttribute("data-id")
+      console.log("[v0] Click en Rechazar con ID:", id)
       rechazarSolicitud(id)
     })
   })
@@ -223,22 +232,29 @@ function attachButtonEventListeners() {
   document.querySelectorAll(".btn-finalizar").forEach((btn) => {
     btn.addEventListener("click", function (e) {
       e.preventDefault()
+      e.stopPropagation()
       const id = this.getAttribute("data-id")
+      console.log("[v0] Click en Finalizar con ID:", id)
       finalizarSolicitud(id)
     })
   })
+  
+  console.log("[v0] Event listeners anexados correctamente")
 }
 
 async function aprobarSolicitud(id) {
   if (confirm("¿Estás seguro de que deseas aprobar esta solicitud?")) {
     try {
-      console.log("[v0] Aprobando solicitud:", id)
+      console.log("[v0] Aprobando solicitud con ID:", id)
 
       if (!id || id.trim() === "") {
         throw new Error("ID de solicitud inválido")
       }
 
-      const response = await fetch(`http://localhost:3000/solicitudes-prestamo/${id}/aprobar`, {
+      const url = `http://localhost:3000/solicitudes-prestamo/${id}/aprobar`
+      console.log("[v0] URL de solicitud:", url)
+
+      const response = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -249,6 +265,8 @@ async function aprobarSolicitud(id) {
       console.log("[v0] Response status:", response.status)
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error("[v0] Error response:", errorText)
         throw new Error(`Error HTTP: ${response.status}`)
       }
 
@@ -256,14 +274,14 @@ async function aprobarSolicitud(id) {
       console.log("[v0] Respuesta del servidor:", result)
 
       if (result.success) {
-        alert("Solicitud aprobada exitosamente")
+        alert("✓ Solicitud aprobada exitosamente\n- Materiales restados correctamente\n- Estado: E02")
         await cargarSolicitudes()
       } else {
-        alert("Error al aprobar la solicitud: " + (result.error || "Error desconocido"))
+        alert("❌ Error al aprobar la solicitud: " + (result.error || "Error desconocido"))
       }
     } catch (error) {
       console.error("[v0] Error al aprobar solicitud:", error)
-      alert("Error al aprobar la solicitud: " + error.message)
+      alert("❌ Error al aprobar la solicitud: " + error.message)
     }
   }
 }
@@ -271,13 +289,16 @@ async function aprobarSolicitud(id) {
 async function rechazarSolicitud(id) {
   if (confirm("¿Estás seguro de que deseas rechazar esta solicitud?")) {
     try {
-      console.log("[v0] Rechazando solicitud:", id)
+      console.log("[v0] Rechazando solicitud con ID:", id)
 
       if (!id || id.trim() === "") {
         throw new Error("ID de solicitud inválido")
       }
 
-      const response = await fetch(`http://localhost:3000/solicitudes-prestamo/${id}/rechazar`, {
+      const url = `http://localhost:3000/solicitudes-prestamo/${id}/rechazar`
+      console.log("[v0] URL de solicitud:", url)
+
+      const response = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -288,6 +309,8 @@ async function rechazarSolicitud(id) {
       console.log("[v0] Response status:", response.status)
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error("[v0] Error response:", errorText)
         throw new Error(`Error HTTP: ${response.status}`)
       }
 
@@ -295,14 +318,14 @@ async function rechazarSolicitud(id) {
       console.log("[v0] Respuesta del servidor:", result)
 
       if (result.success) {
-        alert("Solicitud rechazada")
+        alert("✓ Solicitud rechazada\n- Estado: E03")
         await cargarSolicitudes()
       } else {
-        alert("Error al rechazar la solicitud: " + (result.error || "Error desconocido"))
+        alert("❌ Error al rechazar la solicitud: " + (result.error || "Error desconocido"))
       }
     } catch (error) {
       console.error("[v0] Error al rechazar solicitud:", error)
-      alert("Error al rechazar la solicitud: " + error.message)
+      alert("❌ Error al rechazar la solicitud: " + error.message)
     }
   }
 }
@@ -310,13 +333,16 @@ async function rechazarSolicitud(id) {
 async function finalizarSolicitud(id) {
   if (confirm("¿Estás seguro de que deseas finalizar esta solicitud?")) {
     try {
-      console.log("[v0] Finalizando solicitud:", id)
+      console.log("[v0] Finalizando solicitud con ID:", id)
 
       if (!id || id.trim() === "") {
         throw new Error("ID de solicitud inválido")
       }
 
-      const response = await fetch(`http://localhost:3000/solicitudes-prestamo/${id}/finalizar`, {
+      const url = `http://localhost:3000/solicitudes-prestamo/${id}/finalizar`
+      console.log("[v0] URL de solicitud:", url)
+
+      const response = await fetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -327,6 +353,8 @@ async function finalizarSolicitud(id) {
       console.log("[v0] Response status:", response.status)
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error("[v0] Error response:", errorText)
         throw new Error(`Error HTTP: ${response.status}`)
       }
 
@@ -334,17 +362,20 @@ async function finalizarSolicitud(id) {
       console.log("[v0] Respuesta del servidor:", result)
 
       if (result.success) {
-        alert("Solicitud finalizada exitosamente")
+        alert("✓ Solicitud finalizada exitosamente")
         await cargarSolicitudes()
       } else {
-        alert("Error al finalizar la solicitud: " + (result.error || "Error desconocido"))
+        alert("❌ Error al finalizar la solicitud: " + (result.error || "Error desconocido"))
       }
     } catch (error) {
       console.error("[v0] Error al finalizar solicitud:", error)
-      alert("Error al finalizar la solicitud: " + error.message)
+      alert("❌ Error al finalizar la solicitud: " + error.message)
     }
   }
 }
 
-document.addEventListener("DOMContentLoaded", cargarSolicitudes)
-
+// <CHANGE> Event listener para cargar solicitudes cuando se carga el DOM
+document.addEventListener("DOMContentLoaded", function() {
+  console.log("[v0] DOM cargado, iniciando solicitudes...")
+  cargarSolicitudes()
+})

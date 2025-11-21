@@ -678,6 +678,116 @@ app.get("/solicitudes-prestamo", async (req, res) => {
   }
 })
 
+//aprobar, de e01 a e02
+app.put("/solicitudes-prestamo/:id/aprobar", async (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*")
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS")
+  res.header("Access-Control-Allow-Headers", "Content-Type")
+
+  try {
+    const { id } = req.params
+
+    if (!id || id.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        error: "ID de solicitud inválido",
+      })
+    }
+
+    console.log("[v0 Server] Aprobando solicitud:", id)
+
+    // Actualizar cantidad_disponible de materiales al restar la cantidad prestada
+    const updateMaterialesQuery = `
+      UPDATE materiales m
+      SET cantidad_disponible = cantidad_disponible - vm.cantidad
+      FROM vales_has_materiales vm
+      WHERE vm.materiales_id_materiales = m.id_materiales
+      AND vm.vales_prestamos_id_vales = $1
+    `
+    await pool.query(updateMaterialesQuery, [id])
+
+    // Actualizar estado del vale
+    const query = `
+      UPDATE vales_prestamos
+      SET estado_id_estado = 'E02'
+      WHERE id_vales = $1
+      RETURNING id_vales
+    `
+
+    const result = await pool.query(query, [id])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Solicitud no encontrada",
+      })
+    }
+
+    console.log("[v0 Server] Solicitud aprobada:", id)
+    res.json({
+      success: true,
+      message: "Solicitud aprobada exitosamente",
+      id: id,
+    })
+  } catch (error) {
+    console.error("[Error al aprobar solicitud:", error)
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    })
+  }
+})
+
+//rechazar , de e01 a e03
+app.put("/solicitudes-prestamo/:id/rechazar", async (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*")
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS")
+  res.header("Access-Control-Allow-Headers", "Content-Type")
+
+  try {
+    const { id } = req.params
+
+    if (!id || id.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        error: "ID de solicitud inválido",
+      })
+    }
+
+    console.log("[v0 Server] Rechazando solicitud:", id)
+
+    const query = `
+      UPDATE vales_prestamos
+      SET estado_id_estado = 'E03'
+      WHERE id_vales = $1
+      RETURNING id_vales
+    `
+
+    const result = await pool.query(query, [id])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Solicitud no encontrada",
+      })
+    }
+
+    console.log("[v0 Server] Solicitud rechazada (devuelta):", id)
+    res.json({
+      success: true,
+      message: "Solicitud devuelta exitosamente",
+      id: id,
+    })
+  } catch (error) {
+    console.error("[Error al rechazar solicitud:", error)
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    })
+  }
+})
+
+//finalizar, de e04 a e05
 app.put("/solicitudes-prestamo/:id/finalizar", async (req, res) => {
   res.header("Access-Control-Allow-Origin", "*")
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS")
