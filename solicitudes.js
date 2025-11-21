@@ -4,29 +4,25 @@ async function cargarSolicitudes() {
   try {
     console.log("[v0 Frontend] ========================================")
     console.log("[v0 Frontend] Iniciando carga de solicitudes...")
-    console.log("[v0 Frontend] URL del servidor: http://localhost:3000/solicitudes-prestamo")
 
-    const response = await fetch("http://localhost:3000/solicitudes-prestamo")
+    // Cargar solicitudes pendientes (E01) y devueltas (E04)
+    const [responsePendientes, responseDevueltas] = await Promise.all([
+      fetch("http://localhost:3000/solicitudes-prestamo?estado=E01"),
+      fetch("http://localhost:3000/solicitudes-prestamo?estado=E04"),
+    ])
 
-    console.log("[v0 Frontend] Response status:", response.status)
-    console.log("[v0 Frontend] Response ok:", response.ok)
-
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`)
+    if (!responsePendientes.ok || !responseDevueltas.ok) {
+      throw new Error(`Error HTTP`)
     }
 
-    const data = await response.json()
-    console.log("[v0 Frontend] Datos recibidos del servidor:", data)
-    console.log("[v0 Frontend] Cantidad de registros:", data.length)
+    const dataPendientes = await responsePendientes.json()
+    const dataDevueltas = await responseDevueltas.json()
 
-    if (data.length === 0) {
-      console.log("[v0 Frontend] ⚠️ No hay solicitudes pendientes en la base de datos")
-    }
+    console.log("[v0 Frontend] Solicitudes pendientes:", dataPendientes.length)
+    console.log("[v0 Frontend] Solicitudes devueltas:", dataDevueltas.length)
 
-    solicitudes = data.map((item, index) => {
-      console.log(`[v0 Frontend] Procesando solicitud ${index + 1}:`, item)
-
-      // Parsear hora correctamente
+    // Mapear solicitudes pendientes
+    solicitudes = dataPendientes.map((item, index) => {
       let horaFormateada = "N/A"
       if (item.hora_entrega) {
         const fecha = new Date(item.hora_entrega)
@@ -38,7 +34,6 @@ async function cargarSolicitudes() {
       }
 
       const materialName = item.nombre_material || "Sin especificar"
-      console.log(`[v0 Frontend] Material detectado:`, materialName)
 
       return {
         id: item.id_vales,
@@ -49,103 +44,163 @@ async function cargarSolicitudes() {
         hora: horaFormateada,
         motivo: item.motivo || "Sin motivo especificado",
         estado: "Pendiente",
+        tipo: "pendiente",
       }
     })
 
-    console.log("[v0 Frontend] Solicitudes mapeadas:", solicitudes)
-    console.log("[v0 Frontend] ========================================")
+    // Mapear solicitudes devueltas
+    const solicitudesDevueltas = dataDevueltas.map((item, index) => {
+      let horaFormateada = "N/A"
+      if (item.hora_entrega) {
+        const fecha = new Date(item.hora_entrega)
+        if (!isNaN(fecha.getTime())) {
+          horaFormateada = fecha.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })
+        } else {
+          horaFormateada = item.hora_entrega
+        }
+      }
 
+      const materialName = item.nombre_material || "Sin especificar"
+
+      return {
+        id: item.id_vales,
+        nombreAlumno: item.nombre || "Sin nombre",
+        noControl: item.id_usuario || "N/A",
+        materialSolicitado: materialName,
+        cantidad: `${item.cantidad || 0} unidades`,
+        hora: horaFormateada,
+        motivo: item.motivo || "Sin motivo especificado",
+        estado: "Devuelto",
+        tipo: "devuelto",
+      }
+    })
+
+    solicitudes = [...solicitudes, ...solicitudesDevueltas]
+
+    console.log("[v0 Frontend] ========================================")
     renderSolicitudes()
   } catch (error) {
     console.error("[v0 Frontend] ❌ ERROR al cargar solicitudes:", error)
-    console.error("[v0 Frontend] Mensaje:", error.message)
-    console.error("[v0 Frontend] Stack:", error.stack)
     alert("Error al cargar las solicitudes: " + error.message)
   }
 }
 
 function renderSolicitudes() {
   console.log("[v0 Frontend] Renderizando solicitudes...")
-  const container = document.getElementById("solicitudesContainer")
+  const containerPendientes = document.getElementById("solicitudesContainer")
+  const containerDevueltos = document.getElementById("solicitudesDevueltasContainer")
   const pendingCount = document.getElementById("pendingCount")
+  const devueltosCount = document.getElementById("devueltosCount")
 
-  if (!container) {
-    console.error("[v0 Frontend] ❌ No se encontró el elemento 'solicitudesContainer'")
-    return
-  }
+  const pendingSolicitudes = solicitudes.filter((s) => s.tipo === "pendiente")
+  const devueltasSolicitudes = solicitudes.filter((s) => s.tipo === "devuelto")
 
-  if (!pendingCount) {
-    console.error("[v0 Frontend] ❌ No se encontró el elemento 'pendingCount'")
-    return
-  }
-
-  const pendingSolicitudes = solicitudes.filter((s) => s.estado === "pendiente" || s.estado === "Pendiente")
-  console.log("[v0 Frontend] Solicitudes pendientes filtradas:", pendingSolicitudes.length)
-
+  // Renderizar pendientes
   if (pendingSolicitudes.length === 0) {
-    console.log("[v0 Frontend] Mostrando estado vacío")
-    container.innerHTML = ` 
- <div class="empty-state"> 
- <h3>No hay solicitudes pendientes</h3> 
- <p>Todas las solicitudes han sido procesadas</p> 
- </div> 
- `
+    containerPendientes.innerHTML = `
+      <div class="empty-state">
+        <h3>No hay solicitudes pendientes</h3>
+        <p>Todas las solicitudes han sido procesadas</p>
+      </div>
+    `
     pendingCount.textContent = "0 solicitudes esperando aprobación"
-    return
+  } else {
+    pendingCount.textContent = `${pendingSolicitudes.length} solicitudes esperando aprobación`
+    containerPendientes.innerHTML = pendingSolicitudes
+      .map(
+        (solicitud) => `
+      <div class="solicitud-card">
+        <div class="solicitud-header">
+          <div class="solicitud-title">
+            <h4>${solicitud.nombreAlumno}</h4>
+            <span class="badge badge-pendiente">${solicitud.estado}</span>
+          </div>
+          <div class="solicitud-actions">
+            <button class="btn-aprobar" data-id="${solicitud.id}">Aprobar</button>
+            <button class="btn-rechazar" data-id="${solicitud.id}">Rechazar</button>
+          </div>
+        </div>
+        <div class="solicitud-details">
+          <div class="detail-item">
+            <span class="detail-label">No. Control:</span>
+            <span class="detail-value">${solicitud.noControl}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Cantidad:</span>
+            <span class="detail-value">${solicitud.cantidad}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Material solicitado:</span>
+            <span class="detail-value">${solicitud.materialSolicitado}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Hora:</span>
+            <span class="detail-value">${solicitud.hora}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Motivo:</span>
+            <span class="detail-value">${solicitud.motivo}</span>
+          </div>
+        </div>
+      </div>
+    `,
+      )
+      .join("")
   }
 
-  pendingCount.textContent = `${pendingSolicitudes.length} solicitudes esperando aprobación`
-  console.log("[v0 Frontend] Generando HTML para", pendingSolicitudes.length, "solicitudes")
-
-  container.innerHTML = pendingSolicitudes
-    .map(
-      (solicitud) => ` 
- <div class="solicitud-card"> 
- <div class="solicitud-header"> 
- <div class="solicitud-title"> 
- <h4>${solicitud.nombreAlumno}</h4> 
- <span class="badge badge-pendiente">${solicitud.estado}</span> 
- </div> 
- <div class="solicitud-actions"> 
- <button class="btn-aprobar" data-id="${solicitud.id}">Aprobar</button> 
- <button class="btn-rechazar" data-id="${solicitud.id}">Rechazar</button> 
- </div> 
- </div> 
- 
- <div class="solicitud-details"> 
- <div class="detail-item"> 
- <span class="detail-label">No. Control:</span> 
- <span class="detail-value">${solicitud.noControl}</span> 
- </div> 
- 
- <div class="detail-item"> 
- <span class="detail-label">Cantidad:</span> 
- <span class="detail-value">${solicitud.cantidad}</span> 
- </div> 
- 
- <div class="detail-item"> 
- <span class="detail-label">Material solicitado:</span> 
- <span class="detail-value">${solicitud.materialSolicitado}</span> 
- </div> 
- 
- <div class="detail-item"> 
- <span class="detail-label">Hora:</span> 
- <span class="detail-value">${solicitud.hora}</span> 
- </div> 
- 
- <div class="detail-item"> 
- <span class="detail-label">Motivo:</span> 
- <span class="detail-value">${solicitud.motivo}</span> 
- </div> 
- </div> 
- </div> 
- `,
-    )
-    .join("")
+  // Renderizar devueltos
+  if (devueltasSolicitudes.length === 0) {
+    containerDevueltos.innerHTML = `
+      <div class="empty-state">
+        <h3>No hay solicitudes devueltas</h3>
+        <p>No hay material para finalizar</p>
+      </div>
+    `
+    devueltosCount.textContent = "0 solicitudes devueltas"
+  } else {
+    devueltosCount.textContent = `${devueltasSolicitudes.length} solicitudes devueltas`
+    containerDevueltos.innerHTML = devueltasSolicitudes
+      .map(
+        (solicitud) => `
+      <div class="solicitud-card">
+        <div class="solicitud-header">
+          <div class="solicitud-title">
+            <h4>${solicitud.nombreAlumno}</h4>
+            <span class="badge badge-devuelto">${solicitud.estado}</span>
+          </div>
+          <div class="solicitud-actions">
+            <button class="btn-finalizar" data-id="${solicitud.id}">Finalizar</button>
+          </div>
+        </div>
+        <div class="solicitud-details">
+          <div class="detail-item">
+            <span class="detail-label">No. Control:</span>
+            <span class="detail-value">${solicitud.noControl}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Cantidad:</span>
+            <span class="detail-value">${solicitud.cantidad}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Material solicitado:</span>
+            <span class="detail-value">${solicitud.materialSolicitado}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Hora:</span>
+            <span class="detail-value">${solicitud.hora}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Motivo:</span>
+            <span class="detail-value">${solicitud.motivo}</span>
+          </div>
+        </div>
+      </div>
+    `,
+      )
+      .join("")
+  }
 
   attachButtonEventListeners()
-
-  console.log("[v0 Frontend] Renderizado completado")
 }
 
 function attachButtonEventListeners() {
@@ -162,6 +217,14 @@ function attachButtonEventListeners() {
       e.preventDefault()
       const id = this.getAttribute("data-id")
       rechazarSolicitud(id)
+    })
+  })
+
+  document.querySelectorAll(".btn-finalizar").forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault()
+      const id = this.getAttribute("data-id")
+      finalizarSolicitud(id)
     })
   })
 }
@@ -244,4 +307,44 @@ async function rechazarSolicitud(id) {
   }
 }
 
+async function finalizarSolicitud(id) {
+  if (confirm("¿Estás seguro de que deseas finalizar esta solicitud?")) {
+    try {
+      console.log("[v0] Finalizando solicitud:", id)
+
+      if (!id || id.trim() === "") {
+        throw new Error("ID de solicitud inválido")
+      }
+
+      const response = await fetch(`http://localhost:3000/solicitudes-prestamo/${id}/finalizar`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      })
+
+      console.log("[v0] Response status:", response.status)
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`)
+      }
+
+      const result = await response.json()
+      console.log("[v0] Respuesta del servidor:", result)
+
+      if (result.success) {
+        alert("Solicitud finalizada exitosamente")
+        await cargarSolicitudes()
+      } else {
+        alert("Error al finalizar la solicitud: " + (result.error || "Error desconocido"))
+      }
+    } catch (error) {
+      console.error("[v0] Error al finalizar solicitud:", error)
+      alert("Error al finalizar la solicitud: " + error.message)
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", cargarSolicitudes)
+

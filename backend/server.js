@@ -649,6 +649,8 @@ app.get("/solicitudes-prestamo", async (req, res) => {
   res.header("Access-Control-Allow-Headers", "Content-Type")
 
   try {
+    const estado = req.query.estado || "E01"
+
     const query = `
       SELECT 
         (u.nombres || ' ' || u.apellidos) as nombre,
@@ -664,11 +666,11 @@ app.get("/solicitudes-prestamo", async (req, res) => {
       JOIN vales_has_materiales vm ON vm.vales_prestamos_id_vales = vp.id_vales
       LEFT JOIN materiales m ON vm.materiales_id_materiales = m.id_materiales
       JOIN estado e ON e.id_estado = vp.estado_id_estado
-      WHERE vp.estado_id_estado = 'E01'
+      WHERE vp.estado_id_estado = $1
     `
 
-    const result = await pool.query(query)
-    console.log("[v0 Server] Datos retornados:", result.rows)
+    const result = await pool.query(query, [estado])
+    console.log("[v0 Server] Datos retornados (estado: " + estado + "):", result.rows)
     res.json(result.rows)
   } catch (error) {
     console.error("[Error al obtener solicitudes:", error)
@@ -676,9 +678,7 @@ app.get("/solicitudes-prestamo", async (req, res) => {
   }
 })
 
-// 2. PUT - Aprobar solicitud (cambiar E01 a E02)
-// 2. PUT - Aprobar solicitud (cambiar E01 a E02)
-app.put("/solicitudes-prestamo/:id/aprobar", async (req, res) => {
+app.put("/solicitudes-prestamo/:id/finalizar", async (req, res) => {
   res.header("Access-Control-Allow-Origin", "*")
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS")
   res.header("Access-Control-Allow-Headers", "Content-Type")
@@ -693,23 +693,11 @@ app.put("/solicitudes-prestamo/:id/aprobar", async (req, res) => {
       })
     }
 
-    console.log("[v0 Server] Aprobando solicitud:", id)
+    console.log("[v0 Server] Finalizando solicitud:", id)
 
-    // <CHANGE> Actualizar cantidad_disponible de materiales al restar la cantidad prestada
-    const updateMaterialesQuery = `
-      UPDATE materiales m
-      SET cantidad_disponible = m.cantidad_disponible - vm.cantidad
-      FROM vales_has_materiales vm
-      WHERE vm.materiales_id_materiales = m.id_materiales 
-      AND vm.vales_prestamos_id_vales = $1
-    `
-
-    await pool.query(updateMaterialesQuery, [id])
-
-    // Actualizar estado del vale
     const query = `
       UPDATE vales_prestamos 
-      SET estado_id_estado = 'E02' 
+      SET estado_id_estado = 'E05' 
       WHERE id_vales = $1
       RETURNING id_vales
     `
@@ -723,63 +711,14 @@ app.put("/solicitudes-prestamo/:id/aprobar", async (req, res) => {
       })
     }
 
-    console.log("[v0 Server] Solicitud aprobada:", id)
+    console.log("[v0 Server] Solicitud finalizada:", id)
     res.json({
       success: true,
-      message: "Solicitud aprobada exitosamente",
+      message: "Solicitud finalizada exitosamente",
       id: id,
     })
   } catch (error) {
-    console.error("[Error al aprobar solicitud:", error)
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    })
-  }
-})
-
-// 3. PUT - Rechazar solicitud (cambiar E01 a E03)
-app.put("/solicitudes-prestamo/:id/rechazar", async (req, res) => {
-  res.header("Access-Control-Allow-Origin", "*")
-  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS")
-  res.header("Access-Control-Allow-Headers", "Content-Type")
-
-  try {
-    const { id } = req.params
-
-    if (!id || id.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        error: "ID de solicitud inválido",
-      })
-    }
-
-    console.log("[v0 Server] Rechazando solicitud:", id)
-
-    const query = `
-      UPDATE vales_prestamos 
-      SET estado_id_estado = 'E03' 
-      WHERE id_vales = $1
-      RETURNING id_vales
-    `
-
-    const result = await pool.query(query, [id])
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: "Solicitud no encontrada",
-      })
-    }
-
-    console.log("[v0 Server] Solicitud rechazada:", id)
-    res.json({
-      success: true,
-      message: "Solicitud rechazada exitosamente",
-      id: id,
-    })
-  } catch (error) {
-    console.error("[Error al rechazar solicitud:", error)
+    console.error("[Error al finalizar solicitud:", error)
     res.status(500).json({
       success: false,
       error: error.message,
