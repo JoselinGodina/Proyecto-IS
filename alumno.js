@@ -446,14 +446,17 @@ function renderSolicitudes(solicitudesData) {
         <p style="margin: 0.5rem 0;"><strong>Motivo:</strong> ${solicitud.motivo}</p>
       </div>
       ${
-        solicitud.estado === "Aprobado"
-          ? `
-        <button class="devolver-btn" onclick="devolverMaterial(${solicitud.id_vales})" style="margin-top: 1rem; width: 100%;">
-          Devolver Material
-        </button>
-      `
-          : ""
-      }
+  solicitud.estado === "Aprobado"
+    ? `
+  <button class="devolver-btn" onclick="devolverMaterial(${solicitud.id_vales})" style="margin-top: 1rem; width: 100%;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    Devolver Material
+  </button>
+`
+    : ""
+}
     </div>
   `,
     )
@@ -514,6 +517,19 @@ async function devolverMaterial(id_vales) {
     return
   }
 
+  // Encontrar el botón que disparó la acción
+  const btn = event.target.closest('.devolver-btn')
+  
+  // Guardar el contenido original
+  const originalContent = btn.innerHTML
+  
+  // Mostrar estado de carga
+  btn.classList.add('loading')
+  btn.innerHTML = `
+    <span class="btn-spinner"></span>
+    Procesando...
+  `
+
   try {
     const response = await fetch(`http://localhost:3000/vales-prestamo/${id_vales}/devolver`, {
       method: 'PUT',
@@ -525,13 +541,26 @@ async function devolverMaterial(id_vales) {
     const result = await response.json()
 
     if (response.ok && result.success) {
+      // Restaurar botón antes de mostrar la alerta
+      btn.classList.remove('loading')
+      btn.innerHTML = originalContent
+      
       alert('Material marcado como devuelto exitosamente')
       fetchSolicitudes() // Recargar las solicitudes
     } else {
+      // Restaurar botón en caso de error
+      btn.classList.remove('loading')
+      btn.innerHTML = originalContent
+      
       alert(result.error || 'Error al devolver el material')
     }
   } catch (error) {
     console.error('[Alumno] Error al devolver material:', error)
+    
+    // Restaurar botón en caso de error
+    btn.classList.remove('loading')
+    btn.innerHTML = originalContent
+    
     alert('Error al procesar la devolución. Intenta nuevamente.')
   }
 }
