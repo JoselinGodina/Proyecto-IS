@@ -411,6 +411,7 @@ async function fetchSolicitudes() {
 }
 
 
+// Busca esta función y reemplázala completamente:
 function renderSolicitudes(solicitudesData) {
   const grid = document.getElementById("solicitudesGrid")
   if (!grid) return
@@ -431,23 +432,108 @@ function renderSolicitudes(solicitudesData) {
       <div class="material-header">
         <div>
           <h3 class="material-title">Solicitud #${solicitud.id_vales}</h3>
-          <span class="material-category">Solicitado: ${formatDate(solicitud.hora_entrega)}</span>
+          <span class="material-category">Solicitado: ${formatTime(solicitud.hora_entrega)}</span>
         </div>
         <span class="status-badge status-${solicitud.estado.toLowerCase()}">${solicitud.estado}</span>
       </div>
       <div style="margin: 1rem 0;">
         <p><strong>Material:</strong> ${solicitud.materiales || "N/A"}</p>
-        <p><strong>Fecha de préstamo:</strong> ${formatDate(solicitud.hora_entrega)}</p>
-        <p><strong>Cantidad total:</strong> ${solicitud.cantidad_total || 0} unidades</p>
-        ${solicitud.hora_devolucion ? `<p><strong>Fecha de devolución:</strong> ${formatDate(solicitud.hora_devolucion)}</p>` : ""}
+        <!-- Cambiado de "Fecha de préstamo" a "Hora de entrega" -->
+        <p><strong>Hora de entrega:</strong> ${formatTime(solicitud.hora_entrega)}</p>
+        ${solicitud.hora_devolucion ? `<p><strong>Hora de devolución:</strong> ${formatTime(solicitud.hora_devolucion)}</p>` : ""}
       </div>
       <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
         <p style="margin: 0.5rem 0;"><strong>Motivo:</strong> ${solicitud.motivo}</p>
       </div>
+      ${
+        solicitud.estado === "Aprobado"
+          ? `
+        <button class="devolver-btn" onclick="devolverMaterial(${solicitud.id_vales})" style="margin-top: 1rem; width: 100%;">
+          Devolver Material
+        </button>
+      `
+          : ""
+      }
     </div>
   `,
     )
     .join("")
+}
+
+function formatTime(timeString) {
+  if (!timeString) return "No especificada"
+
+  try {
+    // El campo hora_entrega es de tipo TIME en PostgreSQL (formato: HH:MM:SS)
+    const timeParts = timeString.split(":")
+    if (timeParts.length < 2) return "Hora inválida"
+
+    let hours = Number.parseInt(timeParts[0])
+    const minutes = timeParts[1]
+
+    // Convertir a formato 12 horas con AM/PM
+    const ampm = hours >= 12 ? "PM" : "AM"
+    hours = hours % 12
+    hours = hours ? hours : 12 // La hora '0' debe ser '12'
+
+    return `${hours}:${minutes} ${ampm}`
+  } catch (error) {
+    console.error("[Alumno] Error al formatear hora:", error)
+    return "Error en formato"
+  }
+}
+
+
+function formatDateTime(dateString) {
+  if (!dateString) return "No especificada"
+
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return "Fecha inválida"
+
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }
+
+    return date.toLocaleString("es-MX", options)
+  } catch (error) {
+    console.error("[Alumno] Error al formatear fecha:", error)
+    return "Error en formato"
+  }
+}
+
+
+// Agrega esta nueva función al final del archivo:
+async function devolverMaterial(id_vales) {
+  if (!confirm('¿Estás seguro de que deseas marcar este material como devuelto?')) {
+    return
+  }
+
+  try {
+    const response = await fetch(`http://localhost:3000/vales-prestamo/${id_vales}/devolver`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const result = await response.json()
+
+    if (response.ok && result.success) {
+      alert('Material marcado como devuelto exitosamente')
+      fetchSolicitudes() // Recargar las solicitudes
+    } else {
+      alert(result.error || 'Error al devolver el material')
+    }
+  } catch (error) {
+    console.error('[Alumno] Error al devolver material:', error)
+    alert('Error al procesar la devolución. Intenta nuevamente.')
+  }
 }
 
 // ----------------------

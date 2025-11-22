@@ -993,3 +993,25 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Agrega esto al final de tu archivo CSS */
+.devolver-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #28a745;
+  color: var(--color-white);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.devolver-btn:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.devolver-btn:active {
+  transform: translateY(0);
+}

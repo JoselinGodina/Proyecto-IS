@@ -640,6 +640,43 @@ app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
   }
 })
 
+//devolver vale del alumno
+// Endpoint para marcar material como devuelto
+app.put("/vales-prestamo/:id_vales/devolver", async (req, res) => {
+  try {
+    const { id_vales } = req.params
+    
+    // Verificar que el vale existe y está en estado Aceptado (E02)
+    const checkResult = await pool.query(
+      `SELECT estado_id_estado FROM vales_prestamos WHERE id_vales = $1`,
+      [id_vales]
+    )
+    
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ error: "Vale no encontrado" })
+    }
+    
+    if (checkResult.rows[0].estado_id_estado !== 'E02') {
+      return res.status(400).json({ error: "Solo se pueden devolver materiales aceptados" })
+    }
+    
+    // Actualizar el estado a Devuelto (asumiendo que E03 o similar es el estado Devuelto)
+    // Ajusta 'E03' según tu base de datos
+    const result = await pool.query(
+      `UPDATE vales_prestamos 
+       SET estado_id_estado = 'E03', hora_devolucion = NOW()
+       WHERE id_vales = $1
+       RETURNING *`,
+      [id_vales]
+    )
+    
+    res.json({ success: true, vale: result.rows[0] })
+  } catch (error) {
+    console.error("Error al devolver material:", error)
+    res.status(500).json({ error: "Error al devolver material: " + error.message })
+  }
+})
+
 // Codigos para la parte de solicitudes en la pantalla del administrador
 
 // 1. GET - Obtener todas las solicitudes pendientes con los datos de la consulta
