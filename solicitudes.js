@@ -1,3 +1,5 @@
+//const { default: Swal } = require("sweetalert2")
+
 let solicitudes = []
 
 async function cargarSolicitudes() {
@@ -243,92 +245,154 @@ function attachButtonEventListeners() {
 }
 
 async function aprobarSolicitud(id) {
-  if (confirm("¿Estás seguro de que deseas aprobar esta solicitud?")) {
-    try {
-      console.log("[v0] Aprobando solicitud con ID:", id)
+  // Confirmación con Swal
+  const confirmacion = await Swal.fire({
+    title: "¿Aprobar solicitud?",
+    text: "Se restarán los materiales del inventario.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, aprobar",
+    cancelButtonText: "Cancelar"
+  });
 
-      if (!id || id.trim() === "") {
-        throw new Error("ID de solicitud inválido")
-      }
+  // Si da cancelar, no hace nada
+  if (!confirmacion.isConfirmed) return;
 
-      const url = `http://localhost:3000/solicitudes-prestamo/${id}/aprobar`
-      console.log("[v0] URL de solicitud:", url)
+  try {
+    console.log("[v0] Aprobando solicitud con ID:", id);
 
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      })
-
-      console.log("[v0] Response status:", response.status)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error("[v0] Error response:", errorText)
-        throw new Error(`Error HTTP: ${response.status}`)
-      }
-
-      const result = await response.json()
-      console.log("[v0] Respuesta del servidor:", result)
-
-      if (result.success) {
-        alert("✓ Solicitud aprobada exitosamente\n- Materiales restados correctamente\n- Estado: E02")
-        await cargarSolicitudes()
-      } else {
-        alert("❌ Error al aprobar la solicitud: " + (result.error || "Error desconocido"))
-      }
-    } catch (error) {
-      console.error("[v0] Error al aprobar solicitud:", error)
-      alert("❌ Error al aprobar la solicitud: " + error.message)
+    if (!id || id.trim() === "") {
+      throw new Error("ID de solicitud inválido");
     }
+
+    const url = `http://localhost:3000/solicitudes-prestamo/${id}/aprobar`;
+    console.log("[v0] URL de solicitud:", url);
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+
+    console.log("[v0] Response status:", response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[v0] Error response:", errorText);
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log("[v0] Respuesta del servidor:", result);
+
+    if (result.success) {
+      // Mensaje bonito de aprobación
+      await Swal.fire({
+        icon: "success",
+        title: "Solicitud aprobada",
+        html: `
+          ✓ Materiales restados correctamente<br>
+          Estado actualizado a <b>E02</b>
+        `,
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      await cargarSolicitudes();
+
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Error al aprobar",
+        text: result.error || "Error desconocido"
+      });
+    }
+
+  } catch (error) {
+    console.error("[v0] Error al aprobar solicitud:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.message
+    });
   }
 }
+
 
 async function rechazarSolicitud(id) {
-  if (confirm("¿Estás seguro de que deseas rechazar esta solicitud?")) {
-    try {
-      console.log("[v0] Rechazando solicitud con ID:", id)
+  // Confirmación con Swal
+  const confirmacion = await Swal.fire({
+    title: "¿Rechazar solicitud?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, rechazar",
+    cancelButtonText: "Cancelar"
+  });
 
-      if (!id || id.trim() === "") {
-        throw new Error("ID de solicitud inválido")
-      }
+  // Si cancela, salir
+  if (!confirmacion.isConfirmed) return;
 
-      const url = `http://localhost:3000/solicitudes-prestamo/${id}/rechazar`
-      console.log("[v0] URL de solicitud:", url)
+  try {
+    console.log("[v0] Rechazando solicitud con ID:", id);
 
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      })
-
-      console.log("[v0] Response status:", response.status)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error("[v0] Error response:", errorText)
-        throw new Error(`Error HTTP: ${response.status}`)
-      }
-
-      const result = await response.json()
-      console.log("[v0] Respuesta del servidor:", result)
-
-      if (result.success) {
-        alert("✓ Solicitud rechazada\n- Estado: E03")
-        await cargarSolicitudes()
-      } else {
-        alert("❌ Error al rechazar la solicitud: " + (result.error || "Error desconocido"))
-      }
-    } catch (error) {
-      console.error("[v0] Error al rechazar solicitud:", error)
-      alert("❌ Error al rechazar la solicitud: " + error.message)
+    if (!id || id.trim() === "") {
+      throw new Error("ID de solicitud inválido");
     }
+
+    const url = `http://localhost:3000/solicitudes-prestamo/${id}/rechazar`;
+    console.log("[v0] URL de solicitud:", url);
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+
+    console.log("[v0] Response status:", response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[v0] Error response:", errorText);
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log("[v0] Respuesta del servidor:", result);
+
+    if (result.success) {
+      await Swal.fire({
+        icon: "success",
+        title: "Solicitud rechazada",
+        html: "Estado actualizado a <b>E03</b>",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      await cargarSolicitudes();
+
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Error al rechazar",
+        text: result.error || "Error desconocido"
+      });
+    }
+
+  } catch (error) {
+    console.error("[v0] Error al rechazar solicitud:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.message
+    });
   }
 }
+
 
 async function finalizarSolicitud(id) {
   if (confirm("¿Estás seguro de que deseas finalizar esta solicitud?")) {
