@@ -448,7 +448,7 @@ function renderSolicitudes(solicitudesData) {
       ${
   solicitud.estado === "Aprobado"
     ? `
-  <button class="devolver-btn" onclick="devolverMaterial(${solicitud.id_vales})" style="margin-top: 1rem; width: 100%;">
+  <button class="devolver-btn" onclick="devolverMaterial('${solicitud.id_vales}')" style="margin-top: 1rem; width: 100%;">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));">
       <polyline points="20 6 9 17 4 12"></polyline>
     </svg>
