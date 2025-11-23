@@ -664,7 +664,7 @@ app.put("/vales-prestamo/:id_vales/devolver", async (req, res) => {
     // Ajusta 'E03' según tu base de datos
     const result = await pool.query(
       `UPDATE vales_prestamos 
-       SET estado_id_estado = 'E03', hora_devolucion = NOW()
+       SET estado_id_estado = 'E04', hora_devolucion = NOW()
        WHERE id_vales = $1
        RETURNING *`,
       [id_vales]
