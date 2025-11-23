@@ -46,32 +46,36 @@
     </nav>
 
     <main class="main-content">
-        <div class="content-header">
-            <h2>Solicitudes de Préstamo</h2>
-            <p>Revisa y aprueba las solicitudes de préstamo de material de laboratorio</p>
+    <div class="content-header">
+        <h2>Solicitudes de Préstamo</h2>
+        <p>Revisa y aprueba las solicitudes de préstamo de material de laboratorio</p>
+    </div>
+
+    <!-- GRID DE DOS COLUMNAS -->
+    <div class="solicitudes-grid">
+
+        <!-- Columna 1 -->
+        <div>
+            <div class="section-header">
+                <h3>Solicitudes Pendientes</h3>
+                <p id="pendingCount">1 solicitudes esperando aprobación</p>
+            </div>
+            <div class="solicitudes-container" id="solicitudesContainer"></div>
         </div>
 
-        <!-- Sección de Solicitudes Pendientes -->
-        <div class="section-header">
-            <h3>Solicitudes Pendientes</h3>
-            <p id="pendingCount">1 solicitudes esperando aprobación</p>
+        <!-- Columna 2 -->
+        <div>
+            <div class="section-header">
+                <h3>Solicitudes Devueltas</h3>
+                <p id="devueltosCount">0 solicitudes devueltas</p>
+            </div>
+            <div class="solicitudes-container" id="solicitudesDevueltasContainer"></div>
         </div>
 
-        <div class="solicitudes-container" id="solicitudesContainer">
-            <!-- Solicitudes pendientes will be rendered here -->
-        </div>
+    </div>
+</main>
 
-        <!-- Nueva sección para solicitudes devueltas -->
-        <div class="section-header" style="margin-top: 2rem;">
-            <h3>Solicitudes Devueltas</h3>
-            <p id="devueltosCount">0 solicitudes devueltas</p>
-        </div>
-
-        <div class="solicitudes-container" id="solicitudesDevueltasContainer">
-            <!-- Solicitudes devueltas will be rendered here -->
-        </div>
-    </main>
-
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="solicitudes.js"></script>
 </body>
 </html>

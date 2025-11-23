@@ -339,3 +339,17 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Contenedor principal de 2 columnas */
+.solicitudes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* Para que cada columna sea scrollable si hay muchas solicitudes */
+.solicitudes-container {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
