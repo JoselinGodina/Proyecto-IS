@@ -614,7 +614,30 @@ app.get("/docentes", async (req, res) => {
   }
 });
 
-
+// 👤 Obtener usuario con su carrera
+app.get("/usuario/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(`
+      SELECT 
+        u.id_usuario, 
+        (u.nombres || ' ' || u.apellidos) AS nombre_completo,
+        c.descripcion as carrera
+      FROM usuarios u
+      JOIN carreras c ON u.carreras_id_carreras = c.id_carreras
+      WHERE u.id_usuario = $1
+    `, [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error al obtener usuario:", err);
+    res.status(500).json({ error: "Error al obtener usuario" });
+  }
+});
 
 //vales en la pantalla del alumno
 app.get("/vales-prestamo/usuario/:id_usuario", async (req, res) => {
