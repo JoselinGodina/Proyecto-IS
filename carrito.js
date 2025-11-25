@@ -15,12 +15,23 @@ document.addEventListener("DOMContentLoaded", () => {
   mostrarUsuario(); // 👈
 });
 
-function mostrarUsuario() {
+async function mostrarUsuario() {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   if (!usuario) return;
 
-  document.getElementById("userName").textContent = `${usuario.nombres} ${usuario.apellidos}`;
-  document.getElementById("userCareer").textContent = usuario.carrera || "No registrada";
+  // Obtener datos completos del usuario con carrera
+  try {
+    const response = await fetch(`http://localhost:3000/usuario/${usuario.id_usuario}`);
+    const userData = await response.json();
+    
+    document.getElementById("userName").textContent = userData.nombre_completo;
+    document.getElementById("userCareer").textContent = userData.carrera || "No registrada";
+  } catch (error) {
+    console.error("Error al cargar datos del usuario:", error);
+    // Fallback a datos del localStorage
+    document.getElementById("userName").textContent = `${usuario.nombres} ${usuario.apellidos}`;
+    document.getElementById("userCareer").textContent = "No disponible";
+  }
 }
 
 
