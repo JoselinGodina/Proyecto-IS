@@ -938,11 +938,14 @@ app.get('/reporte/material-danado', async (req, res) => {
 app.get('/reporte/carreras-visitas', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT c.descripcion AS nombre, 'Carrera' AS categoria, COUNT(u.id_usuario) AS cantidad
-      FROM usuarios u
-      JOIN carreras c ON u.carreras_id_carreras = c.id_carreras
-      GROUP BY c.descripcion
-      ORDER BY cantidad DESC;
+     SELECT 
+    c.descripcion AS nombre,
+    'Carrera' AS categoria,
+    COUNT(u.id_usuario) AS cantidad
+FROM carreras c
+LEFT JOIN usuarios u ON u.carreras_id_carreras = c.id_carreras
+GROUP BY c.descripcion
+ORDER BY cantidad DESC;
     `);
     res.json(result.rows);
   } catch (err) {

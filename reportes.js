@@ -28,16 +28,54 @@
 }
 
 
+function obtenerFechaActual() {
+    const fecha = new Date();
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+}
+
+function obtenerSemestreActual() {
+    const fecha = new Date();
+    const mes = fecha.getMonth() + 1;
+
+    if (mes >= 2 && mes <= 7) {
+        return "Febrero - Julio";
+    } else {
+        return "Agosto - Diciembre";
+    }
+}
+
+function obtenerFechaActual() {
+    const fecha = new Date();
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+}
+
 async function generarPDFConGrafica(data) {
 
-    // 1️⃣ Preparar arrays
+    const semestreActual = obtenerSemestreActual();
+    const fechaActual = obtenerFechaActual();
+
+    // Preparar datos
     const labels = data.map(item => item.nombre);
     const valores = data.map(item => item.cantidad);
 
-    // 2️⃣ Crear gráfica en canvas oculto
+    // Calcular máximo para escalar Y dinámicamente
+    const maxValor = Math.max(...valores);
+    const suggestedMax = maxValor <= 10 ? 10 :
+                         maxValor <= 50 ? 50 :
+                         maxValor <= 100 ? 100 :
+                         maxValor + 20;
+
+    const step = Math.ceil(suggestedMax / 10);
+
+    // Canvas
     const ctx = document.getElementById('graficaCarreras').getContext('2d');
 
-    // Destruir gráfica previa si existe
     if (window.graficaReporte) {
         window.graficaReporte.destroy();
     }
@@ -52,16 +90,32 @@ async function generarPDFConGrafica(data) {
                 backgroundColor: "#4A90E2"
             }]
         },
-        options: { responsive: false }
+        options: { 
+            responsive: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: suggestedMax,
+                    ticks: {
+                        stepSize: step
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Visitas por Carrera – ${semestreActual} – ${fechaActual}`
+                }
+            }
+        }
     });
 
-    // Esperar a que la gráfica se dibuje
+    // Esperar que se renderice
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    // 3️⃣ Convertir gráfica a imagen
     const imagenGrafica = document.getElementById('graficaCarreras').toDataURL('image/png');
 
-    // 4️⃣ Crear PDF con jsPDF
+    // Crear PDF
     const pdf = new jspdf.jsPDF();
 
     pdf.setFontSize(16);
@@ -69,12 +123,15 @@ async function generarPDFConGrafica(data) {
 
     pdf.setFontSize(12);
     pdf.text("Gráfica generada automáticamente con estadísticas actuales.", 10, 25);
+    pdf.text(`Semestre actual: ${semestreActual}`, 10, 32);
+    pdf.text(`Fecha del reporte: ${fechaActual}`, 10, 39);
 
-    // Insertar la gráfica en el PDF
-    pdf.addImage(imagenGrafica, 'PNG', 10, 40, 180, 110);
+    pdf.addImage(imagenGrafica, 'PNG', 10, 50, 180, 110);
 
     pdf.save("reporte_carreras_visitas.pdf");
 }
+
+
 
 
        async function generarExcel(categoria) {
