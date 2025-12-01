@@ -305,12 +305,12 @@ async function guardarCambios() {
     const nuevaCategoria = document.getElementById("categoria").value
 
     if (!nuevoNombre) {
-      alert("El nombre del material no puede estar vacío")
+      Swal.fire("El nombre del material no puede estar vacío")
       return
     }
 
     if (!nuevaCategoria) {
-      alert("Debes seleccionar una categoría")
+      Swal.fire("Debes seleccionar una categoría")
       return
     }
 
@@ -349,13 +349,13 @@ const response = await fetch(`http://localhost:3000/materiales/editar/${material
     const result = await response.json()
     console.log("[v0] Material actualizado exitosamente:", result)
 
-    alert("Cambios guardados exitosamente")
+    Swal.fire("Cambios guardados exitosamente")
 
     cerrarModal()
     await cargarMateriales()
   } catch (error) {
     console.error("[v0] Error al guardar cambios:", error)
-    alert("Error al guardar cambios: " + error.message)
+    Swal.fire("Error al guardar cambios: " + error.message)
   }
 }
 

@@ -1,9 +1,29 @@
+//const { default: Swal } = require("sweetalert2");
 
-        function cerrarSesion() {
-            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-                alert('Cerrando sesión...');
-            }
+       function cerrarSesion() {
+    Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Tu sesión se cerrará",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, cerrar sesión",
+        cancelButtonText: "Cancelar"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: "Cerrando sesión...",
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                localStorage.removeItem("usuario");
+                localStorage.removeItem("userRole");
+                window.location.href = "index.html";
+            });
         }
+    });
+}
+
 
         function generarReporte(tipo, categoria) {
     console.log('[v0] Generando reporte:', tipo, categoria);
@@ -25,7 +45,7 @@
     } else if (tipo === 'excel') {
         generarExcel(categoria);
     }
-}
+//}
 
 
 function obtenerFechaActual() {

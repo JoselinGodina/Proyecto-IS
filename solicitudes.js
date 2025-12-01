@@ -429,11 +429,11 @@ async function finalizarSolicitud(id) {
         alert("✓ Solicitud finalizada exitosamente")
         await cargarSolicitudes()
       } else {
-        alert("❌ Error al finalizar la solicitud: " + (result.error || "Error desconocido"))
+        Swal.fire("❌ Error al finalizar la solicitud: " + (result.error || "Error desconocido"))
       }
     } catch (error) {
       console.error("[v0] Error al finalizar solicitud:", error)
-      alert("❌ Error al finalizar la solicitud: " + error.message)
+      Swal.fire("❌ Error al finalizar la solicitud: " + error.message)
     }
   }
 }

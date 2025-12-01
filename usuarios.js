@@ -47,7 +47,7 @@ async function cargarUsuarios() {
     renderUsers()
   } catch (error) {
     console.error("Error al cargar usuarios:", error)
-    alert("Error al cargar los usuarios de la base de datos")
+    Swal.fire("Error al cargar los usuarios de la base de datos")
   }
 }
 
