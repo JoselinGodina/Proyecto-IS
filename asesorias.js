@@ -106,15 +106,40 @@ async function guardarAsesoria(event) {
 
 // 🔹 Cancelar asesoría
 async function cancelarAsesoria(id) {
-  if (confirm("¿Seguro que deseas cancelar esta asesoría?")) {
-    try {
-      await fetch(`${API_URL}/${id}`, { method: "DELETE" })
-      inicializarAsesorias()
-    } catch (error) {
-      console.error("Error al cancelar asesoría:", error)
+  Swal.fire({
+    title: "¿Cancelar asesoría?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, cancelar",
+    cancelButtonText: "No, regresar"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+
+        Swal.fire({
+          title: "Asesoría cancelada",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        inicializarAsesorias();
+
+      } catch (error) {
+        console.error("Error al cancelar asesoría:", error);
+
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo cancelar la asesoría",
+          icon: "error"
+        });
+      }
     }
-  }
+  });
 }
+
 
 // 🔹 Generar ID
 function generarID() {
@@ -295,7 +320,7 @@ async function verInscritos(idAsesoria) {
     mostrarModalInscritos(contenido)
   } catch (error) {
     console.error("Error al obtener inscritos:", error)
-    alert("No se pudieron cargar los alumnos inscritos.")
+    Swal.fire("No se pudieron cargar los alumnos inscritos.")
   }
 }
 

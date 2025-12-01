@@ -79,7 +79,7 @@ async function cargarCategorias() {
 
     if (!categorias || categorias.length === 0) {
       console.warn("[v0] No se encontraron categorías en la base de datos")
-      alert("No hay categorías disponibles. Por favor, agrega categorías primero.")
+      Swal.fire("No hay categorías disponibles. Por favor, agrega categorías primero.")
       return
     }
 
@@ -109,7 +109,7 @@ async function cargarCategorias() {
     })
   } catch (error) {
     console.error("[v0] Error al cargar categorías:", error)
-    alert("Error al cargar las categorías: " + error.message)
+    Swal.fire("Error al cargar las categorías: " + error.message)
   }
 }
 
@@ -235,7 +235,7 @@ submitBtn.addEventListener("click", (e) => {
     const categoryId = categoryInput.value
 
     if (!categoryId) {
-      alert("Por favor selecciona una categoría")
+      Swal.fire("Por favor selecciona una categoría")
       return
     }
 
@@ -246,7 +246,7 @@ submitBtn.addEventListener("click", (e) => {
       categoria_id_categoria: Number.parseInt(categoryId),
     })
 
-    alert("Material agregado a la lista temporal")
+    Swal.fire("Material agregado a la lista temporal")
 
     // Limpiar el formulario para poder agregar otro
     materialForm.reset()
@@ -259,7 +259,7 @@ submitBtn.addEventListener("click", (e) => {
     console.log("Materiales pendientes:", materialesPendientes)
     actualizarListaTemporal() // ✅ DEJA SOLO ESTA
   } else {
-    alert("Por favor completa todos los campos requeridos")
+    Swal.fire("Por favor completa todos los campos requeridos")
   }
 })
 
@@ -282,7 +282,7 @@ const saveAllBtn = document.getElementById("saveAllBtn")
 
 saveAllBtn.addEventListener("click", async () => {
   if (materialesPendientes.length === 0) {
-    alert("No hay materiales pendientes para guardar")
+    Swal.fire("No hay materiales pendientes para guardar")
     return
   }
 
@@ -297,14 +297,14 @@ saveAllBtn.addEventListener("click", async () => {
 
     if (!response.ok) throw new Error(data.error || "Error al guardar materiales")
 
-    alert("Todos los materiales se guardaron correctamente")
+    Swal.fire("Todos los materiales se guardaron correctamente")
 
     materialesPendientes = [] // limpiar lista temporal
     modalOverlay.classList.remove("active")
     await cargarMateriales()
   } catch (error) {
     console.error("Error al guardar múltiples materiales:", error)
-    alert(error.message)
+    Swal.fire(error.message)
   }
 })
 
