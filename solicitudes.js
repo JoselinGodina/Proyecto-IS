@@ -1,6 +1,18 @@
 //const { default: Swal } = require("sweetalert2")
+// 🔐 1. Bloquear acceso si no hay sesión (no permite volver atrás)
+if (!localStorage.getItem("adminLogueado")) {
+  window.location.replace("index.html");
+}
+
+// 🔒 2. Evitar regresar con flecha ← durante la sesión
+history.pushState(null, null, location.href);
+window.onpopstate = function () {
+  history.go(1);
+};
+
 
 let solicitudes = []
+
 
 async function cargarSolicitudes() {
   try {
@@ -466,3 +478,30 @@ document.addEventListener("DOMContentLoaded", function() {
   console.log("[v0] DOM cargado, iniciando solicitudes...")
   cargarSolicitudes()
 })
+
+function cerrarSesion() {
+  Swal.fire({
+    title: "¿Cerrar sesión?",
+    text: "Tendrás que iniciar sesión de nuevo para entrar.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, salir",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+
+      // 1️⃣ Borrar todo lo relacionado a la sesión
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // 2️⃣ Prevenir que vuelva con las flechas
+      history.pushState(null, null, location.href);
+      window.onpopstate = function () {
+        history.go(1);
+      };
+
+      // 3️⃣ Redirigir al login o página principal
+      window.location.href = "index.html";
+    }
+  });
+}

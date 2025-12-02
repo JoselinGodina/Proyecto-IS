@@ -66,12 +66,14 @@ loginForm.addEventListener("submit", async (e) => {
       }).then(() => {
         // Redirigir según el rol
         if (data.user.roles_id_rol === "1") {
-          window.location.href = "usuarios.html";
-        } else if (data.user.roles_id_rol === "2") {
-          window.location.href = "Docente.html";
-        } else {
-          window.location.href = "alumno.html";
-        }
+  localStorage.setItem("adminLogueado", "true");  // 🔥 IMPORTANTE
+  window.location.href = "usuarios.html";
+} else if (data.user.roles_id_rol === "2") {
+  window.location.href = "Docente.html";
+} else {
+  window.location.href = "alumno.html";
+}
+
       });
     } else {
       // ❌ SweetAlert de error de credenciales
