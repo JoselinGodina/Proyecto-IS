@@ -395,48 +395,71 @@ async function rechazarSolicitud(id) {
 
 
 async function finalizarSolicitud(id) {
-  if (confirm("¿Estás seguro de que deseas finalizar esta solicitud?")) {
+  const confirmar = await Swal.fire({
+    title: "¿Estás seguro?",
+    text: "Esta acción finalizará la solicitud.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, finalizar",
+    cancelButtonText: "Cancelar",
+  });
+
+  if (confirmar.isConfirmed) {
     try {
-      console.log("[v0] Finalizando solicitud con ID:", id)
+      console.log("[v0] Finalizando solicitud con ID:", id);
 
       if (!id || id.trim() === "") {
-        throw new Error("ID de solicitud inválido")
+        throw new Error("ID de solicitud inválido");
       }
 
-      const url = `http://localhost:3000/solicitudes-prestamo/${id}/finalizar`
-      console.log("[v0] URL de solicitud:", url)
+      const url = `http://localhost:3000/solicitudes-prestamo/${id}/finalizar`;
+      console.log("[v0] URL de solicitud:", url);
 
       const response = await fetch(url, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
-      })
+      });
 
-      console.log("[v0] Response status:", response.status)
+      console.log("[v0] Response status:", response.status);
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("[v0] Error response:", errorText)
-        throw new Error(`Error HTTP: ${response.status}`)
+        const errorText = await response.text();
+        console.error("[v0] Error response:", errorText);
+        throw new Error(`Error HTTP: ${response.status}`);
       }
 
-      const result = await response.json()
-      console.log("[v0] Respuesta del servidor:", result)
+      const result = await response.json();
+      console.log("[v0] Respuesta del servidor:", result);
 
       if (result.success) {
-        alert("✓ Solicitud finalizada exitosamente")
-        await cargarSolicitudes()
+        await Swal.fire({
+          icon: "success",
+          title: "Solicitud finalizada exitosamente",
+        });
+
+        await cargarSolicitudes();
+
       } else {
-        Swal.fire("❌ Error al finalizar la solicitud: " + (result.error || "Error desconocido"))
+        Swal.fire({
+          icon: "error",
+          title: "Error al finalizar la solicitud",
+          text: result.error || "Error desconocido",
+        });
       }
+
     } catch (error) {
-      console.error("[v0] Error al finalizar solicitud:", error)
-      Swal.fire("❌ Error al finalizar la solicitud: " + error.message)
+      console.error("[v0] Error al finalizar solicitud:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Error al finalizar la solicitud",
+        text: error.message,
+      });
     }
   }
 }
+
 
 // <CHANGE> Event listener para cargar solicitudes cuando se carga el DOM
 document.addEventListener("DOMContentLoaded", function() {
