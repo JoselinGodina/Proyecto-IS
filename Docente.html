@@ -168,25 +168,25 @@
       <form id="form-crear-asesoria" class="modal-form">
         <div class="form-group">
           <label for="crear-titulo">Título</label>
-          <input type="text" id="crear-titulo" placeholder="Ej: Análisis de Circuitos" required>
+          <input type="text" id="crear-titulo" placeholder="Ej: Análisis de Circuitos" >
         </div>
         <div class="form-group">
           <label for="crear-descripcion">Descripción</label>
-          <textarea id="crear-descripcion" rows="3" placeholder="Describe el contenido de la asesoría" required></textarea>
+          <textarea id="crear-descripcion" rows="3" placeholder="Describe el contenido de la asesoría" ></textarea>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label for="crear-fecha">Fecha</label>
-            <input type="date" id="crear-fecha" required>
+            <input type="date" id="crear-fecha" >
           </div>
           <div class="form-group">
             <label for="crear-horario">Horario</label>
-            <input type="text" id="crear-horario" placeholder="14:00-16:00" required>
+            <input type="text" id="crear-horario" placeholder="14:00-16:00" >
           </div>
         </div>
         <div class="form-group">
           <label for="crear-cupos">Cupos Disponibles</label>
-          <input type="number" id="crear-cupos" value="10" min="1" required>
+          <input type="number" id="crear-cupos" value="10" min="1" >
         </div>
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeModal('modal-crear')">Cancelar</button>
@@ -209,25 +209,25 @@
         <input type="hidden" id="editar-id">
         <div class="form-group">
           <label for="editar-titulo">Título</label>
-          <input type="text" id="editar-titulo" required>
+          <input type="text" id="editar-titulo" >
         </div>
         <div class="form-group">
           <label for="editar-descripcion">Descripción</label>
-          <textarea id="editar-descripcion" rows="3" required></textarea>
+          <textarea id="editar-descripcion" rows="3" ></textarea>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label for="editar-fecha">Fecha</label>
-            <input type="date" id="editar-fecha" required>
+            <input type="date" id="editar-fecha" >
           </div>
           <div class="form-group">
             <label for="editar-horario">Horario</label>
-            <input type="text" id="editar-horario" required>
+            <input type="text" id="editar-horario" >
           </div>
         </div>
         <div class="form-group">
           <label for="editar-cupos">Cupos Disponibles</label>
-          <input type="number" id="editar-cupos" min="1" required>
+          <input type="number" id="editar-cupos" min="1" >
         </div>
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeModal('modal-editar')">Cancelar</button>
@@ -254,6 +254,7 @@
       </div>
     </div>
   </div>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script src="Docente.js"></script>
 </body>

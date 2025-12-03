@@ -112,8 +112,8 @@ function renderAsesorias() {
           <button class="btn-icon" onclick="editarAsesoria('${
             asesoria.id_crear_asesoria
           }')" title="Editar">✏️</button>
-          <button class="btn-icon btn-delete" onclick="eliminarAsesoria('${
-            asesoria.id_crear_asesoria}')" title="Eliminar">🗑️</button>
+          <button class="btn-icon btn-delete" onclick="eliminarAsesoria('${asesoria.id_crear_asesoria}')" title="Eliminar">🗑️</button>
+
         </div>
       </div>
     `
@@ -180,24 +180,45 @@ document
   .getElementById("form-crear-asesoria")
   .addEventListener("submit", async (e) => {
     e.preventDefault();
-    console.log("🧠 Evento submit detectado"); // 👈 agrega esta línea
 
-    // Obtener la letra según el rol
-const nuevaAsesoria = {
-  id_crear_asesoria: usuarioActual.roles_id_rol === '2'
-    ? `D${Date.now().toString().slice(-8)}`  // Últimos 8 dígitos
-    : `ASES${Date.now().toString().slice(-7)}`,
-  usuarios_id_usuario: usuarioActual.id_usuario,
-  titulo: document.getElementById("crear-titulo").value,
-  descripcion: document.getElementById("crear-descripcion").value,
-  fecha: document.getElementById("crear-fecha").value,
-  horario: document.getElementById("crear-horario").value,
-  cupo: parseInt(document.getElementById("crear-cupos").value),
-};
+    // Validaciones personalizadas con SweetAlert
+    const titulo = document.getElementById("crear-titulo").value.trim();
+    const descripcion = document.getElementById("crear-descripcion").value.trim();
+    const fecha = document.getElementById("crear-fecha").value;
+    const horario = document.getElementById("crear-horario").value.trim();
+    const cupos = document.getElementById("crear-cupos").value;
 
+    if (!titulo || !descripcion || !fecha || !horario || !cupos) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campos incompletos",
+        text: "Por favor completa todos los campos antes de continuar.",
+      });
+      return; // ❌ Detener envío
+    }
 
+    if (cupos <= 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Cupos inválidos",
+        text: "El número de cupos debe ser mayor a 0.",
+      });
+      return;
+    }
 
-    console.log("📦 Datos enviados:", nuevaAsesoria); // 👈 agrega esta también
+    // Crear asesoría si todo está bien
+    const nuevaAsesoria = {
+      id_crear_asesoria:
+        usuarioActual.roles_id_rol === "2"
+          ? `D${Date.now().toString().slice(-8)}`
+          : `ASES${Date.now().toString().slice(-7)}`,
+      usuarios_id_usuario: usuarioActual.id_usuario,
+      titulo,
+      descripcion,
+      fecha,
+      horario,
+      cupo: parseInt(cupos),
+    };
 
     try {
       const res = await fetch(`${API_URL}/asesorias`, {
@@ -208,12 +229,22 @@ const nuevaAsesoria = {
 
       if (!res.ok) throw new Error("Error al crear la asesoría");
 
-      alert("✅ Asesoría creada correctamente");
+      Swal.fire({
+        icon: "success",
+        title: "Asesoría creada",
+        text: "La asesoría ha sido registrada correctamente.",
+      });
+
       closeModal("modal-crear");
       cargarAsesorias();
+
     } catch (error) {
       console.error(error);
-      alert("❌ Error al crear la asesoría");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al crear la asesoría.",
+      });
     }
   });
 
@@ -240,12 +271,39 @@ document
     e.preventDefault();
 
     const id = document.getElementById("editar-id").value;
+
+    // Validaciones antes de enviar
+    const titulo = document.getElementById("editar-titulo").value.trim();
+    const descripcion = document.getElementById("editar-descripcion").value.trim();
+    const fecha = document.getElementById("editar-fecha").value;
+    const horario = document.getElementById("editar-horario").value.trim();
+    const cupos = parseInt(document.getElementById("editar-cupos").value);
+
+    // 🚨 Validación SweetAlert
+    if (!titulo || !descripcion || !fecha || !horario || !cupos) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campos incompletos",
+        text: "Debes completar todos los campos antes de guardar los cambios.",
+      });
+      return;
+    }
+
+    if (cupos <= 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Cupo inválido",
+        text: "El número de cupos debe ser mayor a 0.",
+      });
+      return;
+    }
+
     const asesoriaActualizada = {
-      titulo: document.getElementById("editar-titulo").value,
-      descripcion: document.getElementById("editar-descripcion").value,
-      fecha: document.getElementById("editar-fecha").value,
-      horario: document.getElementById("editar-horario").value,
-      cupo: parseInt(document.getElementById("editar-cupos").value),
+      titulo,
+      descripcion,
+      fecha,
+      horario,
+      cupo: cupos,
     };
 
     try {
@@ -257,14 +315,26 @@ document
 
       if (!res.ok) throw new Error("Error al editar la asesoría");
 
-      alert("✏️ Asesoría actualizada correctamente");
+      await Swal.fire({
+        icon: "success",
+        title: "Asesoría actualizada",
+        text: "Los cambios se guardaron correctamente.",
+        confirmButtonText: "Aceptar",
+      });
+
       closeModal("modal-editar");
       cargarAsesorias();
     } catch (error) {
       console.error(error);
-      alert("❌ Error al editar la asesoría");
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al editar la asesoría.",
+      });
     }
   });
+
 
 // ===============================
 // Ver estudiantes inscritos
@@ -301,6 +371,62 @@ const res = await fetch(`${API_URL}/asesorias/${id_crear_asesoria}/inscritos`);
     console.error("Error al cargar estudiantes:", err);
   }
 }
+
+// ===============================
+// Eliminar asesoría
+// ===============================
+async function eliminarAsesoria(id) {
+  // Confirmar con SweetAlert
+  const confirm = await Swal.fire({
+    icon: "warning",
+    title: "¿Eliminar asesoría?",
+    text: "Esta acción no se puede deshacer.",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar"
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  try {
+    const res = await fetch(`${API_URL}/asesorias/${id}`, {
+      method: "DELETE",
+    });
+
+    // ❌ Si la asesoría tiene alumnos inscritos (error 500)
+    if (res.status === 500) {
+      return Swal.fire({
+        icon: "error",
+        title: "No se puede eliminar",
+        text: "Esta asesoría tiene estudiantes inscritos. Solo puedes editarla.",
+      });
+    }
+
+    // ❌ Otros errores
+    if (!res.ok) {
+      throw new Error("Error al eliminar");
+    }
+
+    // ✅ Eliminado correctamente
+    await Swal.fire({
+      icon: "success",
+      title: "Asesoría eliminada",
+      text: "La asesoría fue eliminada correctamente."
+    });
+
+    cargarAsesorias();
+  } catch (error) {
+    console.error("Error eliminando:", error);
+
+    Swal.fire({
+      icon: "error",
+      title: "Error inesperado",
+      text: "No se pudo eliminar la asesoría. Inténtalo más tarde."
+    });
+  }
+}
+
+
 // ===============================
 // Cargar y filtrar materiales
 // ===============================
