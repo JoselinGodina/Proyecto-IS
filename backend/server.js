@@ -339,6 +339,22 @@ app.put("/usuarios/:id/rol", async (req, res) => {
   }
 })
 
+app.delete("/usuarios/:id", async (req, res) => {
+  try {
+    const { id } = req.params
+    
+    await pool.query(
+      `DELETE FROM usuarios WHERE id_usuario = $1`,
+      [id]
+    )
+
+    res.json({ message: "Usuario eliminado correctamente" })
+  } catch (error) {
+    console.error("❌ Error al eliminar usuario:", error)
+    res.status(500).json({ error: "Error al eliminar usuario" })
+  }
+})
+
 // ============================
 // 📦 CRUD: CATEGORÍAS Y MATERIALES
 // ============================

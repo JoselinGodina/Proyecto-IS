@@ -93,11 +93,12 @@ function renderUsers() {
             <td>${user.email}</td>
             <td>${user.numero}</td>
             <td>
-                <div class="actions-cell">
-                    <button class="action-btn btn-modificar" onclick="abrirModalEditar('${user.id}')">Modificar</button>
-                    <button class="action-btn btn-asignar" onclick="abrirModalRol('${user.id}')">Asignar Rol</button>
-                </div>
-            </td>
+  <div class="actions-cell">
+    <button class="action-btn btn-modificar" onclick="abrirModalEditar('${user.id}')">Modificar</button>
+    <button class="action-btn btn-asignar" onclick="abrirModalRol('${user.id}')">Asignar Rol</button>
+    <button class="action-btn btn-desactivar" onclick="eliminarUsuario('${user.id}')">Eliminar</button>
+  </div>
+</td>
         </tr>
     `,
     )
@@ -207,3 +208,33 @@ document.addEventListener("keydown", (e) => {
   }
 })
 
+async function eliminarUsuario(userId) {
+  const user = users.find((u) => u.id === userId)
+  
+  Swal.fire({
+    title: "¿Eliminar usuario?",
+    text: `¿Estás seguro de que deseas eliminar a ${user.nombre}? Esta acción no se puede deshacer.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#8b1538",
+    cancelButtonColor: "#d1d5db",
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`http://localhost:3000/usuarios/${userId}`, {
+          method: "DELETE"
+        })
+
+        if (!response.ok) throw new Error("Error al eliminar usuario")
+
+        await cargarUsuarios()
+        Swal.fire("Éxito", `${user.nombre} ha sido eliminado.`, "success")
+      } catch (error) {
+        console.error("Error:", error)
+        Swal.fire("Error", "No se pudo eliminar el usuario.", "error")
+      }
+    }
+  })
+}

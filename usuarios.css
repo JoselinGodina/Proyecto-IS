@@ -534,3 +534,15 @@
             }
         }
     
+        .btn-eliminar {
+  color: #ef4444;
+}
+
+.btn-eliminar:hover {
+  opacity: 0.7;
+}
+/* <CHANGE> center the actions */
+.actions-centered {
+  justify-content: center;
+  gap: 8px;
+}
