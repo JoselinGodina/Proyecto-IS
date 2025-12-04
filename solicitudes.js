@@ -13,6 +13,11 @@ window.onpopstate = function () {
 
 let solicitudes = []
 
+// Convertir UUID a número resumido (primeros 3 caracteres hexadecimales)
+function convertirUUIDaNumero(uuid) {
+  const primeros3 = uuid.replace(/-/g, '').substring(0, 3);
+  return parseInt(primeros3, 16);
+}
 
 async function cargarSolicitudes() {
   try {
@@ -126,7 +131,11 @@ function renderSolicitudes() {
       <div class="solicitud-card">
         <div class="solicitud-header">
           <div class="solicitud-title">
-            <h4>${solicitud.nombreAlumno}</h4>
+            <div style="font-size: 0.75rem; color: #999; margin-bottom: 0.5rem;">
+  Vale: <strong>${convertirUUIDaNumero(solicitud.id)}</strong>
+</div>
+
+<p style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">${solicitud.nombreAlumno}</p>
             <span class="badge badge-pendiente">${solicitud.estado}</span>
           </div>
           <div class="solicitud-actions">
@@ -179,7 +188,10 @@ function renderSolicitudes() {
       <div class="solicitud-card">
         <div class="solicitud-header">
           <div class="solicitud-title">
-            <h4>${solicitud.nombreAlumno}</h4>
+            <div style="font-size: 0.75rem; color: #999; margin-bottom: 0.5rem;">
+  Vale: <strong>${convertirUUIDaNumero(solicitud.id)}</strong>
+</div>
+<h4>${solicitud.nombreAlumno}</h4>
             <span class="badge badge-devuelto">${solicitud.estado}</span>
           </div>
           <div class="solicitud-actions">
