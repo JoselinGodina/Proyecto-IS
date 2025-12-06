@@ -132,7 +132,7 @@ function renderSolicitudes() {
         <div class="solicitud-header">
           <div class="solicitud-title">
             <div style="font-size: 0.75rem; color: #999; margin-bottom: 0.5rem;">
-  Vale: <strong>${convertirUUIDaNumero(solicitud.id)}</strong>
+  Vale: <strong>${solicitud.id}</strong>
 </div>
 
 <p style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">${solicitud.nombreAlumno}</p>
@@ -189,7 +189,7 @@ function renderSolicitudes() {
         <div class="solicitud-header">
           <div class="solicitud-title">
             <div style="font-size: 0.75rem; color: #999; margin-bottom: 0.5rem;">
-  Vale: <strong>${convertirUUIDaNumero(solicitud.id)}</strong>
+  Vale: <strong>${solicitud.id}</strong>
 </div>
 <h4>${solicitud.nombreAlumno}</h4>
             <span class="badge badge-devuelto">${solicitud.estado}</span>
@@ -488,6 +488,16 @@ async function finalizarSolicitud(id) {
 // <CHANGE> Event listener para cargar solicitudes cuando se carga el DOM
 document.addEventListener("DOMContentLoaded", function() {
   console.log("[v0] DOM cargado, iniciando solicitudes...")
+  
+  // <CHANGE> Mostrar nombre del usuario logeado
+  const usuarioNombre = localStorage.getItem('usuarioNombre');
+  if (usuarioNombre) {
+    const nombreElement = document.getElementById('nombreUsuario');
+    if (nombreElement) {
+      nombreElement.textContent = usuarioNombre;
+    }
+  }
+  
   cargarSolicitudes()
 })
 
