@@ -49,11 +49,19 @@ function mostrarAdminLogueado() {
 }
 
 function cerrarSesion() {
-  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-    localStorage.removeItem("usuario")
-    localStorage.clear()
-    window.location.href = "index.html"
-  }
+  Swal.fire({
+    title: "¿Cerrar sesión?",
+    text: "Tu sesión se cerrará y volverás al inicio.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, cerrar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+  });
 }
 
 async function cargarCategorias() {
@@ -133,24 +141,22 @@ function handleAddMaterial(event) {
   const quantity = parseInt(document.getElementById("materialQuantity").value);
 
   if (!materialId || !materialName) {
-    alert("Selecciona un material válido");
-    return;
-  }
+  return Swal.fire("Material inválido", "Selecciona un material válido.", "warning");
+}
 
-  if (isNaN(quantity) || quantity <= 0) {
-    alert("La cantidad debe ser mayor que 0");
-    return;
-  }
+if (isNaN(quantity) || quantity <= 0) {
+  return Swal.fire("Cantidad incorrecta", "Debe ser un número mayor que 0.", "error");
+}
 
-  // Agregar al arreglo temporal
-  materialesPendientes.push({
-    id_materiales: materialId,
-    nombre: materialName,
-    categoria: materialCategory,
-    cantidad: quantity,
-  });
+materialesPendientes.push({
+  id_materiales: materialId,
+  nombre: materialName,
+  categoria: materialCategory,
+  cantidad: quantity,
+});
 
-  alert("Material agregado a la lista temporal");
+Swal.fire("Agregado", "Material añadido a la lista temporal", "success");
+
 
   // Limpiar formulario
   document.getElementById("addMaterialForm").reset();
@@ -315,9 +321,9 @@ function actualizarListaTemporal() {
 // <CHANGE> Guarda todos los materiales usando el endpoint PUT /materiales/:id
 async function guardarTodosMateriales() {
   if (materialesPendientes.length === 0) {
-    alert("No hay materiales pendientes para guardar");
-    return;
-  }
+  return Swal.fire("Nada que guardar", "No hay materiales pendientes.", "info");
+}
+
 
   try {
     // Guardar cada material individualmente
