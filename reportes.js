@@ -1,5 +1,5 @@
 //const { default: Swal } = require("sweetalert2");
-
+let adminLogueado = null
        function cerrarSesion() {
     Swal.fire({
         title: "¿Estás seguro?",
@@ -24,6 +24,42 @@
     });
 }
 
+function mostrarAdminLogueado() {
+  const usuarioGuardado = localStorage.getItem("usuario")
+
+  if (usuarioGuardado) {
+    try {
+      adminLogueado = JSON.parse(usuarioGuardado)
+
+      const adminNameElement = document.querySelector(".admin-details h3")
+      const adminInfoElement = document.querySelector(".admin-details p")
+
+      if (adminNameElement && adminInfoElement) {
+        const nombreCompleto = `${adminLogueado.nombres} ${adminLogueado.apellidos}`
+        adminNameElement.textContent = nombreCompleto
+
+        let rolTexto = "Usuario"
+        if (adminLogueado.roles_id_rol === 1) {
+          rolTexto = "Administrador"
+        } else if (adminLogueado.roles_id_rol === 2) {
+          rolTexto = "Docente"
+        } else if (adminLogueado.roles_id_rol === 3) {
+          rolTexto = "Alumno"
+        }
+
+        adminInfoElement.textContent = `${adminLogueado.id_usuario} - ${rolTexto}`
+      }
+
+      console.log("[v0] Usuario logueado:", adminLogueado)
+    } catch (error) {
+      console.error("[v0] Error al parsear usuario:", error)
+      window.location.href = "index.html"
+    }
+  } else {
+    console.log("[v0] No hay usuario en localStorage, redirigiendo...")
+    window.location.href = "index.html"
+  }
+}
 
         function generarReporte(tipo, categoria) {
     console.log('[v0] Generando reporte:', tipo, categoria);
@@ -293,3 +329,8 @@ async function mostrarVistaPrevia(categoria) {
   // 🖨️ Mostrar la vista de impresión (mantiene tu mismo diseño)
   window.print();
 }
+
+// Llamar al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    mostrarAdminLogueado();
+});
