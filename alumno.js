@@ -41,10 +41,11 @@ window.addEventListener("load", () => {
 const logoutBtn = document.getElementById("logoutBtn")
 if (logoutBtn) {
   logoutBtn.addEventListener("click", () => {
+    if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
     localStorage.removeItem("usuario")
-    localStorage.removeItem("cart")
-    sessionStorage.clear()
+    localStorage.clear()
     window.location.href = "index.html"
+  }
   })
 }
 
