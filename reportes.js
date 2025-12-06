@@ -45,7 +45,7 @@
     } else if (tipo === 'excel') {
         generarExcel(categoria);
     }
-//}
+}
 
 
 function obtenerFechaActual() {
@@ -293,4 +293,3 @@ async function mostrarVistaPrevia(categoria) {
   // 🖨️ Mostrar la vista de impresión (mantiene tu mismo diseño)
   window.print();
 }
-
