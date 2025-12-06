@@ -548,7 +548,7 @@ app.post("/materiales/multiples", async (req, res) => {
 
 app.post("/vales-prestamo", async (req, res) => {
   try {
-    const { id_usuario, materiales, hora_entrega, motivo } = req.body;
+const { id_usuario, materiales, hora_entrega, motivo, docente } = req.body;
 
     if (!id_usuario || !materiales || materiales.length === 0) {
       return res.status(400).json({ error: "Datos incompletos para crear el vale" });
@@ -581,10 +581,18 @@ LIMIT 1
     await pool.query(
       `
       INSERT INTO vales_prestamos 
-        (id_vales, usuarios_id_usuario, estado_id_estado, hora_entrega, motivo)
-      VALUES ($1, $2, $3, $4::time, COALESCE($5::varchar, ''))
+  (id_vales, usuarios_id_usuario, estado_id_estado, hora_entrega, motivo, docente)
+VALUES ($1, $2, $3, $4::time, COALESCE($5::varchar, ''), COALESCE($6::varchar, ''))
+
       `,
-      [idVale, id_usuario, estadoId, horaEntrega, motivo?.toString() || ""]
+      [
+  idVale,
+  id_usuario,
+  estadoId,
+  horaEntrega,
+  motivo?.toString() || "",
+  docente?.toString() || ""
+]
     );
 
     // Insertar materiales asociados al vale

@@ -159,12 +159,16 @@ if (!id_docente) {
       cantidad: item.quantity,
     }));
 
+    const teacherName =
+  teacherSelect.options[teacherSelect.selectedIndex].textContent;
+
+
     const response = await fetch("http://localhost:3000/vales-prestamo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
      body: JSON.stringify({
   id_usuario: usuario.id_usuario,
-  id_docente: id_docente, // 👈 lo agregamos aquí
+  docente: teacherName, // 👈 lo agregamos aquí
   materiales: materialesParaEnviar,
   fecha_entrega: new Date().toISOString(),
   motivo: String(reason),
