@@ -6,6 +6,8 @@ CRUD de Roles
 ⦁	Mostrar en las solicitudes el nombre del Docente (necesario pero no hay vinculo)
 ⦁	No aparece el numero del vale (listo(checar), fue la mejor manera que encontre)
 ⦁	Nombre del usuario arriba (ya saque los códigos que hacen eso(yo lo hago) pero esta pendiente todavia)
+⦁	Botones de cerrar sesion 
+
 
 CRUD materiales
 (En la parte de Inventario)
