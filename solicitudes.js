@@ -10,8 +10,45 @@ window.onpopstate = function () {
   history.go(1);
 };
 
-
+let adminLogueado = null
 let solicitudes = []
+
+function mostrarAdminLogueado() {
+  const usuarioGuardado = localStorage.getItem("usuario")
+
+  if (usuarioGuardado) {
+    try {
+      adminLogueado = JSON.parse(usuarioGuardado)
+
+      const adminNameElement = document.querySelector(".admin-details h3")
+      const adminInfoElement = document.querySelector(".admin-details p")
+
+      if (adminNameElement && adminInfoElement) {
+        const nombreCompleto = `${adminLogueado.nombres} ${adminLogueado.apellidos}`
+        adminNameElement.textContent = nombreCompleto
+
+        let rolTexto = "Usuario"
+        if (adminLogueado.roles_id_rol === 1) {
+          rolTexto = "Administrador"
+        } else if (adminLogueado.roles_id_rol === 2) {
+          rolTexto = "Docente"
+        } else if (adminLogueado.roles_id_rol === 3) {
+          rolTexto = "Alumno"
+        }
+
+        adminInfoElement.textContent = `${adminLogueado.id_usuario} - ${rolTexto}`
+      }
+
+      console.log("[v0] Usuario logueado:", adminLogueado)
+    } catch (error) {
+      console.error("[v0] Error al parsear usuario:", error)
+      window.location.href = "index.html"
+    }
+  } else {
+    console.log("[v0] No hay usuario en localStorage, redirigiendo...")
+    window.location.href = "index.html"
+  }
+}
 
 // Convertir UUID a número resumido (primeros 3 caracteres hexadecimales)
 function convertirUUIDaNumero(uuid) {
@@ -488,7 +525,7 @@ async function finalizarSolicitud(id) {
 // <CHANGE> Event listener para cargar solicitudes cuando se carga el DOM
 document.addEventListener("DOMContentLoaded", function() {
   console.log("[v0] DOM cargado, iniciando solicitudes...")
-  
+  mostrarAdminLogueado()
   // <CHANGE> Mostrar nombre del usuario logeado
   const usuarioNombre = localStorage.getItem('usuarioNombre');
   if (usuarioNombre) {
