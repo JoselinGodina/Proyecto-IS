@@ -20,7 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
 })
 
 function cerrarSesion() {
-  
+  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+    localStorage.removeItem("usuario")
+    localStorage.clear()
+    window.location.href = "index.html"
+  }
 }
 
 let users = []

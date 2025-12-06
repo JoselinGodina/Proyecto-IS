@@ -347,11 +347,11 @@ function mostrarAdminLogueado() {
 
 // 🔹 Cerrar sesión
 function cerrarSesion() {
-  localStorage.removeItem("usuario")
-  localStorage.removeItem("usuarioLogueado")
-  sessionStorage.clear()
-  document.body.innerHTML = ""
-  window.location.href = "index.html"
+  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+    localStorage.removeItem("usuario")
+    localStorage.clear()
+    window.location.href = "index.html"
+  }
 }
 
 document.addEventListener("keydown", (event) => {
