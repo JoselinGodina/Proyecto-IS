@@ -30,10 +30,11 @@ if (usuarioActual) {
 // Cerrar sesión
 // ===============================
 document.querySelector(".btn-logout").addEventListener("click", () => {
-  localStorage.removeItem("usuario");
-  localStorage.removeItem("usuarioActual");
-  sessionStorage.clear();
-  window.location.href = "index.html";
+  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+    localStorage.removeItem("usuario")
+    localStorage.clear()
+    window.location.href = "index.html"
+  }
 });
 
 // ===============================
