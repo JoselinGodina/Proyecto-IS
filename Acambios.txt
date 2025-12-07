@@ -7,6 +7,7 @@ CRUD de Roles
 ⦁	No aparece el numero del vale (listo)
 ⦁	Nombre del usuario arriba (listo)
 ⦁	Botones de cerrar sesion (listo)
+⦁	En los vales devueltos aparece la hora solicitada del vale pero no la hora de devolicion
 
 
 CRUD materiales
@@ -21,7 +22,7 @@ CRUD de asesorias
 
 Parte del alumno
 ⦁	Faltan las alertas (listas tambien en el carrito)
-⦁	La fecha de devolucion de material esta mal xd ()
+⦁	Falta el bug del cupo
 ⦁	
 
 
