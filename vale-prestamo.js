@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })
 
 // Load receipt data
-function loadReceiptData() {
+async function loadReceiptData() {
   const loanData = JSON.parse(localStorage.getItem("currentLoan"))
   const usuario = JSON.parse(localStorage.getItem("usuario"))
 
@@ -21,7 +21,7 @@ function loadReceiptData() {
   }
 
   // Generate receipt number
-  const receiptNumber = "VP-" + loanData.id_vales.toString().padStart(8, '0')
+  const receiptNumber = "VP-" + loanData.id_vales.toString().padStart(8, "0")
   document.getElementById("receiptNumber").textContent = receiptNumber
 
   // Format date and time
@@ -38,11 +38,19 @@ function loadReceiptData() {
   // Student data
   document.getElementById("studentNameReceipt").textContent = `${usuario.nombres} ${usuario.apellidos}`
   document.getElementById("studentControlReceipt").textContent = usuario.id_usuario
-document.getElementById("studentCareerReceipt").textContent =
-  usuario.carrera || usuario.nombre_carrera || "N/A";
+
+  try {
+    const response = await fetch(`/usuario/${usuario.id_usuario}`)
+    const usuarioData = await response.json()
+    document.getElementById("studentCareerReceipt").textContent =
+      usuarioData.carrera || usuarioData.nombre_carrera || "N/A"
+  } catch (error) {
+    console.error("Error al obtener la carrera:", error)
+    document.getElementById("studentCareerReceipt").textContent = usuario.carrera || usuario.nombre_carrera || "N/A"
+  }
+
   document.getElementById("studentSemesterReceipt").textContent = `${usuario.semestre || "N/A"} Semestre`
-document.getElementById("studentTeacherReceipt").textContent =
-  loanData.docente?.nombre || "No asignado";
+  document.getElementById("studentTeacherReceipt").textContent = loanData.docente?.nombre || "No asignado"
 
   // Materials table
   const tableBody = document.getElementById("materialsTableBody")
@@ -50,9 +58,9 @@ document.getElementById("studentTeacherReceipt").textContent =
     .map(
       (item) => `
     <tr>
-      <td>${item.name}</td>
-      <td>${item.category}</td>
-      <td class="text-center">${item.quantity}</td>
+      <td class="border border-gray-300 p-2">${item.name}</td>
+      <td class="border border-gray-300 p-2">${item.category}</td>
+      <td class="border border-gray-300 p-2 text-center">${item.quantity}</td>
     </tr>
   `,
     )
