@@ -25,7 +25,7 @@ function obtenerUsuarioLogueado() {
   return {
     id_usuario: "ADM001",
     nombres: "Usuario Desconocido",
-    rol: "Administrador",
+    rol: "Administrador del sistema",
   }
 }
 

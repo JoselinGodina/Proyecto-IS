@@ -25,7 +25,7 @@ function mostrarAdminLogueado() {
         const nombreCompleto = `${adminLogueado.nombres} ${adminLogueado.apellidos}`
         adminNameElement.textContent = nombreCompleto
 
-        let rolTexto = "Usuario"
+        let rolTexto = "Administrador del sistema"
         if (adminLogueado.roles_id_rol === 1) {
           rolTexto = "Administrador"
         } else if (adminLogueado.roles_id_rol === 2) {

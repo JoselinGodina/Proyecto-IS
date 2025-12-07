@@ -8,38 +8,37 @@
 </head>
 <body>
     <header class="header">
-        <div class="admin-info">
-            <svg class="settings-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+    <div class="admin-info">
+        <svg class="settings-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        <div class="admin-details">
+            <h3>Nombre del Administrador</h3>
+            <p>ADM-2024-001 - Administrador del Sistema</p>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="current-date" id="currentDate"></div>
+        <span class="admin-badge">Administrador</span>
+        <button class="logout-btn" onclick="cerrarSesion()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
             </svg>
-            <div class="admin-details">
-                <h3>Nombre del Administrador</h3>
-                <p>ADM-2024-001 - Administrador del Sistema</p>
-            </div>
-        </div>
-        <div class="header-right">
-            <span class="admin-badge">Administrador</span>
-            <button class="logout-btn" onclick="cerrarSesion()">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-                Cerrar Sesión
-            </button>
-        </div>
-    </header>
+            Cerrar Sesión
+        </button>
+    </div>
+</header>
 
-    
-
-    <nav class="nav-tabs">
-        <a href="solicitudes.html" class="nav-tab">Solicitudes</a>
-        <a href="usuarios.html" class="nav-tab active">Usuarios</a>
-        <a href="inventario.html" class="nav-tab">Inventario</a>
-        <a href="reportes.html" class="nav-tab">Reportes</a>
-        <a href="asesorias.html" class="nav-tab">Asesorías</a>
-        <a href="entradaMaterial.html" class="nav-tab">Entrada de Material</a>
-        <a href="pedidoMaterial.html" class="nav-tab">Gestion de Material</a>
-    </nav>
+<nav class="nav-tabs">
+    <a href="solicitudes.html" class="nav-tab">Solicitudes</a>
+    <a href="usuarios.html" class="nav-tab active">Usuarios</a>
+    <a href="inventario.html" class="nav-tab">Inventario</a>
+    <a href="reportes.html" class="nav-tab">Reportes</a>
+    <a href="asesorias.html" class="nav-tab">Asesorías</a>
+    <a href="entradaMaterial.html" class="nav-tab">Entrada de Material</a>
+    <a href="pedidoMaterial.html" class="nav-tab">Gestion de Material</a>
+</nav>
 
     <main class="main-content">
         <div class="content-header">
@@ -168,5 +167,71 @@
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="usuarios.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// ================== FUNCIONES DEL HEADER ==================
+
+function mostrarFechaActual() {
+  const fechaElement = document.getElementById("currentDate")
+  const hoy = new Date()
+  const opciones = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+  const fechaFormato = hoy.toLocaleDateString("es-ES", opciones)
+  if (fechaElement) {
+    fechaElement.textContent = fechaFormato
+  }
+}
+
+function mostrarAdminLogueado() {
+  const usuarioGuardado = localStorage.getItem("usuario")
+  if (usuarioGuardado) {
+    try {
+      const adminLogueado = JSON.parse(usuarioGuardado)
+      const adminNameElement = document.querySelector(".admin-details h3")
+      const adminInfoElement = document.querySelector(".admin-details p")
+
+      if (adminNameElement && adminInfoElement) {
+        const nombreCompleto = `${adminLogueado.nombres} ${adminLogueado.apellidos}`
+        adminNameElement.textContent = nombreCompleto
+
+        let rolTexto = "Usuario"
+        if (adminLogueado.roles_id_rol === 1) rolTexto = "Administrador"
+        else if (adminLogueado.roles_id_rol === 2) rolTexto = "Docente"
+        else if (adminLogueado.roles_id_rol === 3) rolTexto = "Alumno"
+
+        adminInfoElement.textContent = `${adminLogueado.id_usuario} - ${rolTexto}`
+      }
+    } catch (error) {
+      console.error("Error al parsear usuario:", error)
+      window.location.href = "index.html"
+    }
+  } else {
+    window.location.href = "index.html"
+  }
+}
+
+function cerrarSesion() {
+  Swal.fire({
+    title: "¿Cerrar sesión?",
+    text: "Tu sesión se cerrará y volverás al inicio.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, cerrar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.clear()
+      window.location.href = "index.html"
+    }
+  })
+}
+
+// Ejecutar al cargar
+document.addEventListener("DOMContentLoaded", function() {
+  mostrarFechaActual()
+  mostrarAdminLogueado()
+})
+</script>
+<!-- Luego agrega el script específico de tu página -->
+<script src="usuarios.js"></script>
 </body>
 </html>
