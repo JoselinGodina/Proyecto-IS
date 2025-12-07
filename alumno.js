@@ -41,13 +41,29 @@ window.addEventListener("load", () => {
 const logoutBtn = document.getElementById("logoutBtn")
 if (logoutBtn) {
   logoutBtn.addEventListener("click", () => {
-    if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-    localStorage.removeItem("usuario")
-    localStorage.clear()
-    window.location.href = "index.html"
-  }
-  })
+
+    Swal.fire({
+      title: "Cerrar sesión",
+      html: `¿Estás seguro de que deseas <b>cerrar sesión</b>?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, salir",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#e57373",
+      cancelButtonColor: "#6c757d",
+      background: "#fff",
+      color: "#333"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("usuario")
+        localStorage.clear()
+        window.location.href = "index.html"
+      }
+    });
+
+  });
 }
+
 
 // ----------------------
 // Variables globales
@@ -575,93 +591,111 @@ function formatDateTime(dateString) {
 
 
 // Agrega esta nueva función al final del archivo:
+// Agrega esta nueva función al final del archivo:
 async function devolverMaterial(id_vales) {
-  if (!confirm('¿Estás seguro de que deseas marcar este material como devuelto?')) {
-    return
-  }
-
-  // Encontrar el botón que disparó la acción
-  const btn = event.target.closest('.devolver-btn')
-  
-  // Guardar el contenido original
-  const originalContent = btn.innerHTML
-  
-  // Mostrar estado de carga
-  btn.classList.add('loading')
-  btn.innerHTML = `
-    <span class="btn-spinner"></span>
-    Procesando...
-  `
-
-  try {
-    const response = await fetch(`http://localhost:3000/vales-prestamo/${id_vales}/devolver`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-
-    const result = await response.json()
-
-    if (response.ok && result.success) {
-  // Restaurar botón antes de mostrar la alerta
-  btn.classList.remove('loading')
-  btn.innerHTML = originalContent
 
   Swal.fire({
-    icon: "success",
-    title: "¡Material devuelto!",
+    title: "¿Marcar como devuelto?",
     html: `
-      El material fue marcado como <b>devuelto</b> exitosamente.
+      ¿Estás seguro de que deseas <b>marcar este material como devuelto</b>?
     `,
-    confirmButtonText: "Perfecto",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sí, marcar",
+    cancelButtonText: "Cancelar",
     confirmButtonColor: "#6ecb63",
+    cancelButtonColor: "#6c757d",
     background: "#fff",
-    color: "#333",
-    timer: 1800,
-    timerProgressBar: true
-  })
+    color: "#333"
+  }).then(async (result) => {
 
-  fetchSolicitudes() // Recargar las solicitudes
-}
-else {
-      // Restaurar botón en caso de error
-      btn.classList.remove('loading')
-      btn.innerHTML = originalContent
-      
-Swal.fire({
-  icon: "error",
-  title: "Error",
-  html: `
-    ${result.error || 'Error al devolver el material'}
-  `,
-  confirmButtonText: "Entendido",
-  confirmButtonColor: "#e57373",
-  background: "#fff",
-  color: "#333"
-})
+    if (!result.isConfirmed) return;
+
+    // Encontrar el botón que disparó la acción
+    const btn = event.target.closest('.devolver-btn');
+
+    // Guardar el contenido original
+    const originalContent = btn.innerHTML;
+
+    // Mostrar estado de carga
+    btn.classList.add('loading');
+    btn.innerHTML = `
+      <span class="btn-spinner"></span>
+      Procesando...
+    `;
+
+    try {
+      const response = await fetch(`http://localhost:3000/vales-prestamo/${id_vales}/devolver`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Restaurar botón antes de la alerta
+        btn.classList.remove('loading');
+        btn.innerHTML = originalContent;
+
+        Swal.fire({
+          icon: "success",
+          title: "¡Material devuelto!",
+          html: `
+            El material fue marcado como <b>devuelto</b> exitosamente.
+          `,
+          confirmButtonText: "Perfecto",
+          confirmButtonColor: "#6ecb63",
+          background: "#fff",
+          color: "#333",
+          timer: 1800,
+          timerProgressBar: true
+        });
+
+        fetchSolicitudes(); // Recargar las solicitudes
+      } else {
+        // Restaurar botón en caso de error
+        btn.classList.remove('loading');
+        btn.innerHTML = originalContent;
+
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          html: `
+            ${result.error || 'Error al devolver el material'}
+          `,
+          confirmButtonText: "Entendido",
+          confirmButtonColor: "#e57373",
+          background: "#fff",
+          color: "#333"
+        });
+      }
+
+    } catch (error) {
+      console.error('[Alumno] Error al devolver material:', error);
+
+      // Restaurar botón
+      btn.classList.remove('loading');
+      btn.innerHTML = originalContent;
+
+      Swal.fire({
+        icon: "error",
+        title: "Error al procesar",
+        html: `
+          Ocurrió un problema al procesar la devolución.<br>
+          <b>Intenta nuevamente.</b>
+        `,
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#e57373",
+        background: "#fff",
+        color: "#333"
+      });
     }
-  } catch (error) {
-    console.error('[Alumno] Error al devolver material:', error)
-    
-    // Restaurar botón en caso de error
-    btn.classList.remove('loading')
-    btn.innerHTML = originalContent
-    
-Swal.fire({
-  icon: "error",
-  title: "Error al procesar",
-  html: `
-    Ocurrió un problema al procesar la devolución.<br>
-    <b>Intenta nuevamente.</b>
-  `,
-  confirmButtonText: "Entendido",
-  confirmButtonColor: "#e57373",
-  background: "#fff",
-  color: "#333"
-})
-  }
+
+  });
 }
+
 
 // ----------------------
 // Asesorías
@@ -693,22 +727,10 @@ function renderAsesorias(asesoriasData) {
       let cupoClass = "available",
         cupoTexto = `${disponibles} disponibles`
       if (porcentaje >= 100) {
-  cupoClass = "unavailable"
-  cupoTexto = "Cupo lleno"
-
-  Swal.fire({
-    icon: "info",
-    title: "Cupo lleno",
-    html: `
-      Lo sentimos, esta asesoría ya no tiene lugares disponibles.
-    `,
-    confirmButtonText: "Entendido",
-    confirmButtonColor: "#7aa2ff"
-  })
-
-  return // súper importante para que NO intente inscribirse
-}
- else if (porcentaje >= 75) {
+        cupoClass = "unavailable"
+        cupoTexto = "Cupo lleno"
+        
+      } else if (porcentaje >= 75) {
         cupoClass = "limited"
         cupoTexto = `${disponibles} disponibles`
       }
