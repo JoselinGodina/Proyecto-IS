@@ -117,6 +117,23 @@ async function cargarSolicitudes() {
         }
       }
 
+      let horaDevolucionFormateada = "—"
+      if (item.hora_devolucion) {
+        const horaStr = item.hora_devolucion.toString()
+        // Si es formato timestamp, convertir a hora legible
+        if (!isNaN(new Date(item.hora_devolucion).getTime())) {
+          const fecha = new Date(item.hora_devolucion)
+          horaDevolucionFormateada = fecha
+            .toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+            .substring(0, 8)
+        } else if (horaStr.length >= 8) {
+          // Si ya es string tipo "HH:MM:SS", tomar primeros 8 caracteres
+          horaDevolucionFormateada = horaStr.substring(0, 8)
+        } else {
+          horaDevolucionFormateada = horaStr
+        }
+      }
+
       const materialName = item.nombre_material || "Sin especificar"
 
       return {
@@ -126,6 +143,7 @@ async function cargarSolicitudes() {
         materialSolicitado: materialName,
         cantidad: `${item.cantidad || 0} unidades`,
         hora: horaFormateada,
+        hora_devolucion: horaDevolucionFormateada,
         motivo: item.motivo || "Sin motivo especificado",
         docente: item.docente || "Sin docente asignado",  // ← NUEVO
         estado: "Devuelto",
