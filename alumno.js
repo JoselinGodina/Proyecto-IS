@@ -240,19 +240,28 @@ function openAddModal(materialNombre) {
   selectedMaterial = materialsData.find((m) => m.nombre === materialNombre)
 
   if (!selectedMaterial) {
-    console.error("[Modal] Material no encontrado:", materialNombre)
-    alert("Error: Material no encontrado. Por favor, recarga la página.")
-    return
-  }
+  console.error("[Modal] Material no encontrado:", materialNombre)
+  alert("Error: Material no encontrado. Por favor, recarga la página.")
+  return
+}
 
   console.log("[Modal] Material seleccionado:", selectedMaterial)
 
   const modal = document.getElementById("addMaterialModal")
-  if (!modal) {
-    console.error("[Modal] Elemento modal no encontrado en el DOM")
-    alert("Error: El modal no existe en la página")
-    return
-  }
+ if (!modal) {
+  console.error("[Modal] Elemento modal no encontrado en el DOM")
+
+  Swal.fire({
+    icon: "error",
+    title: "Error",
+    text: "El modal no existe en la página.",
+    confirmButtonText: "Entendido",
+    confirmButtonColor: "#d33"
+  })
+
+  return
+}
+
 
   document.getElementById("modalMaterialName").textContent = selectedMaterial.nombre
   document.getElementById("modalMaterialCategory").textContent = selectedMaterial.categoria
@@ -271,19 +280,58 @@ function confirmAddToCart() {
   const quantity = Number.parseInt(input?.value || 0)
 
   if (!selectedMaterial) {
-    alert("Error: No hay material seleccionado")
-    return
-  }
 
-  if (quantity < 1) {
-    alert("La cantidad debe ser mayor a 0")
-    return
-  }
+  Swal.fire({
+    icon: "error",
+    title: "Sin material seleccionado",
+    html: `
+      Por favor elige un <b>material</b> antes de continuar.
+    `,
+    confirmButtonText: "Ok",
+    confirmButtonColor: "#ff7b9c",
+    background: "#fff",
+    color: "#333"
+  })
+
+  return
+}
+
+
+ if (quantity < 1) {
+
+  Swal.fire({
+    icon: "warning",
+    title: "Cantidad inválida",
+    html: `
+      La cantidad debe ser <b>mayor a 0</b>.
+    `,
+    confirmButtonText: "Entendido",
+    confirmButtonColor: "#f4a259",
+    background: "#fff",
+    color: "#333"
+  })
+
+  return
+}
+
 
   if (quantity > (selectedMaterial.cantidad_disponible || 0)) {
-    alert(`Solo hay ${selectedMaterial.cantidad_disponible || 0} unidades disponibles`)
-    return
-  }
+
+  Swal.fire({
+    icon: "warning",
+    title: "Cantidad insuficiente",
+    html: `
+      Solo hay <b>${selectedMaterial.cantidad_disponible || 0}</b> unidades disponibles.
+    `,
+    confirmButtonText: "Entendido",
+    confirmButtonColor: "#ff9aae",
+    background: "#fff",
+    color: "#333"
+  })
+
+  return
+}
+
 
   console.log("[Carrito] Agregando material:", selectedMaterial)
   console.log("[Carrito] Cantidad:", quantity)
@@ -308,8 +356,22 @@ function confirmAddToCart() {
   localStorage.setItem("cart", JSON.stringify(cart))
   updateCartBadge()
   closeAddModal()
+  Swal.fire({
+  icon: "success",
+  title: "¡Agregado al carrito!",
+  html: `
+    <b>${quantity}</b> unidad(es) de 
+    <b>${selectedMaterial.nombre || "material"}</b> fueron agregadas al carrito.
+  `,
+  confirmButtonText: "Perfecto",
+  confirmButtonColor: "#6ecb63",
+  background: "#fff",
+  color: "#333",
+  timer: 1800,
+  timerProgressBar: true
+})
 
-  alert(`${quantity} unidad(es) de ${selectedMaterial.nombre || "material"} agregado(s) al carrito`)
+
 }
 
 
@@ -542,18 +604,42 @@ async function devolverMaterial(id_vales) {
     const result = await response.json()
 
     if (response.ok && result.success) {
-      // Restaurar botón antes de mostrar la alerta
-      btn.classList.remove('loading')
-      btn.innerHTML = originalContent
-      
-      alert('Material marcado como devuelto exitosamente')
-      fetchSolicitudes() // Recargar las solicitudes
-    } else {
+  // Restaurar botón antes de mostrar la alerta
+  btn.classList.remove('loading')
+  btn.innerHTML = originalContent
+
+  Swal.fire({
+    icon: "success",
+    title: "¡Material devuelto!",
+    html: `
+      El material fue marcado como <b>devuelto</b> exitosamente.
+    `,
+    confirmButtonText: "Perfecto",
+    confirmButtonColor: "#6ecb63",
+    background: "#fff",
+    color: "#333",
+    timer: 1800,
+    timerProgressBar: true
+  })
+
+  fetchSolicitudes() // Recargar las solicitudes
+}
+else {
       // Restaurar botón en caso de error
       btn.classList.remove('loading')
       btn.innerHTML = originalContent
       
-      alert(result.error || 'Error al devolver el material')
+Swal.fire({
+  icon: "error",
+  title: "Error",
+  html: `
+    ${result.error || 'Error al devolver el material'}
+  `,
+  confirmButtonText: "Entendido",
+  confirmButtonColor: "#e57373",
+  background: "#fff",
+  color: "#333"
+})
     }
   } catch (error) {
     console.error('[Alumno] Error al devolver material:', error)
@@ -562,7 +648,18 @@ async function devolverMaterial(id_vales) {
     btn.classList.remove('loading')
     btn.innerHTML = originalContent
     
-    alert('Error al procesar la devolución. Intenta nuevamente.')
+Swal.fire({
+  icon: "error",
+  title: "Error al procesar",
+  html: `
+    Ocurrió un problema al procesar la devolución.<br>
+    <b>Intenta nuevamente.</b>
+  `,
+  confirmButtonText: "Entendido",
+  confirmButtonColor: "#e57373",
+  background: "#fff",
+  color: "#333"
+})
   }
 }
 
@@ -596,9 +693,22 @@ function renderAsesorias(asesoriasData) {
       let cupoClass = "available",
         cupoTexto = `${disponibles} disponibles`
       if (porcentaje >= 100) {
-        cupoClass = "unavailable"
-        cupoTexto = "Cupo lleno"
-      } else if (porcentaje >= 75) {
+  cupoClass = "unavailable"
+  cupoTexto = "Cupo lleno"
+
+  Swal.fire({
+    icon: "info",
+    title: "Cupo lleno",
+    html: `
+      Lo sentimos, esta asesoría ya no tiene lugares disponibles.
+    `,
+    confirmButtonText: "Entendido",
+    confirmButtonColor: "#7aa2ff"
+  })
+
+  return // súper importante para que NO intente inscribirse
+}
+ else if (porcentaje >= 75) {
         cupoClass = "limited"
         cupoTexto = `${disponibles} disponibles`
       }
@@ -642,9 +752,24 @@ async function solicitarAsesoria(id_crear_asesoria) {
     const data = await res.json()
 
     if (data.success) {
-      alert("¡Te has inscrito correctamente!")
-      fetchAndRenderAsesorias()
-    } else {
+
+  Swal.fire({
+    icon: "success",
+    title: "¡Inscripción exitosa!",
+    html: `
+      ¡Te has inscrito correctamente! 🎉
+    `,
+    confirmButtonText: "Perfecto",
+    confirmButtonColor: "#6ecb63",
+    background: "#fff",
+    color: "#333",
+    timer: 1800,
+    timerProgressBar: true
+  })
+
+  fetchAndRenderAsesorias()
+}
+ else {
       alert(data.error || "No se pudo inscribir")
     }
   } catch (err) {
