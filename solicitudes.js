@@ -196,9 +196,11 @@ function renderSolicitudes() {
             <span class="detail-value">${solicitud.materialSolicitado}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Hora:</span>
+            <span class="detail-label">Hora de material solicitado:</span>
             <span class="detail-value">${solicitud.hora}</span>
           </div>
+        
+
           <div class="detail-item">
             <span class="detail-label">Motivo:</span>
             <span class="detail-value">${solicitud.motivo}</span>
@@ -255,9 +257,14 @@ function renderSolicitudes() {
             <span class="detail-value">${solicitud.materialSolicitado}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Hora:</span>
+            <span class="detail-label">Hora de material solicitado:</span>
             <span class="detail-value">${solicitud.hora}</span>
           </div>
+          <div class="detail-item">
+    <span class="detail-label">Hora de devolución:</span>
+    <span class="detail-value">${solicitud.hora_devolucion ?? "—"}</span>
+</div>
+
           <div class="detail-item">
             <span class="detail-label">Motivo:</span>
             <span class="detail-value">${solicitud.motivo}</span>

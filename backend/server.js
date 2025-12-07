@@ -741,6 +741,7 @@ app.get("/solicitudes-prestamo", async (req, res) => {
         u.id_usuario,
         COALESCE(m.nombre, 'Sin especificar') as nombre_material,
         vp.hora_entrega,
+        vp.hora_devolucion,
         vp.motivo,
         vp.docente,
         vm.cantidad,
