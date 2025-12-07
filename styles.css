@@ -1356,7 +1356,7 @@ body {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
 }
 
-/* Etiqueta del select */
+/* carrito */
 label[for="docenteSelect"] {
   font-weight: 600;
   color: #374151;
@@ -1370,5 +1370,28 @@ label[for="docenteSelect"]::before {
   font-size: 20px;
 }
 
+/* Estilo de las opciones */
+.select-docente {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 10px;
+  background: #f9fafb;
+  font-size: 15px;
+  color: #333;
+  transition: all .25s ease;
+  cursor: pointer;
+}
 
+.select-docente:hover {
+  background: #fff;
+  border-color: #93c5fd;
+}
+
+.select-docente:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(59,130,246,.2);
+}
 

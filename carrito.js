@@ -103,13 +103,30 @@ function decreaseQuantity(index) {
 
 // Remove item
 function removeItem(index) {
-  if (confirm("¿Estás seguro de eliminar este material ?")) {
-    cart.splice(index, 1)
-    localStorage.setItem("cart", JSON.stringify(cart))
-    renderCartItems()
-    updateSummary()
-  }
+  Swal.fire({
+    title: "¿Eliminar material?",
+    text: "¿Estás seguro de que deseas eliminar este material?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      cart.splice(index, 1)
+      localStorage.setItem("cart", JSON.stringify(cart))
+      renderCartItems()
+      updateSummary()
+
+      Swal.fire({
+        icon: "success",
+        title: "Material eliminado",
+        showConfirmButton: false,
+        timer: 1500
+      })
+    }
+  })
 }
+
 
 
 // Cargar lista de docentes en el select
@@ -122,19 +139,31 @@ async function confirmLoan() {
   const docenteId = document.getElementById("docenteSelect").value;
 
   if (!reason) {
-    alert("Por favor, ingresa el motivo del préstamo");
-    return;
-  }
+  Swal.fire({
+    icon: "warning",
+    title: "Campo vacío",
+    text: "Por favor, ingresa el motivo del préstamo.",
+    confirmButtonText: "Entendido",
+  });
+  return;
+}
+
 
 const teacherSelect = document.getElementById("docenteSelect");
 const id_docente = teacherSelect.value;
 
 
-if (!id_docente) {
-  alert("Por favor, selecciona un docente");
+if (id_docente === "" || id_docente === null) {
+  Swal.fire({
+    icon: "warning",
+    title: "Docente no seleccionado",
+    text: "Por favor, selecciona un docente antes de continuar.",
+    confirmButtonText: "Entendido"
+  });
   teacherSelect.focus();
   return;
 }
+
 
 
   if (cart.length === 0) {
@@ -228,12 +257,15 @@ async function cargarDocentes() {
       return;
     }
 
-    select.innerHTML = docentes
-      .map(
-        (d) =>
-          `<option value="${d.id_usuario}">${d.nombre_completo}</option>`
-      )
-      .join("");
+    select.innerHTML =
+  `<option value="">Seleccione un docente</option>` + 
+  docentes
+    .map(
+      (d) =>
+        `<option value="${d.id_usuario}">${d.nombre_completo}</option>`
+    )
+    .join("");
+
   } catch (error) {
     console.error("Error al cargar docentes:", error);
     select.innerHTML = `<option value="">Error al cargar docentes</option>`;
