@@ -592,7 +592,7 @@ function formatDateTime(dateString) {
 
 // Agrega esta nueva función al final del archivo:
 // Agrega esta nueva función al final del archivo:
-async function devolverMaterial(id_vales) {
+async function devolverMaterial(id_vales,btn) {
 
   Swal.fire({
     title: "¿Marcar como devuelto?",
@@ -612,7 +612,7 @@ async function devolverMaterial(id_vales) {
     if (!result.isConfirmed) return;
 
     // Encontrar el botón que disparó la acción
-    const btn = event.target.closest('.devolver-btn');
+const btn = document.querySelector(`button.devolver-btn[onclick*="${id_vales}"]`);
 
     // Guardar el contenido original
     const originalContent = btn.innerHTML;

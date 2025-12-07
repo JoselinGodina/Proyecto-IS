@@ -20,7 +20,9 @@ CRUD de asesorias
 
 
 Parte del alumno
-⦁	Faltan las alertas
-⦁	La fecha de devolucion de material esta mal xd
+⦁	Faltan las alertas (listas tambien en el carrito)
+⦁	La fecha de devolucion de material esta mal xd ()
+⦁	
+
 
 Parte del Docente
