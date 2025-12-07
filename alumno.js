@@ -518,7 +518,7 @@ function renderSolicitudes(solicitudesData) {
       <div style="margin: 1rem 0;">
         <p><strong>Material:</strong> ${solicitud.materiales || "N/A"}</p>
         <!-- Cambiado de "Fecha de préstamo" a "Hora de entrega" -->
-        <p><strong>Hora de entrega:</strong> ${formatTime(solicitud.hora_entrega)}</p>
+        <!--<p><strong>Hora de entrega:</strong> ${formatTime(solicitud.hora_entrega)}</p>-->
         ${solicitud.hora_devolucion ? `<p><strong>Hora de devolución:</strong> ${formatTime(solicitud.hora_devolucion)}</p>` : ""}
       </div>
       <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
