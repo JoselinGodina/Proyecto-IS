@@ -99,6 +99,7 @@ async function cargarSolicitudes() {
         cantidad: `${item.cantidad || 0} unidades`,
         hora: horaFormateada,
         motivo: item.motivo || "Sin motivo especificado",
+        docente: item.docente || "Sin docente asignado",  // ← NUEVO
         estado: "Pendiente",
         tipo: "pendiente",
       }
@@ -126,6 +127,7 @@ async function cargarSolicitudes() {
         cantidad: `${item.cantidad || 0} unidades`,
         hora: horaFormateada,
         motivo: item.motivo || "Sin motivo especificado",
+        docente: item.docente || "Sin docente asignado",  // ← NUEVO
         estado: "Devuelto",
         tipo: "devuelto",
       }
@@ -201,6 +203,10 @@ function renderSolicitudes() {
             <span class="detail-label">Motivo:</span>
             <span class="detail-value">${solicitud.motivo}</span>
           </div>
+<div class="detail-item">
+  <span class="detail-label">Docente:</span>
+  <span class="detail-value">${solicitud.docente}</span>
+</div>
         </div>
       </div>
     `,
@@ -256,6 +262,11 @@ function renderSolicitudes() {
             <span class="detail-label">Motivo:</span>
             <span class="detail-value">${solicitud.motivo}</span>
           </div>
+          
+<div class="detail-item">
+  <span class="detail-label">Docente:</span>
+  <span class="detail-value">${solicitud.docente}</span>
+</div>
         </div>
       </div>
     `,

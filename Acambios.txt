@@ -3,7 +3,7 @@ Lo que falta en el proyecto de IS
 Parte del admin
 CRUD de Roles
 ⦁	Eliminacion de usuario(ya que es un CRUD) (listo)
-⦁	Mostrar en las solicitudes el nombre del Docente (necesario pero no hay vinculo)
+⦁	Mostrar en las solicitudes el nombre del Docente (nuevo atributo en la tabla vales_prestamos)
 ⦁	No aparece el numero del vale (listo)
 ⦁	Nombre del usuario arriba (listo)
 ⦁	Botones de cerrar sesion (listo)
