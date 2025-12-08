@@ -66,8 +66,9 @@ async function cargarCategorias() {
     const res = await fetch("http://localhost:3000/categorias");
     if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
 
-    const categorias = await res.json();
-    console.log("Categorías recibidas:", categorias);
+    categorias = await res.json();
+
+    categorias.sort((a, b) => a.id_categoria - b.id_categoria); // ← ORDENAR
 
     const categoriaSelect = document.getElementById("filtroCategoria");
     categoriaSelect.innerHTML = `
@@ -76,10 +77,11 @@ async function cargarCategorias() {
 
     categorias.forEach(cat => {
       const option = document.createElement("option");
-      option.value = cat.id_categoria || cat.ID_CATEGORIA || cat.id;
-      option.textContent = cat.descripcion || cat.DESCRIPCION;
+      option.value = cat.id_categoria;
+      option.textContent = `${cat.id_categoria} - ${cat.descripcion}`;
       categoriaSelect.appendChild(option);
     });
+
   } catch (error) {
     console.error("[v0] Error al cargar categorías:", error);
   }
@@ -115,28 +117,9 @@ async function cargarMateriales(categoria = "", nombre = "") {
   }
 }
 
-function renderizarMateriales(materiales) {
-  const lista = document.getElementById("materialsList");
-  if (materiales.length === 0) {
-    lista.innerHTML =
-      '<p style="text-align:center; color:#666; padding:2rem;">No hay materiales disponibles</p>';
-    return;
-  }
 
-  lista.innerHTML = materiales
-    .map(
-      (mat) => `
-      <div class="material-card">
-        <h3>${mat.nombre}</h3>
-        <p><strong>Categoría:</strong> ${mat.categoria_id_categoria}</p>
-        <p><strong>Disponibles:</strong> ${mat.cantidad_disponible}</p>
-        <p><strong>Dañados:</strong> ${mat.cantidad_daniada}</p>
-        <button class="btn-editar" data-id="${mat.id_materiales}">Editar</button>
-      </div>
-    `
-    )
-    .join("");
-}
+
+
 
 function agregarEventosMateriales() {
   const botonesEditar = document.querySelectorAll(".btn-editar");
