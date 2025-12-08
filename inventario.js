@@ -368,3 +368,117 @@ function filtrarMateriales() {
 
 
 
+const modalCategorias = document.getElementById("modalCategorias");
+const btnCategorias = document.getElementById("btnCategorias");
+const btnCerrarCategorias = document.getElementById("btnCerrarCategorias");
+const btnAgregarCategoria = document.getElementById("btnAgregarCategoria");
+const listaCategorias = document.getElementById("listaCategorias");
+const nuevaCategoriaInput = document.getElementById("nuevaCategoria");
+
+// Abrir modal
+btnCategorias.addEventListener("click", () => {
+  modalCategorias.classList.add("active");
+  renderizarListaCategorias();
+});
+
+// Cerrar modal
+btnCerrarCategorias.addEventListener("click", () => {
+  modalCategorias.classList.remove("active");
+});
+
+// Agregar categoría (sin backend aún)
+btnAgregarCategoria.addEventListener("click", () => {
+  const descripcion = nuevaCategoriaInput.value.trim();
+  if (!descripcion) {
+Swal.fire({
+icon: 'error',
+title: '¡Oops!',
+text: 'Ingresa una categoría',
+confirmButtonText: 'Aceptar'
+});
+return;
+}
+
+  // Crear ID simple, tipo timestamp
+  const id_categoria = Date.now().toString();
+  categorias.push({ id_categoria, descripcion });
+
+  nuevaCategoriaInput.value = "";
+  renderizarListaCategorias();
+  cargarCategorias(); // recarga select de categorías
+});
+
+// Renderizar lista con botón eliminar
+function renderizarListaCategorias() {
+  listaCategorias.innerHTML = "";
+  categorias.forEach(cat => {
+    const li = document.createElement("li");
+    li.textContent = cat.descripcion;
+
+   const btnEliminar = document.createElement("button");
+btnEliminar.textContent = "Eliminar";
+btnEliminar.classList.add("btn-categoria"); // Clase para CSS
+
+btnEliminar.addEventListener("click", () => {
+Swal.fire({
+title: "¿Eliminar la categoría \"" + cat.descripcion + "\"?",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonText: 'Sí, eliminar',
+cancelButtonText: 'Cancelar',
+reverseButtons: true
+}).then((result) => {
+if (result.isConfirmed) {
+categorias = categorias.filter(c => c.id_categoria !== cat.id_categoria);
+renderizarListaCategorias();
+cargarCategorias();
+Swal.fire({
+icon: 'success',
+title: 'Categoría eliminada',
+showConfirmButton: false,
+timer: 1200
+});
+}
+});
+});
+// Botón editar
+const btnEditar = document.createElement("button");
+btnEditar.textContent = "Editar";
+btnEditar.classList.add("btn-categoria", "editar"); // Clase para CSS
+  btnEditar.addEventListener("click", () => {
+        Swal.fire({
+        title: 'Editar categoría',
+        input: 'text',
+        inputLabel: 'Nueva descripción',
+        inputValue: cat.descripcion,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar',
+        inputValidator: (value) => {
+  if (!value || value.trim() === '') {
+  return 'La descripción no puede estar vacía';
+  }
+  return null;
+  }
+}).then((result) => {
+    if (result.isConfirmed) {
+    cat.descripcion = result.value.trim();
+    renderizarListaCategorias();
+    cargarCategorias();
+    Swal.fire({
+    icon: 'success',
+    title: 'Categoría actualizada',
+    showConfirmButton: false,
+    timer: 1200
+});
+}
+});
+});
+
+
+
+li.appendChild(btnEditar);  
+    li.appendChild(btnEliminar);
+    listaCategorias.appendChild(li);
+  });
+}

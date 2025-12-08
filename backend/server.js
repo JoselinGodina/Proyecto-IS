@@ -540,6 +540,46 @@ app.post("/materiales/multiples", async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 })
+
+// GET todas las categorías
+app.get("/categorias", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM categoria ORDER BY id_categoria");
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener categorías" });
+  }
+});
+
+// POST nueva categoría
+app.post("/categorias", async (req, res) => {
+  const { id_categoria, descripcion } = req.body;
+  try {
+    const result = await pool.query(
+      "INSERT INTO categoria (id_categoria, descripcion) VALUES ($1, $2) RETURNING *",
+      [id_categoria, descripcion]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al crear categoría" });
+  }
+});
+
+// DELETE categoría
+app.delete("/categorias/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query("DELETE FROM categoria WHERE id_categoria = $1", [id]);
+    res.json({ message: "Categoría eliminada correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al eliminar categoría" });
+  }
+});
+
+app.listen(3000, () => console.log("Servidor corriendo en puerto 3000"));
 //creo hasta aqui y luego aqui ya empiezan los vales
 
 // ============================

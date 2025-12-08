@@ -46,6 +46,18 @@
             <p>Gestiona el inventario del laboratorio de electrónica</p>
         </div>
 
+        <button id="btnCategorias">Administrar Categorías</button>
+
+<!-- Modal de categorías -->
+<div id="modalCategorias" class="modal-overlay">
+  <div class="modal-content">
+    <h2>Administrar Categorías</h2>
+    <input type="text" id="nuevaCategoria" placeholder="Nueva categoría">
+    <button id="btnAgregarCategoria">Agregar</button>
+    <ul id="listaCategorias"></ul>
+    <button id="btnCerrarCategorias">Cerrar</button>
+  </div>
+</div>
         <div class="filtros" style="display:flex; gap:1rem; align-items:center; margin: 1rem;">
   <select id="filtroCategoria" style="padding:0.5rem; border-radius:6px; border:1px solid #ccc;">
     <option value="">Todas las categorías</option>
@@ -70,6 +82,7 @@
         <div class="materials-list" id="materialsList"></div>
     </main>
     
+
 
 
     <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalSiClickFuera(event)">
