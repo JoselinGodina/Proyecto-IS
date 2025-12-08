@@ -101,12 +101,15 @@ async function cargarMateriales(categoria = "", nombre = "") {
     // 🔍 Filtrar
     const filtrados = materiales.filter((mat) => {
       const coincideCategoria =
-        !categoria || mat.categoria_id_categoria === categoria;
+  !categoria || String(mat.categoria_id_categoria) === String(categoria);
+
       const coincideNombre = mat.nombre
         .toLowerCase()
         .includes(nombre.toLowerCase());
       return coincideCategoria && coincideNombre;
     });
+
+    console.log("Filtrando por categoría:", categoria, "y nombre:", nombre);
 
     renderizarMateriales(filtrados);
     agregarEventosMateriales();
@@ -355,4 +358,13 @@ document.addEventListener("keydown", (event) => {
     cerrarModal()
   }
 })
+
+function filtrarMateriales() {
+  const categoria = document.getElementById("filtroCategoria").value;
+  const nombre = document.getElementById("busquedaNombre").value;
+  cargarMateriales(categoria, nombre);
+  console.log("Material:", mat.nombre, "ID Cat:", mat.categoria_id_categoria);
+
+}
+
 
