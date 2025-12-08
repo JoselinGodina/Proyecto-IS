@@ -120,13 +120,26 @@ app.post("/login", async (req, res) => {
 // ============================
 app.get("/asesorias", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM crear_asesoria ORDER BY fecha ASC")
+    const query = `
+      SELECT 
+        c.*, 
+        COUNT(i.id_inscripcion) AS cuposocupados
+      FROM crear_asesoria c
+      LEFT JOIN inscripciones i 
+        ON c.id_crear_asesoria = i.id_crear_asesoria
+      GROUP BY c.id_crear_asesoria
+      ORDER BY c.fecha ASC
+    `
+
+    const result = await pool.query(query)
     res.json(result.rows)
+
   } catch (error) {
     console.error("Error al obtener asesorías:", error)
     res.status(500).json({ error: "Error al obtener asesorías" })
   }
 })
+
 
 app.post("/asesorias", async (req, res) => {
   try {
