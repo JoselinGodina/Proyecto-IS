@@ -22,7 +22,7 @@ CRUD de asesorias
 
 Parte del alumno
 ⦁	Faltan las alertas (listas tambien en el carrito)
-⦁	Falta el bug del cupo
+⦁	Falta el bug del cupo(listo)
 ⦁	
 
 
