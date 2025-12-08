@@ -91,25 +91,22 @@ async function cargarCategorias() {
 
 async function cargarMateriales(categoria = "", nombre = "") {
   const lista = document.getElementById("materialsList");
-  lista.innerHTML =
-    '<p style="text-align:center; color:#666; padding:2rem;">Cargando materiales...</p>';
+  lista.innerHTML = '<p style="text-align:center; color:#666; padding:2rem;">Cargando materiales...</p>';
 
   try {
     const res = await fetch("http://localhost:3000/materiales");
     const materiales = await res.json();
 
-    // 🔍 Filtrar
     const filtrados = materiales.filter((mat) => {
       const coincideCategoria =
-  !categoria || String(mat.categoria_id_categoria) === String(categoria);
+        !categoria || mat.categoria === categoria;
 
       const coincideNombre = mat.nombre
         .toLowerCase()
         .includes(nombre.toLowerCase());
+
       return coincideCategoria && coincideNombre;
     });
-
-    console.log("Filtrando por categoría:", categoria, "y nombre:", nombre);
 
     renderizarMateriales(filtrados);
     agregarEventosMateriales();
@@ -119,6 +116,7 @@ async function cargarMateriales(categoria = "", nombre = "") {
       '<p style="color:red; text-align:center;">Error al cargar materiales</p>';
   }
 }
+
 
 
 
@@ -360,11 +358,13 @@ document.addEventListener("keydown", (event) => {
 })
 
 function filtrarMateriales() {
-  const categoria = document.getElementById("filtroCategoria").value;
+  const categoriaSelect = document.getElementById("filtroCategoria");
+  const categoriaSeleccionada = categoriaSelect.options[categoriaSelect.selectedIndex].text.split(' - ')[1] || "";
   const nombre = document.getElementById("busquedaNombre").value;
-  cargarMateriales(categoria, nombre);
-  console.log("Material:", mat.nombre, "ID Cat:", mat.categoria_id_categoria);
 
+  cargarMateriales(categoriaSeleccionada, nombre);
 }
+
+
 
 
