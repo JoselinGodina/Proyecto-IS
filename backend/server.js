@@ -541,6 +541,8 @@ app.post("/materiales/multiples", async (req, res) => {
   }
 })
 
+
+//BOTONES DEL CRUD DE CATEGORIAS
 // GET todas las categorías
 app.get("/categorias", async (req, res) => {
   try {

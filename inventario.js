@@ -420,23 +420,23 @@ btnEliminar.textContent = "Eliminar";
 btnEliminar.classList.add("btn-categoria"); // Clase para CSS
 
 btnEliminar.addEventListener("click", () => {
-Swal.fire({
-title: "¿Eliminar la categoría \"" + cat.descripcion + "\"?",
-icon: 'warning',
-showCancelButton: true,
-confirmButtonText: 'Sí, eliminar',
-cancelButtonText: 'Cancelar',
-reverseButtons: true
+      Swal.fire({
+      title: "¿Eliminar la categoría \"" + cat.descripcion + "\"?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true
 }).then((result) => {
-if (result.isConfirmed) {
-categorias = categorias.filter(c => c.id_categoria !== cat.id_categoria);
-renderizarListaCategorias();
-cargarCategorias();
-Swal.fire({
-icon: 'success',
-title: 'Categoría eliminada',
-showConfirmButton: false,
-timer: 1200
+        if (result.isConfirmed) {
+        categorias = categorias.filter(c => c.id_categoria !== cat.id_categoria);
+        renderizarListaCategorias();
+        cargarCategorias();
+        Swal.fire({
+        icon: 'success',
+        title: 'Categoría eliminada',
+        showConfirmButton: false,
+        timer: 1200
 });
 }
 });
