@@ -13,7 +13,7 @@ CRUD de Roles
 CRUD materiales
 (En la parte de Inventario)
 ⦁	Agregar las categorias o eliminarlas
-⦁	Corregir lo de busqueda de material por categorias y por el buscador
+⦁	Corregir lo de busqueda de material por categorias y por el buscador(listo)
 
 CRUD de asesorias
 
