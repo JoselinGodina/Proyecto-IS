@@ -233,44 +233,54 @@ app.get("/inscripciones/:id_usuario", async (req, res) => {
 })
 
 app.post("/inscribir", async (req, res) => {
-  const { id_usuario, id_crear_asesoria } = req.body
+  const { id_usuario, id_crear_asesoria } = req.body;
 
   try {
     const asesoriaResult = await pool.query(
       "SELECT cupo, cuposocupados FROM crear_asesoria WHERE id_crear_asesoria = $1",
-      [id_crear_asesoria],
-    )
+      [id_crear_asesoria]
+    );
 
-    if (asesoriaResult.rows.length === 0)
-      return res.status(404).json({ success: false, error: "Asesoría no encontrada" })
+    if (asesoriaResult.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Asesoría no encontrada" });
+    }
 
-    const { cupo, cuposocupados } = asesoriaResult.rows[0]
+    // Convertir NUMERIC a Number
+    const cupo = Number(asesoriaResult.rows[0].cupo);
+    const ocupados = Number(asesoriaResult.rows[0].cuposocupados);
 
-    const existe = await pool.query("SELECT * FROM inscripciones WHERE id_usuario = $1 AND id_crear_asesoria = $2", [
-      id_usuario,
-      id_crear_asesoria,
-    ])
-    if (existe.rows.length > 0)
-      return res.status(400).json({ success: false, error: "Ya estás inscrito en esta asesoría" })
+    console.log("→ CUPOS:", ocupados, "/", cupo);
 
-    if (cuposocupados >= cupo) return res.status(400).json({ success: false, error: "cupo lleno" })
+    const existe = await pool.query(
+      "SELECT * FROM inscripciones WHERE id_usuario = $1 AND id_crear_asesoria = $2",
+      [id_usuario, id_crear_asesoria]
+    );
+
+    if (existe.rows.length > 0) {
+      return res.status(400).json({ success: false, error: "Ya estás inscrito en esta asesoría" });
+    }
+
+    if (ocupados >= cupo) {
+      return res.status(400).json({ success: false, error: "cupo lleno" });
+    }
 
     await pool.query(
-      `INSERT INTO inscripciones (id_usuario, id_crear_asesoria, fecha_inscripcion)
-       VALUES ($1, $2, NOW())`,
-      [id_usuario, id_crear_asesoria],
-    )
+      "INSERT INTO inscripciones (id_usuario, id_crear_asesoria, fecha_inscripcion) VALUES ($1, $2, NOW())",
+      [id_usuario, id_crear_asesoria]
+    );
 
-    await pool.query("UPDATE crear_asesoria SET cuposocupados = cuposocupados + 1 WHERE id_crear_asesoria = $1", [
-      id_crear_asesoria,
-    ])
+    await pool.query(
+      "UPDATE crear_asesoria SET cuposocupados = cuposocupados + 1 WHERE id_crear_asesoria = $1",
+      [id_crear_asesoria]
+    );
 
-    res.json({ success: true, message: "Inscripción realizada correctamente" })
+    res.json({ success: true, message: "Inscripción realizada correctamente" });
   } catch (error) {
-    console.error("❌ Error en /inscribir:", error)
-    res.status(500).json({ success: false, error: "Error en el servidor" })
+    console.error("❌ Error en /inscribir:", error);
+    res.status(500).json({ success: false, error: "Error en el servidor" });
   }
-})
+});
+
 
 // ============================
 // 📋 USUARIOS CON ROLES
