@@ -78,6 +78,7 @@ async function guardarAsesoria(event) {
     fecha,
     horario,
     cupo: cupos,
+    cuposocupados: asesoria.cuposOcupados,
     estado: "Programado",
     instructor,
   }
