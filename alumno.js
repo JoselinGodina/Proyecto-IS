@@ -791,14 +791,13 @@ function renderAsesorias(asesoriasData) {
 }
 
 async function solicitarAsesoria(id_crear_asesoria) {
-  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const usuario = JSON.parse(localStorage.getItem("usuario"))
   if (!usuario) {
-    Swal.fire({
+    return Swal.fire({
       icon: "warning",
-      title: "Debes iniciar sesión",
-      text: "Inicia sesión para inscribirte en asesorías."
-    });
-    return;
+      title: "Inicia sesión",
+      text: "Debes iniciar sesión para inscribirte.",
+    })
   }
 
   try {
@@ -807,42 +806,44 @@ async function solicitarAsesoria(id_crear_asesoria) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id_usuario: usuario.id_usuario,
-        id_crear_asesoria
+        id_crear_asesoria,
       }),
-    });
+    })
 
-    // 🔥 MANEJAR ERRORES DEL SERVIDOR ANTES
-    const data = await res.json();
-
+    // 🔥 SI el servidor responde 400, ENTRA AQUÍ y NO sale error en consola
     if (!res.ok) {
+      const errorData = await res.json()
       Swal.fire({
         icon: "error",
-        title: "Ups...",
-        text: data.error || "No se pudo inscribir."
-      });
-      return;
+        title: "No se pudo inscribir",
+        text: errorData.error || "Error desconocido",
+        confirmButtonColor: "#d33",
+      })
+      return
     }
 
-    // 🔥 SI TODO SALIÓ BIEN
-    Swal.fire({
-      icon: "success",
-      title: "¡Inscripción exitosa!",
-      html: `¡Te has inscrito correctamente! 🎉`,
-      confirmButtonText: "Perfecto",
-      confirmButtonColor: "#6ecb63",
-      timer: 1800,
-      timerProgressBar: true
-    });
+    const data = await res.json()
 
-    fetchAndRenderAsesorias();
+    // 🔥 EXITO
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "¡Inscripción exitosa!",
+        html: `¡Te has inscrito correctamente! 🎉`,
+        confirmButtonColor: "#6ecb63",
+        timer: 1800,
+        timerProgressBar: true,
+      })
 
+      fetchAndRenderAsesorias()
+    }
   } catch (err) {
-    console.error(err);
+    console.error("Error en fetch:", err)
     Swal.fire({
       icon: "error",
-      title: "Error de conexión",
-      text: "No se pudo comunicar con el servidor."
-    });
+      title: "Error inesperado",
+      text: "Ocurrió un error al conectarse con el servidor.",
+    })
   }
 }
 
