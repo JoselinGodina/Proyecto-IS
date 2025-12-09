@@ -579,18 +579,26 @@ app.get("/categorias", async (req, res) => {
 
 // POST nueva categoría
 app.post("/categorias", async (req, res) => {
-  const { id_categoria, descripcion } = req.body;
+  const { descripcion } = req.body;
+
   try {
+    // Generar ID autoincremental manual (último ID + 1)
+    const resultId = await pool.query("SELECT COALESCE(MAX(CAST(id_categoria AS INTEGER)), 0) + 1 AS nuevo_id FROM categoria");
+    const id_categoria = resultId.rows[0].nuevo_id.toString();
+
+    // Guardar en la BD
     const result = await pool.query(
       "INSERT INTO categoria (id_categoria, descripcion) VALUES ($1, $2) RETURNING *",
       [id_categoria, descripcion]
     );
+
     res.json(result.rows[0]);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al crear categoría" });
+    console.error("Error al agregar categoría:", error);
+    res.status(500).json({ error: "Error al agregar categoría" });
   }
 });
+
 
 // DELETE categoría
 app.delete("/categorias/:id", async (req, res) => {

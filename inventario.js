@@ -387,26 +387,54 @@ btnCerrarCategorias.addEventListener("click", () => {
 });
 
 // Agregar categoría (sin backend aún)
-btnAgregarCategoria.addEventListener("click", () => {
+btnAgregarCategoria.addEventListener("click", async () => {
   const descripcion = nuevaCategoriaInput.value.trim();
+
   if (!descripcion) {
-Swal.fire({
-icon: 'error',
-title: '¡Oops!',
-text: 'Ingresa una categoría',
-confirmButtonText: 'Aceptar'
-});
-return;
-}
+    Swal.fire({
+      icon: 'error',
+      title: '¡Oops!',
+      text: 'Ingresa una categoría',
+      confirmButtonText: 'Aceptar'
+    });
+    return;
+  }
 
-  // Crear ID simple, tipo timestamp
-  const id_categoria = Date.now().toString();
-  categorias.push({ id_categoria, descripcion });
+  try {
+    // Enviar al backend
+const resp = await fetch("http://localhost:3000/categorias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ descripcion })
+    });
 
-  nuevaCategoriaInput.value = "";
-  renderizarListaCategorias();
-  cargarCategorias(); // recarga select de categorías
+    if (!resp.ok) throw new Error("Error al guardar");
+
+    const nuevaCategoria = await resp.json();
+
+    // Agregar al array local
+    categorias.push(nuevaCategoria);
+
+    Swal.fire({
+      icon: "success",
+      title: "Categoría agregada",
+      text: `"${nuevaCategoria.descripcion}" se guardó correctamente`,
+      timer: 1500,
+      showConfirmButton: false
+    });
+
+    nuevaCategoriaInput.value = "";
+    renderizarListaCategorias();
+    cargarCategorias(); // para actualizar el select
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "No se pudo agregar la categoría."
+    });
+  }
 });
+
 
 // Renderizar lista con botón eliminar
 function renderizarListaCategorias() {
