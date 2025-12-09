@@ -443,32 +443,53 @@ function renderizarListaCategorias() {
     const li = document.createElement("li");
     li.textContent = cat.descripcion;
 
-   const btnEliminar = document.createElement("button");
+  const btnEliminar = document.createElement("button");
 btnEliminar.textContent = "Eliminar";
-btnEliminar.classList.add("btn-categoria"); // Clase para CSS
+btnEliminar.classList.add("btn-categoria");
 
 btnEliminar.addEventListener("click", () => {
-      Swal.fire({
-      title: "¿Eliminar la categoría \"" + cat.descripcion + "\"?",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      reverseButtons: true
-}).then((result) => {
-        if (result.isConfirmed) {
-        categorias = categorias.filter(c => c.id_categoria !== cat.id_categoria);
-        renderizarListaCategorias();
-        cargarCategorias();
-        Swal.fire({
-        icon: 'success',
-        title: 'Categoría eliminada',
-        showConfirmButton: false,
-        timer: 1200
+  Swal.fire({
+    title: `¿Eliminar la categoría "${cat.descripcion}"?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  }).then((result) => {
+
+    if (result.isConfirmed) {
+
+      fetch(`http://localhost:3000/categorias/${cat.id_categoria}`, {
+        method: "DELETE"
+      })
+        .then(res => res.json())
+        .then(() => {
+          
+          // ❗Eliminar en el frontend
+          categorias = categorias.filter(c => c.id_categoria !== cat.id_categoria);
+
+          // Volver a dibujar la lista
+          renderizarListaCategorias();
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Categoría eliminada',
+            showConfirmButton: false,
+            timer: 1300
+          });
+        })
+        .catch(() => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al eliminar',
+            text: 'Intenta de nuevo'
+          });
+        });
+
+    }
+  });
 });
-}
-});
-});
+
 const btnEditar = document.createElement("button");
     btnEditar.textContent = "Editar";
     btnEditar.classList.add("btn-categoria", "editar");

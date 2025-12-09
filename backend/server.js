@@ -632,18 +632,20 @@ app.put("/categorias/:id", async (req, res) => {
 
 
 // DELETE categoría
-app.delete("/categorias/:id", async (req, res) => {
-  const { id } = req.params;
+// Eliminar categoría
+app.delete("/categorias/:id_categoria", async (req, res) => {
+  const { id_categoria } = req.params;
+
   try {
-    await pool.query("DELETE FROM categoria WHERE id_categoria = $1", [id]);
-    res.json({ message: "Categoría eliminada correctamente" });
+    await pool.query("DELETE FROM categoria WHERE id_categoria = $1", [id_categoria]);
+    res.json({ message: "Categoría eliminada" });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al eliminar categoría" });
+    console.error("Error al eliminar categoría:", error);
+    res.status(500).json({ error: "Error al eliminar la categoría" });
   }
 });
 
-app.listen(3000, () => console.log("Servidor corriendo en puerto 3000"));
 //creo hasta aqui y luego aqui ya empiezan los vales
 
 // ============================
