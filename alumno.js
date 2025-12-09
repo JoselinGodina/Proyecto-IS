@@ -791,41 +791,58 @@ function renderAsesorias(asesoriasData) {
 }
 
 async function solicitarAsesoria(id_crear_asesoria) {
-  const usuario = JSON.parse(localStorage.getItem("usuario"))
-  if (!usuario) return alert("Debes iniciar sesión.")
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario) {
+    Swal.fire({
+      icon: "warning",
+      title: "Debes iniciar sesión",
+      text: "Inicia sesión para inscribirte en asesorías."
+    });
+    return;
+  }
 
   try {
     const res = await fetch("http://localhost:3000/inscribir", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id_usuario: usuario.id_usuario, id_crear_asesoria }),
-    })
-    const data = await res.json()
+      body: JSON.stringify({
+        id_usuario: usuario.id_usuario,
+        id_crear_asesoria
+      }),
+    });
 
-    if (data.success) {
+    // 🔥 MANEJAR ERRORES DEL SERVIDOR ANTES
+    const data = await res.json();
 
-  Swal.fire({
-    icon: "success",
-    title: "¡Inscripción exitosa!",
-    html: `
-      ¡Te has inscrito correctamente! 🎉
-    `,
-    confirmButtonText: "Perfecto",
-    confirmButtonColor: "#6ecb63",
-    background: "#fff",
-    color: "#333",
-    timer: 1800,
-    timerProgressBar: true
-  })
-
-  fetchAndRenderAsesorias()
-}
- else {
-      alert(data.error || "No se pudo inscribir")
+    if (!res.ok) {
+      Swal.fire({
+        icon: "error",
+        title: "Ups...",
+        text: data.error || "No se pudo inscribir."
+      });
+      return;
     }
+
+    // 🔥 SI TODO SALIÓ BIEN
+    Swal.fire({
+      icon: "success",
+      title: "¡Inscripción exitosa!",
+      html: `¡Te has inscrito correctamente! 🎉`,
+      confirmButtonText: "Perfecto",
+      confirmButtonColor: "#6ecb63",
+      timer: 1800,
+      timerProgressBar: true
+    });
+
+    fetchAndRenderAsesorias();
+
   } catch (err) {
-    console.error(err)
-    alert("Error al inscribirse. Revisa la consola.")
+    console.error(err);
+    Swal.fire({
+      icon: "error",
+      title: "Error de conexión",
+      text: "No se pudo comunicar con el servidor."
+    });
   }
 }
 
