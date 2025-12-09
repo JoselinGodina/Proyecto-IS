@@ -40,12 +40,34 @@ function mostrarAdminLogueado() {
 }
 
 function cerrarSesion() {
-  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-    localStorage.removeItem("usuario")
-    localStorage.clear()
-    window.location.href = "index.html"
-  }
+  Swal.fire({
+    title: '¿Cerrar sesión?',
+    text: 'Se cerrará tu sesión actual.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, salir',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+
+      // Limpia todo el localStorage
+      localStorage.clear();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Sesión cerrada',
+        showConfirmButton: false,
+        timer: 1200
+      });
+
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1200);
+    }
+  });
 }
+
 
 const modalOverlay = document.getElementById("modalOverlay")
 const openModalBtn = document.getElementById("openModalBtn")
