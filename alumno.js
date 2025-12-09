@@ -217,30 +217,59 @@ function setupSearch() {
 // Dropdown categorías
 // ----------------------
 function setupCategoryDropdown() {
-  const categoryBtn = document.getElementById("categoryBtn")
-  const categoryMenu = document.getElementById("categoryMenu")
-  const dropdownItems = document.querySelectorAll(".dropdown-item")
+  const categoryBtn = document.getElementById("categoryBtn");
+  const categoryMenu = document.getElementById("categoryMenu");
+  const selectedCategory = document.getElementById("selectedCategory");
 
-  if (!categoryBtn || !categoryMenu) return
+  if (!categoryBtn || !categoryMenu) return;
 
-  categoryBtn.addEventListener("click", (e) => {
-    e.stopPropagation()
-    categoryMenu.classList.toggle("show")
-  })
+  // 1️⃣ Obtener categorías del backend
+  fetch("http://localhost:3000/categorias")
+    .then(res => res.json())
+    .then(categorias => {
 
-  dropdownItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      currentCategory = item.dataset.category
-      document.getElementById("selectedCategory").textContent = item.textContent
-      categoryMenu.classList.remove("show")
-      dropdownItems.forEach((i) => i.classList.remove("active"))
-      item.classList.add("active")
-      renderMaterials()
+      // 2️⃣ Insertar los botones dinámicamente
+      categoryMenu.innerHTML = `
+        <button class="dropdown-item" data-category="all">Todas las Categorías</button>
+        ${categorias
+          .map(cat => `
+            <button class="dropdown-item" data-category="${cat.descripcion}">
+              ${cat.descripcion}
+            </button>
+          `)
+          .join("")}
+      `;
+
+      // 3️⃣ Reasignar eventos a los botones generados
+      const dropdownItems = categoryMenu.querySelectorAll(".dropdown-item");
+
+      dropdownItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          currentCategory = item.dataset.category;
+
+          selectedCategory.textContent = item.textContent;
+
+          dropdownItems.forEach((i) => i.classList.remove("active"));
+          item.classList.add("active");
+
+          categoryMenu.classList.remove("show");
+
+          renderMaterials(); // vuelve a dibujar el inventario filtrado
+        });
+      });
     })
-  })
+    .catch(err => console.error("Error cargando categorías:", err));
 
-  document.addEventListener("click", () => categoryMenu.classList.remove("show"))
+  // 4️⃣ Toggle del menú
+  categoryBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    categoryMenu.classList.toggle("show");
+  });
+
+  // 5️⃣ Cerrar cuando clic fuera
+  document.addEventListener("click", () => categoryMenu.classList.remove("show"));
 }
+
 
 // ----------------------
 // Modal materiales

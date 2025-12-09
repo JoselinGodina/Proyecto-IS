@@ -1187,3 +1187,18 @@ body {
   background-color: #0d2a5c;
   transform: translateY(-1px);
 }
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  background: white;
+  width: 100%;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  margin-top: 4px;
+  z-index: 50;
+}
+
+.dropdown-menu.show {
+  display: block;
+}

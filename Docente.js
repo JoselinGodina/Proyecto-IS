@@ -30,11 +30,33 @@ if (usuarioActual) {
 // Cerrar sesión
 // ===============================
 document.querySelector(".btn-logout").addEventListener("click", () => {
-  if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-    localStorage.removeItem("usuario")
-    localStorage.clear()
-    window.location.href = "index.html"
-  }
+  Swal.fire({
+    title: '¿Cerrar sesión?',
+    text: 'Se cerrará tu sesión actual.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, salir',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+
+      // Limpia el localStorage
+      localStorage.clear();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Sesión cerrada',
+        showConfirmButton: false,
+        timer: 1200
+      });
+
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1200);
+
+    }
+  });
 });
 
 // ===============================
@@ -502,18 +524,30 @@ function mostrarMateriales(lista) {
 // ===============================
 // Llenar select de categorías
 // ===============================
-function llenarCategorias(materiales) {
+function llenarCategorias() {
   const select = document.getElementById("filtroCategoria");
   if (!select) return;
 
-  const categorias = [
-    ...new Set(materiales.map((m) => m.categoria || "Sin categoría")),
-  ];
+  // Obtener categorías desde el backend
+  fetch("http://localhost:3000/categorias")
+    .then(res => res.json())
+    .then(categorias => {
 
-  select.innerHTML =
-    `<option value="">Todas las categorías</option>` +
-    categorias.map((cat) => `<option value="${cat}">${cat}</option>`).join("");
+      select.innerHTML = `
+        <option value="">Todas las categorías</option>
+        ${categorias.map(cat => `
+          <option value="${cat.descripcion}">
+            ${cat.descripcion}
+          </option>
+        `).join("")}
+      `;
+
+    })
+    .catch(error => {
+      console.error("Error cargando categorías:", error);
+    });
 }
+
 
 // ===============================
 // Filtrar materiales (nombre o categoría)
