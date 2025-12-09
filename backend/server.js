@@ -599,6 +599,37 @@ app.post("/categorias", async (req, res) => {
   }
 });
 
+// EDITAR categoría
+// EDITAR categoría
+app.put("/categorias/:id", async (req, res) => {
+  const { id } = req.params;
+  const { descripcion } = req.body;
+
+  if (!descripcion || descripcion.trim() === "") {
+    return res.status(400).json({ error: "La descripción no puede estar vacía" });
+  }
+
+  try {
+    const query = `
+      UPDATE categoria
+      SET descripcion = $1
+      WHERE id_categoria = $2
+      RETURNING *;
+    `;
+
+    const result = await pool.query(query, [descripcion.trim(), id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Categoría no encontrada" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Error al actualizar categoría:", error);
+    res.status(500).json({ error: "Error al actualizar categoría" });
+  }
+});
+
 
 // DELETE categoría
 app.delete("/categorias/:id", async (req, res) => {

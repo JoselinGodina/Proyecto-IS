@@ -469,12 +469,13 @@ btnEliminar.addEventListener("click", () => {
 }
 });
 });
-// Botón editar
 const btnEditar = document.createElement("button");
-btnEditar.textContent = "Editar";
-btnEditar.classList.add("btn-categoria", "editar"); // Clase para CSS
-  btnEditar.addEventListener("click", () => {
-        Swal.fire({
+    btnEditar.textContent = "Editar";
+    btnEditar.classList.add("btn-categoria", "editar");
+
+    btnEditar.addEventListener("click", () => {
+
+      Swal.fire({
         title: 'Editar categoría',
         input: 'text',
         inputLabel: 'Nueva descripción',
@@ -483,25 +484,54 @@ btnEditar.classList.add("btn-categoria", "editar"); // Clase para CSS
         confirmButtonText: 'Guardar',
         cancelButtonText: 'Cancelar',
         inputValidator: (value) => {
-  if (!value || value.trim() === '') {
-  return 'La descripción no puede estar vacía';
-  }
-  return null;
-  }
-}).then((result) => {
-    if (result.isConfirmed) {
-    cat.descripcion = result.value.trim();
-    renderizarListaCategorias();
-    cargarCategorias();
-    Swal.fire({
+          if (!value || value.trim() === '') {
+            return 'La descripción no puede estar vacía';
+          }
+        }
+      }).then((result) => {
+
+        if (result.isConfirmed) {
+
+          const nuevaDescripcion = result.value.trim();
+
+          // actualizar en backend
+          fetch(`http://localhost:3000/categorias/${cat.id_categoria}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ descripcion: nuevaDescripcion })
+          })
+            .then(res => res.json())
+            .then(() => {
+  // Actualizar en frontend sin esperar cargarCategorias
+  cat.descripcion = nuevaDescripcion;
+
+  Swal.fire({
     icon: 'success',
     title: 'Categoría actualizada',
     showConfirmButton: false,
     timer: 1200
-});
-}
-});
-});
+  });
+
+  // Volver a dibujar la lista
+  renderizarListaCategorias();
+
+  // Actualizar en BD por si hubo cambios atrás
+  cargarCategorias();
+})
+
+            .catch(() => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error al actualizar',
+                text: 'Intenta de nuevo'
+              });
+            });
+
+        }
+
+      });
+
+    });
 
 
 
