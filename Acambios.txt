@@ -17,8 +17,10 @@ CRUD materiales
 
 CRUD de asesorias
 
-⦁	Editar las alertas
+⦁	Editar las alertas(listo)
 -----Validaciones de fechas
+-----Alerta de que no se puede eliminar la asesoria porque tiene alumnos(copiar lo del docente)
+-----Eliminar alumnos de asesorias
 
 
 Parte del alumno
@@ -28,3 +30,4 @@ Parte del alumno
 
 
 Parte del Docente
+--Eliminar alumnos de asesorias
