@@ -294,6 +294,38 @@ app.post("/inscribir", async (req, res) => {
   }
 });
 
+app.delete("/inscripciones/:id_usuario/:id_crear_asesoria", async (req, res) => {
+  try {
+    const { id_usuario, id_crear_asesoria } = req.params;
+
+    // Obtener la inscripción
+    const inscripcion = await pool.query(
+      "SELECT * FROM inscripciones WHERE id_usuario = $1 AND id_crear_asesoria = $2",
+      [id_usuario, id_crear_asesoria]
+    );
+
+    if (inscripcion.rows.length === 0) {
+      return res.status(404).json({ error: "Inscripción no encontrada" });
+    }
+
+    // Eliminar inscripción
+    await pool.query(
+      "DELETE FROM inscripciones WHERE id_usuario = $1 AND id_crear_asesoria = $2",
+      [id_usuario, id_crear_asesoria]
+    );
+
+    // Decrementar cupos ocupados
+    await pool.query(
+      "UPDATE crear_asesoria SET cuposocupados = cuposocupados - 1 WHERE id_crear_asesoria = $1",
+      [id_crear_asesoria]
+    );
+
+    res.json({ message: "Estudiante removido correctamente" });
+  } catch (error) {
+    console.error("Error al remover estudiante:", error);
+    res.status(500).json({ error: "Error al remover estudiante" });
+  }
+});
 
 // ============================
 // 📋 USUARIOS CON ROLES
