@@ -1313,3 +1313,17 @@ body {
   }
 }
 
+.btn-remover {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.3s;
+}
+
+.btn-remover:hover {
+  background-color: #c82333;
+}

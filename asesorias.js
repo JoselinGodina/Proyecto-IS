@@ -292,28 +292,36 @@ async function verInscritos(idAsesoria) {
     } else {
       contenido = `
         <table class="tabla-inscritos">
-          <thead>
-            <tr>
-              <th>ID Usuario</th>
-              <th>Nombre</th>
-              <th>Correo</th>
-              <th>Fecha de inscripción</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${inscritos
-              .map(
-                (alumno) => `
-              <tr>
-                <td>${alumno.id_usuario}</td>
-                <td>${alumno.nombres} ${alumno.apellidos}</td>
-                <td>${alumno.correo}</td>
-                <td>${new Date(alumno.fecha_inscripcion).toLocaleString("es-MX")}</td>
-              </tr>
-            `
-              )
-              .join("")}
-          </tbody>
+          // Donde está la tabla en verInscritos(), agrega la columna "Acciones":
+
+<thead>
+  <tr>
+    <th>ID Usuario</th>
+    <th>Nombre</th>
+    <th>Correo</th>
+    <th>Fecha de inscripción</th>
+    <th>Acciones</th>  <!-- ← NUEVA COLUMNA -->
+  </tr>
+</thead>
+<tbody>
+  ${inscritos
+    .map(
+      (alumno) => `
+    <tr>
+      <td>${alumno.id_usuario}</td>
+      <td>${alumno.nombres} ${alumno.apellidos}</td>
+      <td>${alumno.correo}</td>
+      <td>${new Date(alumno.fecha_inscripcion).toLocaleString("es-MX")}</td>
+      <td>
+        <button class="btn-remover" onclick="removerEstudiante('${idAsesoria}', '${alumno.id_usuario}', this)">
+          Remover
+        </button>
+      </td>
+    </tr>
+  `
+    )
+    .join("")}
+</tbody>
         </table>
       `
     }
@@ -382,3 +390,44 @@ document.addEventListener("keydown", (event) => {
 })
 
 window.addEventListener("DOMContentLoaded", inicializarAsesorias)
+
+async function removerEstudiante(idAsesoria, idUsuario, botonElement) {
+  Swal.fire({
+    title: "¿Remover estudiante?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, remover",
+    cancelButtonText: "Cancelar",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(
+          `${API_URL}/${idAsesoria}/inscritos/${idUsuario}`,
+          { method: "DELETE" }
+        );
+
+        if (res.ok) {
+          Swal.fire({
+            title: "Estudiante removido",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+
+          // Recargar la lista de inscritos
+          verInscritos(idAsesoria);
+        } else {
+          throw new Error("Error al remover");
+        }
+      } catch (error) {
+        console.error("Error al remover estudiante:", error);
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo remover al estudiante",
+          icon: "error",
+        });
+      }
+    }
+  });
+}
