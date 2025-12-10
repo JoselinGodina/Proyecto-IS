@@ -615,3 +615,9 @@ body {
 .filter-select {
   max-width: 250px;
 }
+
+.btn-danger:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}

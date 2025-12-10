@@ -373,25 +373,73 @@ const res = await fetch(`${API_URL}/asesorias/${id_crear_asesoria}/inscritos`);
       container.innerHTML =
         '<p style="text-align: center; color: #666;">No hay estudiantes inscritos</p>';
     } else {
-      container.innerHTML = estudiantes
-        .map(
-          (e) => `
-        <div class="estudiante-item">
-          <div class="estudiante-avatar">👩‍🎓</div>
-          <div class="estudiante-info">
-            <div class="estudiante-name">${e.nombres} ${e.apellidos}</div>
-            <div class="estudiante-code">${e.id_usuario}</div>
-          </div>
-          <div class="estudiante-email">${e.correo}</div>
-        </div>
-      `
-        )
-        .join("");
+      // BUSCA ESTA SECCIÓN EN TU verEstudiantes():
+container.innerHTML = estudiantes
+  .map(
+    (e) => `
+  <div class="estudiante-item">
+    <div class="estudiante-avatar">👩‍🎓</div>
+    <div class="estudiante-info">
+      <div class="estudiante-name">${e.nombres} ${e.apellidos}</div>
+      <div class="estudiante-code">${e.id_usuario}</div>
+    </div>
+    <div class="estudiante-email">${e.correo}</div>
+    <button class="btn-icon btn-danger" onclick="removerEstudiante('${e.id_usuario}', '${id_crear_asesoria}', '${e.nombres} ${e.apellidos}')" title="Remover">✕</button>
+  </div>
+`
+  )
+  .join("");
     }
-
+// Guardar el ID de la asesoría en un atributo del modal
+document.getElementById("modal-estudiantes").dataset.asesoriaId = id_crear_asesoria;
     openModal("modal-estudiantes");
   } catch (err) {
     console.error("Error al cargar estudiantes:", err);
+  }
+}
+
+// ===============================
+// Remover estudiante de asesoría
+// ===============================
+async function removerEstudiante(id_usuario, id_crear_asesoria, nombreEstudiante) {
+  console.log("[v0] Removiendo:", { id_usuario, id_crear_asesoria, nombreEstudiante });
+  
+  const confirm = await Swal.fire({
+    icon: "warning",
+    title: "¿Remover estudiante?",
+    text: `¿Deseas remover a ${nombreEstudiante} de esta asesoría?`,
+    showCancelButton: true,
+    confirmButtonText: "Sí, remover",
+    cancelButtonText: "Cancelar"
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  try {
+    const res = await fetch(`${API_URL}/inscripciones/${id_usuario}/${id_crear_asesoria}`, {
+      method: "DELETE",
+    });
+
+    console.log("[v0] Response status:", res.status);
+
+    if (!res.ok) throw new Error("Error al remover estudiante");
+
+    Swal.fire({
+      icon: "success",
+      title: "Estudiante removido",
+      text: "El estudiante fue removido de la asesoría.",
+    });
+
+    // Recargar lista sin cerrar modal
+    verEstudiantes(id_crear_asesoria);
+    cargarAsesorias();
+  } catch (error) {
+    console.error("[v0] Error:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "No se pudo remover al estudiante."
+    });
   }
 }
 
