@@ -30,7 +30,7 @@ window.addEventListener("load", () => {
   if (!usuario) window.location.href = "index.html"
   else {
     document.getElementById("studentName").textContent = usuario.nombres + " " + usuario.apellidos
-    document.getElementById("studentInfo").textContent = usuario.id_usuario + " - " + (usuario.carrera || "Carrera")
+    document.getElementById("studentInfo").textContent = usuario.id_usuario + " - " + (usuario.carrera || "Ingeniería en Sistemas")
     document.getElementById("semesterBadge").textContent = usuario.semestre || "Semestre"
   }
 })

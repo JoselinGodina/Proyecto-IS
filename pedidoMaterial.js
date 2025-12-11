@@ -340,7 +340,12 @@ async function guardarTodosMateriales() {
       }
     }
 
-    alert("✅ Todos los materiales se guardaron correctamente");
+Swal.fire({
+  icon: "success",
+  title: "Operación exitosa",
+  text: "Todos los materiales se guardaron correctamente.",
+  confirmButtonText: "Aceptar"
+});
     materialesPendientes = [];
     actualizarListaTemporal();
     await cargarMateriales();
