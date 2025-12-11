@@ -1202,3 +1202,31 @@ body {
 .dropdown-menu.show {
   display: block;
 }
+
+/* Botón de Salir de Asesoría */
+.salir-asesoria-btn {
+  width: 100%;
+  padding: 0.875rem;
+  background-color: #dc3545;
+  color: var(--color-white);
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.salir-asesoria-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.salir-asesoria-btn:active {
+  transform: translateY(0);
+}

@@ -729,15 +729,237 @@ const btn = document.querySelector(`button.devolver-btn[onclick*="${id_vales}"]`
 // ----------------------
 // Asesorías
 // ----------------------
+// <CHANGE> Actualizar función para incluir lógica de inscripción y botón de salir
 async function fetchAndRenderAsesorias() {
   try {
-    const res = await fetch("http://localhost:3000/asesorias")
-    allAsesoriasData = await res.json()
-    setupAsesoriasSearch()
-    renderAsesorias(allAsesoriasData)
-  } catch (err) {
-    console.error(err)
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (!usuario) return;
+
+    const response = await fetch("http://localhost:3000/alumno/asesorias");
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const asesorias = await response.json();
+    
+    // Obtener inscripciones del usuario
+    const inscripcionesResponse = await fetch(`http://localhost:3000/inscripciones/${usuario.id_usuario}`);
+    const inscripciones = await inscripcionesResponse.json();
+    
+    // Crear un set con los IDs de asesorías donde está inscrito
+    const inscriptosSet = new Set(inscripciones.map(i => i.id_crear_asesoria));
+    
+    renderAsesorias(asesorias, usuario, inscriptosSet);
+  } catch (error) {
+    console.error("[Alumno] Error al cargar asesorías:", error);
+    document.getElementById("asesoriasGrid").innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #666;">
+        <p>Error al cargar asesorías</p>
+      </div>
+    `;
   }
+}
+
+function renderAsesorias(asesorias, usuario, inscriptosSet) {
+  const grid = document.getElementById("asesoriasGrid");
+  if (!grid) return;
+
+  // Filtrar por búsqueda
+  const searchTerm = document.getElementById("searchAsesoriasInput")?.value.toLowerCase() || "";
+  let filteredAsesorias = asesorias;
+  
+  if (searchTerm) {
+    filteredAsesorias = asesorias.filter(a => 
+      a.titulo.toLowerCase().includes(searchTerm) || 
+      a.descripcion.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  if (filteredAsesorias.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #666;">
+        <p>No se encontraron asesorías</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = filteredAsesorias.map(asesoria => {
+    const estaInscrito = inscriptosSet.has(asesoria.id_crear_asesoria);
+    const cuposDisponibles = asesoria.cupo - (asesoria.cuposocupados || 0);
+    
+    return `
+      <div class="asesoria-card">
+        <div class="asesoria-header">
+          <h3 class="asesoria-title">${asesoria.titulo}</h3>
+          <div class="asesoria-docente">
+            <div class="docente-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="docente-info">
+              <div class="docente-label">Docente</div>
+              <div class="docente-name">${asesoria.nombres || "Profesor"}</div>
+            </div>
+          </div>
+        </div>
+        <div class="asesoria-details">
+          <div class="detail-item">
+            <div class="detail-item-label">Fecha</div>
+            <div class="detail-item-value">${asesoria.fecha}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">Horario</div>
+            <div class="detail-item-value">${asesoria.horario}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">Cupo</div>
+            <div class="detail-item-value">${asesoria.cuposocupados}/${asesoria.cupo}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">Disponibilidad</div>
+            <div class="detail-item-value ${cuposDisponibles > 0 ? 'cupo-disponible' : 'cupo-lleno'}">
+              ${cuposDisponibles > 0 ? cuposDisponibles + ' disponibles' : 'Cupo lleno'}
+            </div>
+          </div>
+        </div>
+        <div class="asesoria-descripcion">
+          <div class="descripcion-label">Descripción</div>
+          <div class="descripcion-text">${asesoria.descripcion}</div>
+        </div>
+        <button class="solicitar-btn" onclick="solicitarAsesoria('${asesoria.id_crear_asesoria}', '${usuario.id_usuario}', '${asesoria.titulo}')" 
+                ${estaInscrito ? 'style="display:none;"' : ''} id="btn-solicitar-${asesoria.id_crear_asesoria}">
+          Solicitar Asesoría
+        </button>
+        ${estaInscrito ? `
+          <button class="salir-asesoria-btn" onclick="salirAsesoria('${asesoria.id_crear_asesoria}', '${usuario.id_usuario}', '${asesoria.titulo}')" id="btn-salir-${asesoria.id_crear_asesoria}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 4 21 4 23 6 23 20a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6"></polyline>
+              <line x1="10" y1="12" x2="14" y2="12"></line>
+            </svg>
+            Salir de la Asesoría
+          </button>
+        ` : ''}
+      </div>
+    `;
+  }).join("");
+  
+  // Agregar event listener a búsqueda
+  const searchInput = document.getElementById("searchAsesoriasInput");
+  if (searchInput) {
+    searchInput.removeEventListener("input", handleSearchAsesorias);
+    searchInput.addEventListener("input", handleSearchAsesorias);
+  }
+}
+
+function handleSearchAsesorias() {
+  // Función helper para búsqueda
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  fetch(`http://localhost:3000/alumno/asesorias`)
+    .then(res => res.json())
+    .then(asesorias => {
+      fetch(`http://localhost:3000/inscripciones/${usuario.id_usuario}`)
+        .then(res => res.json())
+        .then(inscripciones => {
+          const inscriptosSet = new Set(inscripciones.map(i => i.id_crear_asesoria));
+          renderAsesorias(asesorias, usuario, inscriptosSet);
+        });
+    });
+}
+
+// <CHANGE> Nueva función para solicitar asesoría
+async function solicitarAsesoria(idAsesoria, idUsuario, titulo) {
+  try {
+    const response = await fetch("http://localhost:3000/inscribir", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id_usuario: idUsuario,
+        id_crear_asesoria: idAsesoria
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: "success",
+        title: "¡Inscrito!",
+        html: `Te has inscrito en <b>${titulo}</b> exitosamente.`,
+        confirmButtonText: "Perfecto",
+        confirmButtonColor: "#6ecb63",
+        background: "#fff",
+        color: "#333",
+        timer: 2000,
+        timerProgressBar: true
+      });
+      fetchAndRenderAsesorias(); // Recargar
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        html: result.error || "No se pudo completar la inscripción",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#d33"
+      });
+    }
+  } catch (error) {
+    console.error("[Alumno] Error:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Error al conectar con el servidor"
+    });
+  }
+}
+
+// <CHANGE> Nueva función para salir de asesoría
+async function salirAsesoria(idAsesoria, idUsuario, titulo) {
+  Swal.fire({
+    title: "Salir de la Asesoría",
+    html: `¿Estás seguro de que deseas <b>salir de ${titulo}</b>?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, salir",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#dc3545",
+    cancelButtonColor: "#6c757d",
+    background: "#fff",
+    color: "#333"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`http://localhost:3000/inscripciones/${idUsuario}/${idAsesoria}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" }
+        });
+
+        if (response.ok) {
+          Swal.fire({
+            icon: "success",
+            title: "¡Listo!",
+            html: `Has salido de <b>${titulo}</b> exitosamente.`,
+            confirmButtonText: "Perfecto",
+            confirmButtonColor: "#6ecb63",
+            background: "#fff",
+            color: "#333",
+            timer: 2000,
+            timerProgressBar: true
+          });
+          fetchAndRenderAsesorias(); // Recargar
+        } else {
+          throw new Error("Error en la respuesta del servidor");
+        }
+      } catch (error) {
+        console.error("[Alumno] Error:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo procesar tu solicitud"
+        });
+      }
+    }
+  });
 }
 
 function renderAsesorias(asesoriasData) {
@@ -783,6 +1005,11 @@ function renderAsesorias(asesoriasData) {
         </div>
         <button class="add-to-cart-btn" onclick="solicitarAsesoria('${a.id_crear_asesoria}')" ${disponibles === 0 ? "disabled" : ""} style="margin-top: 1rem; width: 100%;">
           ${disponibles === 0 ? "Cupo Completo" : "Solicitar Asesoría"}
+        </button>
+        <!-- Agrega después del botón "Solicitar Asesoría" -->
+<div id="exitButtonContainer-{ID_ASESORIA}"></div>
+<button class="add-to-cart-btn" onclick="solicitarAsesoria('${a.id_crear_asesoria}')" ${disponibles === 0 ? "disabled" : ""} style="margin-top: 1rem; width: 100%;">
+          ${disponibles === 0 ? "Salir de la Asesoría" : "Salir de la Asesoría"}
         </button>
       </div>
     `
