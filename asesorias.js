@@ -60,16 +60,27 @@ async function inicializarAsesorias() {
 
 // 🔹 Guardar (crear o editar)
 async function guardarAsesoria(event) {
-  event.preventDefault()
+  event.preventDefault();
 
-  const titulo = document.getElementById("titulo").value
-  const descripcion = document.getElementById("descripcion").value
-  const fecha = document.getElementById("fecha").value
-  const horario = document.getElementById("horario").value
-  const cupos = document.getElementById("cupos").value
-  const instructorField = document.getElementById("instructor")
-  const instructor = instructorField ? instructorField.value : ""
+  const titulo = document.getElementById("titulo").value;
+  const descripcion = document.getElementById("descripcion").value;
+  const fecha = document.getElementById("fecha").value;
+  const horario = document.getElementById("horario").value;
+  const cupos = document.getElementById("cupos").value;
+  const instructorField = document.getElementById("instructor");
+  const instructor = instructorField ? instructorField.value : "";
 
+  // Determinar cupos ocupados según si se está editando o creando
+  let cuposOcupados = 0;
+
+  if (editandoAsesoriaId) {
+    const asesoriaExistente = asesorias.find(a => String(a.id) === String(editandoAsesoriaId));
+    if (asesoriaExistente) {
+      cuposOcupados = asesoriaExistente.cuposOcupados;
+    }
+  }
+
+  // Construcción del objeto que enviará al backend
   const data = {
     id_crear_asesoria: editandoAsesoriaId || generarID(),
     usuarios_id_usuario: adminLogueado.id_usuario,
@@ -78,32 +89,35 @@ async function guardarAsesoria(event) {
     fecha,
     horario,
     cupo: cupos,
-    cuposocupados: asesoria.cuposOcupados,
+    cuposocupados: cuposOcupados,
     estado: "Programado",
-    instructor,
-  }
+    instructor
+  };
 
   try {
     if (editandoAsesoriaId) {
+      // Actualizar asesoría existente
       await fetch(`${API_URL}/${editandoAsesoriaId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      })
+      });
     } else {
+      // Crear nueva asesoría
       await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      })
+      });
     }
 
-    cerrarModal()
-    inicializarAsesorias()
+    cerrarModal();
+    inicializarAsesorias();
   } catch (error) {
-    console.error("Error al guardar asesoría:", error)
+    console.error("Error al guardar asesoría:", error);
   }
 }
+
 
 // 🔹 Cancelar asesoría
 async function cancelarAsesoria(id) {
